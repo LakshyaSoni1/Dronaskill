@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Background Aesthetic</title>
+<style>
+  :root {
+    /* Ocean */
+    --cta: linear-gradient(135deg, #22d3ee, #2563eb);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* ── Layer 0 — Base ───────────────────────────────────────────────── */
+  body {
+    margin: 0;
+    background: #08080e;
+    overflow: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: rgba(255,255,255,0.86);
+  }
+
+  /* ── Layer 1 — Drifting color orbs ────────────────────────────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.22;
+    will-change: transform;
+  }
+
+  .orb-1 { width: 560px; height: 560px;
+    background: radial-gradient(circle, #22d3ee 0%, #0e7490 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px;
+    background: radial-gradient(circle, #38bdf8 0%, #0369a1 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px;
+    background: radial-gradient(circle, #60a5fa 0%, #1e40af 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px;
+    background: radial-gradient(circle, #67e8f9 0%, #155e75 55%, transparent 100%); }
+
+  .orb-center {
+    width: 580px; height: 580px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #0e7490 0%, transparent 68%);
+    filter: blur(110px);
+    opacity: 0.07;
+  }
+
+  /* ── Layer 2 — Grid ───────────────────────────────────────────────── */
+  .grid {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ── Layer 3 — Film grain / noise ─────────────────────────────────── */
+  .noise {
+    position: fixed; inset: 0; z-index: 2;
+    pointer-events: none;
+    opacity: 0.038;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* ── Foreground — glass surfaces ──────────────────────────────────── */
+  .stage {
+    position: fixed; inset: 0; z-index: 3;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 22px;
+    padding: 28px 20px 40px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.06);
+    -webkit-backdrop-filter: blur(32px) saturate(190%);
+    backdrop-filter: blur(32px) saturate(190%);
+    border: 1px solid rgba(255,255,255,0.11);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.11);
+  }
+
+  nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px 9px 18px;
+    border-radius: 999px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .brand {
+    font-size: 14px; font-weight: 600; letter-spacing: 0.2px;
+    margin-right: 6px;
+  }
+
+  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.56);
+    font-family: inherit; font-size: 12.5px;
+    text-decoration: none; white-space: nowrap;
+    cursor: pointer;
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.86); }
+  .nav-link[aria-current="page"] {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.16);
+    color: rgba(255,255,255,0.86);
+  }
+  .nav-link i {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--cta);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  }
+
+  .nav-cta {
+    margin-left: 4px;
+    padding: 7px 16px;
+    border: 0; border-radius: 999px;
+    background: var(--cta);
+    color: #fff; font-family: inherit; font-size: 12.5px; font-weight: 590;
+    white-space: nowrap; cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
+  }
+
+  .panel {
+    width: min(620px, 100%);
+    margin-top: auto;
+    padding: 34px 34px 30px;
+    border-radius: 22px;
+  }
+  .panel + .panel { margin-top: 0; }
+  .panel:last-of-type { margin-bottom: auto; }
+
+  h1 {
+    margin: 0 0 10px;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 600; letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .sub { margin: 0 0 26px; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.56); }
+
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    padding: 11px 22px;
+    border: 0; border-radius: 12px;
+    background: var(--cta);
+    color: #fff; font-family: inherit; font-size: 14px; font-weight: 590;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.22);
+    transition: background 1s ease, transform .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-ghost {
+    padding: 11px 22px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.13);
+    color: rgba(255,255,255,0.86);
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: background .25s ease;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.09); }
+
+  .meta {
+    margin-top: 26px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: rgba(255,255,255,0.3);
+  }
+  .track {
+    margin-top: 9px;
+    height: 5px; border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%; width: 62%;
+    border-radius: 999px;
+    background: var(--cta);
+    transition: background 1s ease, width .6s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn:active { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="orb orb-1" id="o1"></div>
+  <div class="orb orb-2" id="o2"></div>
+  <div class="orb orb-3" id="o3"></div>
+  <div class="orb orb-4" id="o4"></div>
+  <div class="orb orb-center" id="oc"></div>
+</div>
+<div class="grid"></div>
+<div class="noise"></div>
+
+<div class="stage">
+  <nav class="glass">
+    <span class="brand">Aesthetic</span>
+    <div class="nav-links">
+      <a class="nav-link" href="#" aria-current="page"><i></i>Home</a>
+      <a class="nav-link" href="#">Features</a>
+      <a class="nav-link" href="#">Docs</a>
+      <a class="nav-link" href="#">About</a>
+    </div>
+    <button class="nav-cta">Sign in</button>
+  </nav>
+
+  <div class="panel glass">
+    <h1>Four layers, one atmosphere.</h1>
+    <p class="sub">
+      A near-black void, five blurred orbs drifting on desynced 18–28 second loops,
+      a hairline grid at 2.8% opacity, and film grain at 3.8%. Everything above it
+      is frosted glass — blurred and saturated, never muddy.
+    </p>
+    <div class="row">
+      <button class="btn">Get started</button>
+      <button class="btn-ghost" id="reshuffle">Reshuffle orbs</button>
+    </div>
+    <div class="meta"><span>Ambient drift</span><span>Ocean</span></div>
+    <div class="track"><div class="fill"></div></div>
+  </div>
+</div>
+
+<script>
+  /* ── Drift ──────────────────────────────────────────────────────────── */
+  const ORBS = ["o1","o2","o3","o4"].map(id => document.getElementById(id));
+
+  const rand = (min, max) => Math.random() * (max - min) + min;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const running = new Map();
+
+  function startDrift(el) {
+    const w = el.offsetWidth, h = el.offsetHeight;
+    el.style.left = rand(-w * 0.4, innerWidth  - w * 0.6) + "px";
+    el.style.top  = rand(-h * 0.4, innerHeight - h * 0.6) + "px";
+
+    running.get(el)?.cancel();
+    if (reduced) return;
+
+    const dur = rand(18000, 28000);            // 18–28s per orb, all different
+    const frames = [{ transform: "translate(0,0) scale(1)" }];
+    for (let i = 1; i < 5; i++)
+      frames.push({ transform: `translate(${rand(-70,70)}px,${rand(-60,60)}px) scale(${rand(0.93,1.09)})` });
+    frames.push({ transform: "translate(0,0) scale(1)" });
+
+    running.set(el, el.animate(frames, {
+      duration: dur,
+      iterations: Infinity,
+      easing: "ease-in-out",
+      delay: -rand(0, dur)                     // desync — never moves in unison
+    }));
+  }
+
+  function placeAll() { ORBS.forEach(startDrift); }
+
+  /* ── Boot ───────────────────────────────────────────────────────────── */
+  placeAll();
+
+  document.getElementById("reshuffle").addEventListener("click", placeAll);
+
+  let resizeTimer;
+  addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(placeAll, 250);
+  });
+</script>
+</body>
+</html>

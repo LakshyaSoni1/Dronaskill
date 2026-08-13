@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Mock Interview — Dronaskill</title>
+<meta name="description" content="Practice role-specific mock interviews with instant AI-style scoring on technical accuracy, clarity and confidence. Free for Dronaskill students.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --series-gold: #c98500;
+    --series-blue: #3987e5;
+    --series-aqua: #199e70;
+    --good:        #0ca30c;
+    --track:       rgba(57,135,229,0.16);
+    --track-gold:  rgba(201,133,0,0.18);
+    --gridline:    rgba(255,255,255,0.07);
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background (identical system to the homepage) ─────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #5b6ee0 0%, #1e2a7a 55%, transparent 100%); }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost, .btn-quiet {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease, opacity .2s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn:disabled { opacity: .6; cursor: default; box-shadow: none; }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn svg, .btn-ghost svg { flex: none; }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: linear-gradient(135deg,#7c7ff2,#4d4fc4); color: #fff; }
+
+  /* ── Stage machine ───────────────────────────────────────────────── */
+  .stage-hidden { display: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .stage-enter { animation: fadeUp .5s ease both; }
+
+  /* ── Setup screen ────────────────────────────────────────────────── */
+  .setup-wrap { padding: 54px 0 90px; display: flex; justify-content: center; }
+  .setup-card { width: min(640px, 100%); padding: 38px 36px 34px; border-radius: var(--r-xl); }
+  .setup-card h1 { font-size: clamp(26px, 4vw, 34px); margin: 14px 0 12px; }
+  .setup-card .lede { margin-bottom: 30px; max-width: 52ch; }
+  .field { margin-bottom: 22px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink-2); margin-bottom: 9px; }
+  .field-error { margin-top: 8px; font-size: 12px; color: var(--saffron); min-height: 15px; }
+
+  .select-wrap { position: relative; }
+  .select {
+    width: 100%; appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding: 12px 40px 12px 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    color: var(--ink); font-family: inherit; font-size: 14px; cursor: pointer;
+  }
+  .select option { background: #14141b; color: var(--ink); }
+  .select:focus { border-color: rgba(242,171,60,0.5); outline: none; }
+  .select-wrap svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+
+  .toggle-group { display: flex; gap: 6px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); flex-wrap: wrap; }
+  .toggle-btn {
+    flex: 1 1 0; min-width: 128px; display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 14px; border: 0; border-radius: 10px; background: none; color: var(--ink-2);
+    font-family: inherit; font-size: 13px; font-weight: 560; cursor: pointer; white-space: nowrap;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .toggle-btn:hover { color: var(--ink); }
+  .toggle-btn[aria-pressed="true"] { background: var(--cta); color: var(--cta-ink); box-shadow: 0 4px 14px rgba(224,125,28,0.28); }
+  .toggle-btn svg { flex: none; }
+
+  .setup-cta { margin-top: 30px; text-align: center; }
+  .setup-cta .btn { width: 100%; padding: 15px 22px; font-size: 15.5px; }
+  .setup-cta p { margin-top: 14px; font-size: 12px; color: var(--ink-3); }
+
+  /* ── Interview room ──────────────────────────────────────────────── */
+  .room-wrap { padding: 40px 0 90px; }
+  .room-grid { display: grid; grid-template-columns: 1.02fr 0.98fr; gap: 22px; align-items: start; }
+  .q-col { display: flex; flex-direction: column; gap: 20px; }
+
+  .progress-head { display: flex; align-items: center; gap: 16px; }
+  .progress-info { flex: 1 1 auto; min-width: 0; }
+  .progress-info .q-num { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px; display: block; }
+  .progress-track { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--cta); transition: width .5s cubic-bezier(.22,.9,.3,1); }
+  .timer {
+    display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); font-size: 13.5px;
+    font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; flex: none;
+  }
+  .timer svg { color: var(--saffron); flex: none; }
+  .timer.low { color: #f7bb52; animation: warnPulse 1s ease-in-out infinite; }
+  @keyframes warnPulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+  .q-card { padding: 26px 26px 24px; border-radius: var(--r-xl); }
+  .q-card .chip {
+    display: inline-flex; align-items: center; gap: 9px; padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2);
+    margin-bottom: 16px;
+  }
+  .q-card h3 { font-size: 19px; line-height: 1.4; font-weight: 600; letter-spacing: -0.01em; }
+  .hint { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+  .hint summary {
+    cursor: pointer; list-style: none; font-size: 12.5px; color: var(--ink-2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hint summary::-webkit-details-marker { display: none; }
+  .hint summary::before {
+    content: "?"; display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%; background: rgba(242,171,60,0.16);
+    border: 1px solid rgba(242,171,60,0.3); color: var(--saffron); font-size: 10.5px; font-weight: 700; flex: none;
+  }
+  .hint summary:hover { color: var(--ink); }
+  .hint[open] summary { color: var(--ink); margin-bottom: 10px; }
+  .hint p { font-size: 12.5px; color: var(--ink-3); line-height: 1.6; padding-left: 24px; }
+
+  .resp-card { padding: 22px; border-radius: var(--r-xl); display: flex; flex-direction: column; gap: 14px; }
+  .mic-row {
+    display: none; align-items: center; gap: 13px; padding: 12px 14px; border-radius: var(--r-md);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft);
+  }
+  .resp-card.voice-mode .mic-row { display: flex; }
+  .mic {
+    width: 38px; height: 38px; flex: none; border-radius: 50%; border: 0; cursor: pointer;
+    display: grid; place-items: center; background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 4px 16px rgba(224,125,28,0.32);
+  }
+  .wave { display: flex; align-items: center; gap: 3px; height: 22px; flex: 1; }
+  .wave i { flex: 1; max-width: 3px; border-radius: 999px; background: var(--saffron); opacity: .55; height: 20%; }
+  .listening .wave i { animation: pulse 1.1s ease-in-out infinite; }
+  .wave i:nth-child(3n) { animation-delay: .12s; }
+  .wave i:nth-child(3n+1) { animation-delay: .26s; }
+  .wave i:nth-child(4n) { animation-delay: .4s; }
+  @keyframes pulse { 0%, 100% { height: 18%; } 50% { height: 92%; } }
+  .mic-hint { font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .voice-note { font-size: 12px; color: var(--saffron); }
+
+  .textarea {
+    width: 100%; min-height: 220px; resize: vertical; padding: 14px 16px; border-radius: var(--r-md);
+    background: rgba(255,255,255,0.045); border: 1px solid var(--line); color: var(--ink);
+    font-family: inherit; font-size: 14px; line-height: 1.6;
+  }
+  .textarea::placeholder { color: var(--ink-3); }
+  .textarea:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+  .textarea:disabled { opacity: .6; }
+  .resp-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-3); }
+  .submit-row { display: flex; justify-content: flex-end; }
+  .submit-row .btn { min-width: 236px; justify-content: center; }
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(26,18,6,0.3); border-top-color: var(--cta-ink); animation: spin .75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-row { display: none; align-items: center; gap: 9px; }
+  .btn[data-loading="true"] .btn-label { display: none; }
+  .btn[data-loading="true"] .load-row { display: inline-flex; }
+
+  /* ── Feedback modal ──────────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+    padding: 22px; background: rgba(7,7,13,0.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  }
+  .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(600px, 100%); max-height: 88vh; overflow-y: auto; padding: 30px 28px 26px; border-radius: var(--r-xl);
+    background: rgba(19,19,24,0.94); transform: translateY(14px) scale(.98); opacity: 0;
+    transition: transform .3s cubic-bezier(.22,.9,.3,1), opacity .3s ease;
+  }
+  .modal-backdrop.show .modal { transform: translateY(0) scale(1); opacity: 1; }
+
+  .fb-head { display: flex; align-items: center; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); }
+  .fb-ring { position: relative; width: 74px; height: 74px; flex: none; }
+  .fb-ring svg { transform: rotate(-90deg); }
+  .fb-ring-val { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .fb-ring-val b { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
+  .fb-ring-val span { font-size: 9px; color: var(--ink-3); }
+  .fb-meta { min-width: 0; }
+  .fb-status {
+    display: inline-flex; padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 650;
+    letter-spacing: .02em; margin-bottom: 7px;
+  }
+  .fb-status.strong { background: rgba(12,163,12,0.14); border: 1px solid rgba(12,163,12,0.3); color: #4ade80; }
+  .fb-status.good { background: rgba(242,171,60,0.14); border: 1px solid rgba(242,171,60,0.3); color: var(--saffron); }
+  .fb-status.work { background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--ink-2); }
+  .fb-meta h3 { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+
+  .bars { margin-top: 20px; display: grid; gap: 13px; }
+  .bar-row { display: grid; grid-template-columns: 128px 1fr 38px; align-items: center; gap: 12px; }
+  .bar-lbl { font-size: 12.5px; color: var(--ink-2); }
+  .bar-track { display: block; position: relative; height: 10px; border-radius: 3px; background: var(--track); }
+  .bar-fill { display: block; height: 100%; width: 0; border-radius: 0 4px 4px 0; transition: width .8s cubic-bezier(.22,.9,.3,1); background: var(--series-gold); }
+  .bar-fill.gold { background: var(--series-gold); }
+  .bar-fill.blue { background: var(--series-blue); }
+  .bar-fill.aqua { background: var(--series-aqua); }
+  .bar-val { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+
+  .fb-section { margin-top: 20px; }
+  .fb-section h4 { font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+  .fb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+  .fb-list li { display: flex; gap: 9px; align-items: flex-start; }
+  .fb-list li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex: none; }
+  .fb-list.good li::before { background: var(--good); }
+  .fb-list.improve li::before { background: var(--saffron); }
+
+  .fb-model { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+  .fb-model summary { cursor: pointer; list-style: none; font-size: 13px; color: var(--ink); font-weight: 560; display: flex; align-items: center; gap: 7px; }
+  .fb-model summary::-webkit-details-marker { display: none; }
+  .fb-model summary::before { content: "▸"; color: var(--saffron); display: inline-block; transition: transform .2s ease; }
+  .fb-model[open] summary::before { transform: rotate(90deg); }
+  .fb-model p { margin-top: 12px; font-size: 13px; color: var(--ink-2); line-height: 1.65; padding: 14px 16px; border-radius: var(--r-md); background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft); }
+
+  .fb-actions { margin-top: 24px; display: flex; justify-content: flex-end; }
+
+  /* ── Final report ────────────────────────────────────────────────── */
+  .final-wrap { padding: 20px 0 90px; }
+  .section-head-fr { max-width: 62ch; margin-bottom: 30px; }
+  .section-head-fr h2 { font-size: clamp(24px, 3.4vw, 32px); margin: 14px 0 12px; }
+  .final-hero, .final-bars { padding: 26px; border-radius: var(--r-xl); margin-bottom: 16px; }
+  .readiness { display: flex; align-items: center; gap: 22px; }
+  .ring { position: relative; width: 108px; height: 108px; flex: none; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring-val { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .ring-val b { font-size: 30px; font-weight: 620; letter-spacing: -0.03em; line-height: 1; }
+  .ring-val span { font-size: 10.5px; color: var(--ink-3); }
+  .readiness-meta strong { display: block; font-size: 40px; font-weight: 620; letter-spacing: -0.03em; line-height: 1; }
+  .readiness-meta .cap { font-size: 12.5px; color: var(--ink-2); margin-top: 10px; display: block; max-width: 40ch; }
+  .cell-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .cell-head h3 { font-size: 13.5px; font-weight: 560; }
+  .cell-head .sub { font-size: 11.5px; color: var(--ink-3); }
+
+  .final-list { display: grid; gap: 12px; margin-bottom: 28px; }
+  .qr-card { padding: 18px 20px; border-radius: var(--r-lg); }
+  .qr-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+  .qr-head::-webkit-details-marker { display: none; }
+  .qr-head h4 { font-size: 13.5px; font-weight: 560; color: var(--ink); max-width: 76ch; }
+  .qr-score { flex: none; font-size: 12.5px; font-weight: 650; padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+  .qr-score.strong { background: rgba(12,163,12,0.14); color: #4ade80; }
+  .qr-score.good { background: rgba(242,171,60,0.14); color: var(--saffron); }
+  .qr-score.work, .qr-score.none { background: rgba(255,255,255,0.06); color: var(--ink-2); }
+  .qr-card[open] .qr-head { margin-bottom: 12px; }
+  .qr-body { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; display: grid; gap: 8px; }
+  .qr-body .qr-your { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft); }
+  .qr-body strong { color: var(--ink); font-weight: 560; }
+
+  .final-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  /* ── Reveal-style focus utility kept minimal for this app shell ────── */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+
+  @media (max-width: 1000px) {
+    .room-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+  }
+  @media (max-width: 560px) {
+    .setup-card { padding: 28px 22px 26px; }
+    .bar-row { grid-template-columns: 96px 1fr 32px; }
+    .readiness { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .fb-head { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1" id="o1"></div>
+  <div class="orb orb-2" id="o2"></div>
+  <div class="orb orb-3" id="o3"></div>
+  <div class="orb orb-4" id="o4"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="index.html#features">Learn</a>
+      <a class="nav-link" href="index.html#internships">Internships</a>
+      <a class="nav-link" href="mock-interview.html" aria-current="page">Practice</a>
+      <a class="nav-link" href="index.html#dashboard">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+      <span class="avatar" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>
+        </svg>
+      </span>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ══════════════════ STAGE 1 — SETUP ══════════════════ -->
+  <section class="stage setup-wrap wrap stage-enter" id="stage-setup">
+    <div class="setup-card glass">
+      <span class="eyebrow">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.6l2.1 5.3 5.3 2.1-5.3 2.1-2.1 5.3-2.1-5.3L4.6 10l5.3-2.1z"/>
+        </svg>
+        AI Mock Interview
+      </span>
+      <h1>Practice the interview before it counts.</h1>
+      <p class="lede">Pick a role and a level, and Dronaskill runs a five-question round — timed,
+        scored on technical accuracy, clarity and confidence, with a model answer for every question.</p>
+
+      <div class="field">
+        <label for="roleSelect">Target role</label>
+        <div class="select-wrap">
+          <select id="roleSelect" class="select">
+            <option value="" selected disabled>Select your target role…</option>
+          </select>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>
+        </div>
+        <p class="field-error" id="roleError" role="alert"></p>
+      </div>
+
+      <div class="field">
+        <label id="expLabel">Experience level</label>
+        <div class="toggle-group" role="group" aria-labelledby="expLabel" id="expGroup">
+          <button type="button" class="toggle-btn" data-exp="entry" aria-pressed="true">Entry-Level / College Grad</button>
+          <button type="button" class="toggle-btn" data-exp="intermediate" aria-pressed="false">Intermediate</button>
+          <button type="button" class="toggle-btn" data-exp="senior" aria-pressed="false">Senior</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="modeLabel">Interview mode</label>
+        <div class="toggle-group" role="group" aria-labelledby="modeLabel" id="modeGroup">
+          <button type="button" class="toggle-btn" data-mode="text" aria-pressed="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2.5H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 2.5V8h5"/><path d="M9 13h6M9 16.5h6"/></svg>
+            Text Answer
+          </button>
+          <button type="button" class="toggle-btn" data-mode="voice" aria-pressed="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="10" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+            Voice Answer
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-cta">
+        <button type="button" class="btn" id="startBtn">
+          Start AI Mock Interview
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </button>
+        <p>5 questions · role-matched · scored instantly</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STAGE 2 — INTERVIEW ROOM ══════════════════ -->
+  <section class="stage room-wrap wrap stage-hidden" id="stage-room">
+    <div class="room-grid">
+      <div class="q-col">
+        <div class="progress-head">
+          <div class="progress-info">
+            <span class="q-num" id="qLabel">Question 1 of 5</span>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+          <div class="timer" id="timerBox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.4 2"/></svg>
+            <span id="timerText" aria-live="polite">03:00</span>
+          </div>
+        </div>
+
+        <div class="q-card glass">
+          <span class="chip" id="qChip">Role · Level</span>
+          <h3 id="qText">Question text</h3>
+          <details class="hint" id="hintBox">
+            <summary>Stuck? Click for a structural tip</summary>
+            <p id="hintText">Hint text</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="resp-card glass" id="respCard">
+        <div>
+          <h3 style="font-size:14px">Your response</h3>
+          <p class="muted" style="font-size:12px;margin-top:4px">Type or speak your answer — you can edit it anytime before submitting.</p>
+        </div>
+
+        <div class="mic-row" id="micRow">
+          <button class="mic" id="micBtn" type="button" aria-pressed="false" aria-label="Start voice answer">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="2.5" width="6" height="10" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>
+            </svg>
+          </button>
+          <span class="wave" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span class="mic-hint" id="micHint">Tap to speak your answer</span>
+        </div>
+        <p class="voice-note" id="voiceNote" hidden>Voice input isn't available in this browser right now — type your answer below instead.</p>
+
+        <textarea id="answerInput" class="textarea" placeholder="Type your answer here…" aria-label="Your answer"></textarea>
+        <div class="resp-meta">
+          <span id="wordCount">0 words</span>
+          <span class="muted">Aim for 60–150 words</span>
+        </div>
+        <div class="submit-row">
+          <button type="button" class="btn" id="submitBtn">
+            <span class="btn-label">Submit Answer for AI Review</span>
+            <span class="load-row"><span class="spinner" aria-hidden="true"></span> Analyzing your answer…</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STAGE 3 — FINAL REPORT ══════════════════ -->
+  <section class="stage final-wrap wrap stage-hidden" id="stage-final">
+    <div class="section-head-fr">
+      <span class="eyebrow">Interview complete</span>
+      <h2>Here's how you did.</h2>
+      <p class="lede" id="finalRecap">Recap line</p>
+    </div>
+
+    <div class="final-hero glass">
+      <div class="readiness">
+        <div class="ring">
+          <svg width="108" height="108" viewBox="0 0 108 108" aria-hidden="true">
+            <circle cx="54" cy="54" r="46" fill="none" stroke="var(--track-gold)" stroke-width="9"/>
+            <circle id="finalRingArc" cx="54" cy="54" r="46" fill="none" stroke="var(--series-gold)"
+                    stroke-width="9" stroke-linecap="round"
+                    stroke-dasharray="289.03" stroke-dashoffset="289.03"
+                    style="transition: stroke-dashoffset 1.1s cubic-bezier(.22,.9,.3,1)"/>
+          </svg>
+          <span class="ring-val"><b id="finalRingNum">0</b><span>of 100</span></span>
+        </div>
+        <div class="readiness-meta">
+          <strong id="finalScoreBig">0.0/10</strong>
+          <span class="cap" id="finalStatusNote">Status note</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="final-bars glass">
+      <div class="cell-head"><h3>Average performance</h3><span class="sub">across all 5 answers</span></div>
+      <div class="bars">
+        <div class="bar-row">
+          <span class="bar-lbl">Technical accuracy</span>
+          <span class="bar-track"><span class="bar-fill gold" id="finalBarTech" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarTechVal">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">Clarity</span>
+          <span class="bar-track"><span class="bar-fill blue" id="finalBarClarity" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarClarityVal">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">Confidence</span>
+          <span class="bar-track"><span class="bar-fill aqua" id="finalBarConf" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarConfVal">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="final-list" id="finalList"></div>
+
+    <div class="final-actions">
+      <button type="button" class="btn" id="restartBtn">Start New Interview</button>
+      <a class="btn-ghost" href="index.html#dashboard">Back to Dashboard</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════ FEEDBACK MODAL ══════════════════ -->
+<div class="modal-backdrop" id="feedbackBackdrop">
+  <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <div class="fb-head">
+      <div class="fb-ring">
+        <svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true">
+          <circle cx="37" cy="37" r="30" fill="none" stroke="var(--track-gold)" stroke-width="7"/>
+          <circle id="fbRingArc" cx="37" cy="37" r="30" fill="none" stroke="var(--series-gold)"
+                  stroke-width="7" stroke-linecap="round"
+                  stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                  style="transition: stroke-dashoffset .9s cubic-bezier(.22,.9,.3,1)"/>
+        </svg>
+        <span class="fb-ring-val"><b id="fbRingNum">0</b><span>/10</span></span>
+      </div>
+      <div class="fb-meta">
+        <span class="fb-status" id="fbStatus">Status</span>
+        <h3 id="fbTitle">Question feedback</h3>
+      </div>
+    </div>
+
+    <div class="fb-bars">
+      <div class="bar-row">
+        <span class="bar-lbl">Technical accuracy</span>
+        <span class="bar-track"><span class="bar-fill gold" id="fbBarTech" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarTechVal">0%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">Clarity</span>
+        <span class="bar-track"><span class="bar-fill blue" id="fbBarClarity" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarClarityVal">0%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">Confidence</span>
+        <span class="bar-track"><span class="bar-fill aqua" id="fbBarConf" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarConfVal">0%</span>
+      </div>
+    </div>
+
+    <div class="fb-section">
+      <h4>What you did well</h4>
+      <ul class="fb-list good" id="fbWins"></ul>
+    </div>
+    <div class="fb-section">
+      <h4>Areas for improvement</h4>
+      <ul class="fb-list improve" id="fbImprove"></ul>
+    </div>
+
+    <details class="fb-model">
+      <summary>Show model sample answer</summary>
+      <p id="fbModelAnswer"></p>
+    </details>
+
+    <div class="fb-actions">
+      <button type="button" class="btn" id="fbNextBtn">Next Question →</button>
+    </div>
+  </div>
+</div>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── Config ──────────────────────────────────────────────────────── */
+  const EXPERIENCE = {
+    entry:        { label: "Entry-Level / College Graduate", short: "Entry-Level",   timer: 180, idealMin: 30, idealMax: 140, rigor: 1.06 },
+    intermediate: { label: "Intermediate",                    short: "Intermediate", timer: 150, idealMin: 40, idealMax: 160, rigor: 1.00 },
+    senior:       { label: "Senior",                          short: "Senior",       timer: 120, idealMin: 50, idealMax: 180, rigor: 0.94 }
+  };
+
+  /* ── Question bank ───────────────────────────────────────────────── */
+  const QUESTION_BANK = {
+    frontend: { label: "Frontend Developer", questions: [
+      { id: "fe1", text: "Walk me through how you would optimize a React application that's re-rendering too often.",
+        hint: "Structure your answer around: identify (profiler / why-did-you-render), isolate (memoization), and prevent (state colocation). Name 2–3 concrete React APIs.",
+        keywords: ["memo", "usememo", "usecallback", "re-render", "profiler", "key", "state", "virtual dom"],
+        modelAnswer: `I'd start with the React DevTools Profiler to find which components re-render unnecessarily and why. Common fixes: wrap pure components in React.memo, memoize expensive calculations with useMemo, and stabilize callback props with useCallback so children don't see new references every render. I'd also check for state that's colocated too high in the tree — moving it closer to where it's used avoids re-rendering unrelated siblings. Finally, I'd verify list keys are stable, since unstable keys force full remounts.` },
+      { id: "fe2", text: "What's the difference between CSS specificity and the cascade, and how do you avoid specificity wars on a large team?",
+        hint: "Define both terms first, then talk about conventions (BEM / utility classes) and tooling that prevent the problem at the source.",
+        keywords: ["specificity", "cascade", "bem", "utility classes", "!important", "source order", "css modules", "naming convention"],
+        modelAnswer: `Specificity is the scoring system the browser uses to decide which rule wins when multiple selectors match the same element; the cascade is the broader set of rules — source order, origin, and specificity — that resolves conflicts overall. On a large team I avoid specificity wars by keeping selectors flat (one class per rule, BEM-style naming or utility classes) and banning !important outside of true overrides, so no one ever needs to out-specificity a previous rule.` },
+      { id: "fe3", text: "How would you make a complex data table accessible to keyboard and screen reader users?",
+        hint: "Cover semantic markup, keyboard navigation (roving tabindex), and ARIA roles/labels — in that priority order.",
+        keywords: ["aria", "semantic html", "keyboard navigation", "tabindex", "screen reader", "role", "scope", "focus"],
+        modelAnswer: `I'd start with semantic table markup — proper <th> elements with scope attributes — since that alone gives screen readers a lot for free. For keyboard users I'd implement roving tabindex so arrow keys move focus within the grid instead of tabbing through every cell. Where native semantics run out, like sortable headers, I'd add ARIA roles and aria-sort, and always test with an actual screen reader, not just an automated audit.` },
+      { id: "fe4", text: "Explain how the browser's critical rendering path works and one thing you'd change to speed up first paint.",
+        hint: "Trace it in order: HTML→DOM, CSS→CSSOM, combine into render tree, layout, paint. Then pick one concrete lever.",
+        keywords: ["dom", "cssom", "render tree", "layout", "paint", "critical css", "render-blocking", "preload"],
+        modelAnswer: `The browser parses HTML into the DOM and CSS into the CSSOM, combines them into a render tree, computes layout, then paints pixels. Anything render-blocking — like a large stylesheet in <head> — delays that first paint. One concrete fix I'd reach for is inlining critical above-the-fold CSS and deferring the rest, or using rel=preload for the font and hero image so the browser starts fetching them before it discovers them in the CSSOM.` },
+      { id: "fe5", text: "Tell me about a time you disagreed with a design decision. How did you handle it?",
+        hint: "Use STAR — situation, task, action, result — and end on what changed because of the conversation.",
+        keywords: ["situation", "disagreed", "communicated", "compromise", "data", "user testing", "outcome"],
+        modelAnswer: `On a past project the design called for a multi-step signup modal that I felt would hurt conversion. Instead of just pushing back, I built a quick prototype of a single-step alternative and we ran it past five users informally. Two clearly struggled with the modal version, which gave the designer concrete evidence rather than just my opinion, and we shipped the simpler version — conversion on that flow improved about 9% the following month.` },
+      { id: "fe6", text: "How do you decide between client-side rendering, server-side rendering, and static generation for a new page?",
+        hint: "Anchor the decision on two axes: how often the content changes, and how much SEO / first-paint speed matters for that page.",
+        keywords: ["seo", "hydration", "static generation", "ssr", "csr", "caching", "content freshness", "revalidate"],
+        modelAnswer: `It comes down to how often the content changes and how much first-paint speed or SEO matters. A marketing page that rarely changes is a great fit for static generation — it's fast and cacheable at the edge. A logged-in dashboard with per-user data doesn't need SEO and benefits more from client-side rendering. Anything in between, like a product page that changes daily and needs to be indexable, is where I'd reach for server-side rendering with revalidation.` }
+    ]},
+    backend: { label: "Backend Developer", questions: [
+      { id: "be1", text: "How would you design a rate limiter for a public API?",
+        hint: "Name an algorithm (token bucket / sliding window), then say where the state lives (in-memory vs Redis) for a multi-instance deployment.",
+        keywords: ["token bucket", "sliding window", "redis", "distributed", "429", "throttle", "per-user", "leaky bucket"],
+        modelAnswer: `I'd use a token bucket algorithm — each client gets a bucket that refills at a fixed rate, and requests are rejected with a 429 once it's empty. Since the API likely runs on multiple instances, I'd keep bucket state in Redis rather than in-memory, using atomic operations so instances share one source of truth. I'd key it per API key or user ID rather than per IP, since IPs get shared behind NATs.` },
+      { id: "be2", text: "Explain the difference between SQL and NoSQL and when you'd pick each.",
+        hint: "Compare on schema flexibility, consistency guarantees, and query patterns — give one concrete example of each.",
+        keywords: ["schema", "consistency", "acid", "joins", "horizontal scaling", "document store", "relational", "eventual consistency"],
+        modelAnswer: `SQL databases enforce a fixed schema and give you strong ACID guarantees and joins, which is great when data is relational and correctness matters, like financial records. NoSQL stores trade some of that consistency and structure for flexible schemas and easier horizontal scaling, which suits high-write, loosely-structured data like activity logs or product catalogs with varying attributes.` },
+      { id: "be3", text: "What happens when two requests try to update the same row at the same time, and how do you prevent a lost update?",
+        hint: "Mention both optimistic locking (version column) and pessimistic locking (SELECT FOR UPDATE), and when you'd choose each.",
+        keywords: ["race condition", "optimistic locking", "pessimistic locking", "version column", "select for update", "transaction", "isolation level"],
+        modelAnswer: `Without protection, the second write can silently overwrite the first — a lost update. I'd use optimistic locking for most cases: add a version column, and the update only succeeds if the version still matches what was read, retrying on conflict. For high-contention rows where retries would be wasteful, I'd use pessimistic locking instead, wrapping the read in SELECT ... FOR UPDATE inside a transaction so the second request blocks until the first commits.` },
+      { id: "be4", text: "How would you design a database schema for an internship application system, similar to what Dronaskill would need?",
+        hint: "Identify the core entities first (students, companies, postings, applications), then talk about the relationships between them.",
+        keywords: ["entities", "foreign key", "normalization", "one-to-many", "many-to-many", "applications table", "indexes"],
+        modelAnswer: `The core entities are students, companies, internship postings, and applications. A student can apply to many postings and a posting can receive many applications, so applications is a join table with a status column and timestamps, foreign-keyed to both. I'd index applications on student_id and posting_id separately for fast lookups either direction, and keep verification data on the student record rather than duplicating it per application.` },
+      { id: "be5", text: "Describe a time a production system went down. What did you do?",
+        hint: "STAR format, and be specific about the diagnostic steps you took, not just the fix.",
+        keywords: ["incident", "root cause", "rollback", "monitoring", "postmortem", "logs", "alert", "mitigate"],
+        modelAnswer: `A deploy once caused our checkout API's error rate to spike. I checked the monitoring dashboard first, saw the spike lined up exactly with the deploy timestamp, and rolled back immediately rather than trying to debug live in production. Once traffic recovered, I reproduced the issue in staging — a missing null check on a new optional field — fixed it, and wrote a short postmortem so we added a staging smoke test for that endpoint.` },
+      { id: "be6", text: "What's the difference between horizontal and vertical scaling, and which would you reach for first for a growing API?",
+        hint: "Give a real tradeoff, not just a definition — cost, downtime, and ceiling for each.",
+        keywords: ["horizontal scaling", "vertical scaling", "load balancer", "stateless", "single point of failure", "downtime", "cost"],
+        modelAnswer: `Vertical scaling means giving one server more CPU or RAM — it's simple and requires no architecture changes, but it has a ceiling and that server is a single point of failure. Horizontal scaling means running more instances behind a load balancer, which scales further and adds redundancy, but only works cleanly if the API is stateless. For a growing API I'd usually reach for vertical scaling first since it buys time cheaply, while making sure the app stays stateless so horizontal scaling is an option later.` }
+    ]},
+    fullstack: { label: "Full-Stack Developer", questions: [
+      { id: "fs1", text: "How do you keep a REST API's response shape and the frontend types in sync as both evolve?",
+        hint: "Talk about a single source of truth — codegen from an OpenAPI / schema — rather than manually mirroring types.",
+        keywords: ["openapi", "schema", "codegen", "typescript", "contract", "versioning", "shared types"],
+        modelAnswer: `I try to make the API schema the single source of truth — an OpenAPI spec or a shared schema file — and generate TypeScript types from it on both sides rather than hand-writing them twice. That way a backend field rename fails the frontend build immediately instead of surfacing as a runtime bug. For breaking changes I'd version the endpoint rather than mutate the existing contract underneath consumers.` },
+      { id: "fs2", text: "Walk me through what happens end-to-end when a user submits a form on your app.",
+        hint: "Trace the full path: client validation, network request, server validation, database write, response, UI update.",
+        keywords: ["validation", "http request", "api", "database", "response", "state update", "error handling", "optimistic ui"],
+        modelAnswer: `Client-side, I validate for immediate feedback, then send the request to the API. The server re-validates — never trusting the client — then writes to the database inside a transaction if multiple tables are touched. It returns a response, and the frontend updates state based on success or failure, showing a specific error message rather than a generic one if something fails.` },
+      { id: "fs3", text: "How do you decide what logic belongs on the client versus the server?",
+        hint: "Anchor on trust and cost: anything security- or money-related belongs server-side; UI responsiveness logic can live client-side.",
+        keywords: ["security", "trust boundary", "validation", "business logic", "latency", "authorization", "source of truth"],
+        modelAnswer: `Anything that affects security, money, or data integrity has to be enforced server-side, since client code can always be bypassed. Client-side logic is for responsiveness — instant form validation, optimistic UI updates — but I always treat it as a UX nicety layered on top of server-side enforcement, never a replacement for it.` },
+      { id: "fs4", text: "You need to add a feature end-to-end in a week with a tight deadline. How do you plan the work?",
+        hint: "Talk about slicing vertically (a thin end-to-end path first) rather than finishing one layer completely before starting the next.",
+        keywords: ["vertical slice", "mvp", "scope", "prioritize", "api contract first", "incremental", "deadline"],
+        modelAnswer: `I'd slice the feature vertically rather than horizontally — get one thin path working end-to-end, from database to UI, on day one, even if it's ugly. That surfaces integration problems immediately instead of on day six. I'd agree on the API contract early, build backend and frontend against that contract in parallel, and cut scope on polish before I'd cut scope on the core path actually working.` },
+      { id: "fs5", text: "How do you approach debugging an issue that only happens in production, not locally?",
+        hint: "List concrete tools: logs, error tracking, reproducing with production-like data/config, feature flags to isolate.",
+        keywords: ["logs", "error tracking", "sentry", "reproduce", "environment parity", "feature flag", "staging"],
+        modelAnswer: `First I check error tracking and logs to narrow down which request or user path triggers it, since production has real data and traffic patterns local doesn't. If I can't reproduce locally, I check for environment differences — config, feature flags, data shape — since "works on my machine" is usually an environment-parity problem, not a code mystery.` },
+      { id: "fs6", text: "Tell me about a project where you had to learn a new technology quickly to ship it.",
+        hint: "STAR format — be specific about how you learned it, not just 'I read the docs' — and the concrete result.",
+        keywords: ["situation", "learned quickly", "documentation", "prototype", "shipped", "deadline", "outcome"],
+        modelAnswer: `I needed to add real-time updates to a project and had never used WebSockets before. I spent the first afternoon building a tiny throwaway prototype outside the main codebase just to understand connection handling and reconnection logic, then integrated it once I trusted I understood the failure modes. It shipped on time and taught me to always prototype the risky unknown piece in isolation before wiring it into a real feature.` }
+    ]},
+    ml: { label: "Data Scientist / ML Engineer", questions: [
+      { id: "ml1", text: "How do you detect and handle overfitting in a model you're training?",
+        hint: "Name the symptom (train/val gap), then 2–3 concrete remedies (regularization, more data, early stopping, simpler model).",
+        keywords: ["overfitting", "validation loss", "regularization", "dropout", "early stopping", "cross-validation", "generalization"],
+        modelAnswer: `The clearest signal is a growing gap between training and validation loss — the model keeps improving on data it's seen while getting worse on data it hasn't. To address it I'd try regularization or dropout first since they're cheap, then early stopping based on validation loss, and if the gap persists, either get more training data or simplify the model — a model too large for the dataset will always find a way to memorize it.` },
+      { id: "ml2", text: "Explain precision and recall, and describe a scenario where you'd optimize for one over the other.",
+        hint: "Give the definitions, then use a concrete example — fraud detection or medical screening are classic ones.",
+        keywords: ["precision", "recall", "false positive", "false negative", "f1 score", "threshold", "trade-off"],
+        modelAnswer: `Precision is what fraction of the things you flagged as positive actually are positive; recall is what fraction of the true positives you actually caught. In fraud detection I'd usually optimize for recall — missing real fraud is expensive — even if it means more false positives to review manually. For spam filtering on a primary inbox, I'd weight precision higher, since a false positive means a real email gets lost.` },
+      { id: "ml3", text: "How would you explain a 'black box' model's prediction to a non-technical stakeholder?",
+        hint: "Mention a concrete interpretability tool (SHAP / LIME / feature importance) and translate the output into plain language.",
+        keywords: ["shap", "lime", "feature importance", "interpretability", "explainability", "plain language"],
+        modelAnswer: `I'd run a tool like SHAP on the specific prediction to see which features pushed it up or down, then translate that into plain language — "this applicant was flagged mainly because of X and Y, not because of Z" — rather than showing raw coefficient values. The goal is to answer the stakeholder's actual question, which is usually "can I trust this and why," not "how does gradient boosting work."` },
+      { id: "ml4", text: "Walk me through your process for cleaning a messy real-world dataset before modeling.",
+        hint: "Structure it as steps: understand the data, handle missing values, handle outliers, check for leakage — in that order.",
+        keywords: ["missing values", "outliers", "data leakage", "exploratory analysis", "imputation", "distribution", "duplicates"],
+        modelAnswer: `I start with exploratory analysis — distributions, missing value counts, obvious duplicates — before touching anything, so I understand what I'm dealing with. For missing values I check whether they're random or meaningful before choosing to impute or drop. I specifically check for data leakage, like a feature that wouldn't actually be available at prediction time, since that's the mistake that quietly inflates offline metrics and fails in production.` },
+      { id: "ml5", text: "How do you decide a model is ready to go into production?",
+        hint: "Go beyond 'good accuracy' — mention a baseline comparison, business metric alignment, and a monitoring plan.",
+        keywords: ["baseline", "business metric", "a/b test", "monitoring", "drift", "offline evaluation", "rollback"],
+        modelAnswer: `Accuracy alone isn't enough — I want to see it beat a simple baseline by a meaningful margin, and I want the offline metric to actually correlate with the business outcome we care about. Before full rollout I'd push for an A/B test against the current system, and I wouldn't call it done without a monitoring plan for data drift, since a model that's right today can quietly become wrong as real-world data shifts.` },
+      { id: "ml6", text: "Tell me about a time your model or analysis was wrong. What did you learn?",
+        hint: "STAR format — own the mistake plainly, then focus on the process change you made afterward, not just the fix.",
+        keywords: ["mistake", "root cause", "wrong assumption", "process change", "validated", "learned"],
+        modelAnswer: `I once shipped a churn model that looked strong offline but performed much worse in production. It turned out one feature was computed slightly differently in the production pipeline than in training — a subtle leakage issue I hadn't caught. Since then I always add a check that compares feature distributions between training and serving before trusting offline metrics.` }
+    ]},
+    pm: { label: "Product Manager", questions: [
+      { id: "pm1", text: "How would you prioritize a backlog when engineering, sales, and support all want different things shipped first?",
+        hint: "Name a concrete prioritization framework (RICE, impact/effort) and mention how you communicate the 'no's.",
+        keywords: ["rice", "impact", "effort", "prioritize", "framework", "stakeholders", "trade-off", "communicate"],
+        modelAnswer: `I'd score each request against a shared framework like RICE — reach, impact, confidence, effort — so the conversation is about the criteria, not whoever argues loudest. I'd bring stakeholders into that scoring rather than doing it behind closed doors, so when something doesn't make the cut, it's clear why, and I follow up individually with the people whose asks got deprioritized so they don't hear it for the first time in a backlog review.` },
+      { id: "pm2", text: "How do you know if a feature you shipped was actually successful?",
+        hint: "Say you'd define the success metric before shipping, not after — and name what that metric would actually be.",
+        keywords: ["success metric", "north star", "before launch", "adoption", "retention", "define upfront"],
+        modelAnswer: `I define the success metric before we build it, not after, because it's too easy to retroactively pick whatever number looks good. For a new feature I'd usually look at adoption in the first two weeks and then retention of that behavior at 30 days — a feature people try once and abandon isn't actually solving their problem, even if the initial adoption number looks great.` },
+      { id: "pm3", text: "Walk me through how you'd validate a new product idea before committing engineering resources to it.",
+        hint: "Mention cheap validation methods before expensive ones — user interviews, a landing page or prototype — before a full build.",
+        keywords: ["user interviews", "prototype", "mvp", "landing page", "validate", "assumption", "cheap test"],
+        modelAnswer: `Before any engineering time goes in, I'd talk to five to ten target users to understand if the problem is real and how they solve it today. If that's promising, I'd build the cheapest possible test of the actual solution — a clickable prototype or even a landing page measuring signups — before committing to a full build, so we're spending engineering time on something we already have evidence for.` },
+      { id: "pm4", text: "Tell me about a time you had to say no to a stakeholder's feature request. How did you handle it?",
+        hint: "STAR format — show you gave a reason grounded in data or strategy, not just 'not now.'",
+        keywords: ["said no", "data", "strategy", "stakeholder", "reasoning", "alternative", "roadmap"],
+        modelAnswer: `A sales lead wanted a custom integration built for one large prospect. I pulled the data on how many other deals were actually blocked by the same gap — it was just that one account — and showed the roadmap items it would displace. Instead of a flat no, I offered a manual workaround for that account while the general integration stayed prioritized based on broader demand, and the sales lead appreciated seeing the reasoning rather than just a rejection.` },
+      { id: "pm5", text: "How would you design an onboarding flow for a first-time user of a mock-interview product like Dronaskill?",
+        hint: "Focus on getting the user to their first 'aha moment' — a real value experience — as fast as possible, minimizing setup friction.",
+        keywords: ["onboarding", "aha moment", "friction", "first value", "activation", "drop-off", "minimal steps"],
+        modelAnswer: `I'd minimize setup before the user experiences real value — asking for a role and experience level is fine, but I wouldn't gate the first practice question behind a long profile form. The goal is to get them to a completed mock question and real feedback as fast as possible, since that's the "aha moment" that proves the product works; everything else, like full profile completion, can happen after that hook lands.` },
+      { id: "pm6", text: "How do you work with engineering when a project is going to miss its deadline?",
+        hint: "Emphasize early communication and offering trade-offs (scope/time/quality) rather than just reporting bad news late.",
+        keywords: ["early communication", "scope", "trade-off", "transparency", "replan", "stakeholders informed"],
+        modelAnswer: `I'd rather hear it's at risk two weeks early than on time the day before launch, so I try to build a relationship with engineering where flagging risk early feels safe, not like an admission of failure. Once it's flagged, I bring options, not just the problem — cut scope, extend the deadline, or add resources — and let the team and stakeholders make an informed trade-off instead of finding out passively.` }
+    ]},
+    design: { label: "UI/UX Designer", questions: [
+      { id: "ux1", text: "Walk me through your design process from a new problem brief to a shipped feature.",
+        hint: "Name distinct stages — research, ideation, wireframes, prototype, test, handoff — don't jump straight to visuals.",
+        keywords: ["research", "wireframe", "prototype", "usability testing", "iterate", "handoff", "user needs"],
+        modelAnswer: `I start by making sure I actually understand the problem — talking to users or reviewing existing research — before opening a design tool. Then low-fidelity wireframes to explore structure fast, a clickable prototype for the direction that feels right, and a round of usability testing before it's ever considered final. I iterate based on what testing surfaces, and handoff includes states I know engineering will ask about — empty, loading, error — not just the happy path.` },
+      { id: "ux2", text: "How do you balance what users say they want with what the data shows they actually do?",
+        hint: "Give a concrete example of when self-reported preference and behavioral data diverged, and how you resolved it.",
+        keywords: ["qualitative", "quantitative", "behavioral data", "self-reported", "analytics", "reconcile", "usability testing"],
+        modelAnswer: `Users are a good source for the problem, not always for the solution — what people say they want and what actually gets used can diverge. I treat interviews and surveys as qualitative signal for what's broken, and analytics as the check on whether a design actually solved it. When they conflict, I trust behavior over stated preference, but I try to understand why the gap exists rather than just picking one source and ignoring the other.` },
+      { id: "ux3", text: "How would you design an empty state for a dashboard, like the analytics dashboard on a learning platform, before the user has any data?",
+        hint: "Focus on making the empty state teach and motivate the first action, not just say 'no data yet.'",
+        keywords: ["empty state", "first action", "onboarding", "motivate", "sample data", "clear cta"],
+        modelAnswer: `A blank dashboard that just says "no data yet" wastes a real opportunity — I'd show what the filled-in version looks like, using sample data clearly labeled as an example, so the user understands what they're working toward. Then a single clear call to action that starts the behavior that would populate it, so the empty state is doing onboarding work, not just apologizing for being empty.` },
+      { id: "ux4", text: "Tell me about a time user testing completely changed your design direction.",
+        hint: "STAR format — be specific about what you observed in testing, not just that 'testing showed issues.'",
+        keywords: ["user testing", "observed", "changed direction", "assumption wrong", "redesigned", "outcome"],
+        modelAnswer: `I designed a multi-step wizard for account setup that I was confident about, but in testing, three of five users tried to skip ahead and got confused about how many steps were left. I redesigned it as a single scrollable form with clear section headers instead, which testing showed people completed faster and with fewer errors — it taught me to test my confident designs just as rigorously as my uncertain ones.` },
+      { id: "ux5", text: "How do you ensure your designs are accessible to users with disabilities?",
+        hint: "Mention concrete, checkable things — contrast ratios, focus states, not relying on color alone — not just 'I care about accessibility.'",
+        keywords: ["contrast ratio", "wcag", "focus state", "color alone", "alt text", "screen reader", "keyboard"],
+        modelAnswer: `I check color contrast ratios against WCAG AA as part of my normal design review, not as an afterthought, and I never rely on color alone to convey status — an error state gets an icon and text, not just red. I design visible focus states for every interactive element, and for anything complex I try navigating my own prototype with just a keyboard before it goes to engineering.` },
+      { id: "ux6", text: "How do you handle disagreement with a product manager about a design decision under a tight deadline?",
+        hint: "Show you'd anchor on user evidence when possible, and know when to disagree-and-commit rather than stalling the team.",
+        keywords: ["disagree and commit", "user evidence", "deadline", "compromise", "prioritize", "timebox"],
+        modelAnswer: `I'd bring whatever user evidence I have first, since that reframes it from opinion versus opinion into a shared question about the user. If we're genuinely out of time to resolve it with more research, I'll state my concern clearly once, then disagree and commit rather than stall the team — and I'd flag it as something worth revisiting with real usage data once it ships.` }
+    ]}
+  };
+
+  /* ── State ───────────────────────────────────────────────────────── */
+  const state = {
+    roleId: null, roleLabel: "", experience: "entry", mode: "text",
+    questions: [], currentIndex: 0, answers: [],
+    timerId: null, timeLeft: 0, submitting: false,
+    recognition: null, recognizing: false, voiceSupported: true, voiceBase: ""
+  };
+
+  /* ── Stage switching ─────────────────────────────────────────────── */
+  function showStage(id) {
+    document.querySelectorAll(".stage").forEach(s => {
+      if (s.id === id) {
+        s.classList.remove("stage-hidden", "stage-enter");
+        void s.offsetWidth;
+        s.classList.add("stage-enter");
+      } else {
+        s.classList.add("stage-hidden");
+      }
+    });
+    scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  }
+
+  /* ── Setup screen ────────────────────────────────────────────────── */
+  const roleSelect = $("roleSelect");
+  Object.keys(QUESTION_BANK).forEach(id => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = QUESTION_BANK[id].label;
+    roleSelect.appendChild(opt);
+  });
+  roleSelect.addEventListener("change", () => { $("roleError").textContent = ""; });
+
+  function wireToggleGroup(groupId, dataAttr, onPick) {
+    const group = $(groupId);
+    group.addEventListener("click", e => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      group.querySelectorAll(".toggle-btn").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      onPick(btn.dataset[dataAttr]);
+    });
+  }
+  wireToggleGroup("expGroup", "exp", v => { state.experience = v; });
+  wireToggleGroup("modeGroup", "mode", v => { state.mode = v; });
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  $("startBtn").addEventListener("click", () => {
+    const roleId = roleSelect.value;
+    if (!roleId) {
+      $("roleError").textContent = "Pick a role to start your mock interview.";
+      roleSelect.focus();
+      return;
+    }
+    state.roleId = roleId;
+    state.roleLabel = QUESTION_BANK[roleId].label;
+    state.questions = shuffle(QUESTION_BANK[roleId].questions).slice(0, 5);
+    state.currentIndex = 0;
+    state.answers = [];
+    showStage("stage-room");
+    renderQuestion();
+  });
+
+  /* ── Question rendering ─────────────────────────────────────────── */
+  const answerInput = $("answerInput");
+  const respCard = $("respCard");
+  const submitBtn = $("submitBtn");
+
+  function renderQuestion() {
+    const q = state.questions[state.currentIndex];
+    const total = state.questions.length;
+    $("qLabel").textContent = `Question ${state.currentIndex + 1} of ${total}`;
+    $("progressFill").style.width = (state.currentIndex / total) * 100 + "%";
+    $("qChip").textContent = `${state.roleLabel} · ${EXPERIENCE[state.experience].short}`;
+    $("qText").textContent = q.text;
+    $("hintText").textContent = q.hint;
+    $("hintBox").open = false;
+
+    answerInput.value = "";
+    answerInput.disabled = false;
+    updateWordCount();
+
+    respCard.classList.toggle("voice-mode", state.mode === "voice");
+    if (state.mode === "voice") {
+      if (state.voiceSupported) {
+        $("micRow").hidden = false;
+        $("voiceNote").hidden = true;
+      } else {
+        $("micRow").hidden = true;
+        $("voiceNote").hidden = false;
+      }
+    }
+    stopListening();
+
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute("data-loading");
+
+    startTimer(EXPERIENCE[state.experience].timer);
+  }
+
+  answerInput.addEventListener("input", updateWordCount);
+  function updateWordCount() {
+    const words = answerInput.value.trim().split(/\s+/).filter(Boolean);
+    $("wordCount").textContent = `${words.length} word${words.length === 1 ? "" : "s"}`;
+  }
+
+  /* ── Timer ───────────────────────────────────────────────────────── */
+  function formatTime(s) {
+    const m = Math.floor(s / 60), sec = s % 60;
+    return `${m}:${String(sec).padStart(2, "0")}`;
+  }
+  function startTimer(seconds) {
+    stopTimer();
+    state.timeLeft = seconds;
+    state.timerTotal = seconds;
+    renderTimer();
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      renderTimer();
+      if (state.timeLeft <= 0) {
+        stopTimer();
+        handleSubmit();
+      }
+    }, 1000);
+  }
+  function stopTimer() {
+    if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+  }
+  function renderTimer() {
+    $("timerText").textContent = formatTime(Math.max(state.timeLeft, 0));
+    $("timerBox").classList.toggle("low", state.timeLeft <= Math.max(state.timerTotal * 0.2, 20));
+  }
+
+  /* ── Voice answer (Web Speech API, graceful fallback) ───────────── */
+  const micBtn = $("micBtn");
+  const micRow = $("micRow");
+  const micHint = $("micHint");
+  let finalTranscript = "";
+
+  (function setupRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { state.voiceSupported = false; return; }
+    try {
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      rec.onresult = e => {
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalTranscript += t + " ";
+          else interim += t;
+        }
+        answerInput.value = (state.voiceBase + finalTranscript + interim).trim();
+        updateWordCount();
+      };
+      rec.onerror = () => { state.voiceSupported = false; stopListening(); showVoiceUnavailable(); };
+      rec.onend = () => {
+        if (state.recognizing) {
+          state.voiceBase = answerInput.value ? answerInput.value + " " : "";
+          finalTranscript = "";
+          try { rec.start(); } catch (err) { /* already stopped */ }
+        }
+      };
+      state.recognition = rec;
+    } catch (err) {
+      state.voiceSupported = false;
+    }
+  })();
+
+  function showVoiceUnavailable() {
+    micRow.hidden = true;
+    $("voiceNote").hidden = false;
+  }
+
+  function startListening() {
+    if (!state.recognition) { showVoiceUnavailable(); return; }
+    state.voiceBase = answerInput.value ? answerInput.value + " " : "";
+    finalTranscript = "";
+    try { state.recognition.start(); } catch (err) { /* already running */ }
+    state.recognizing = true;
+    micRow.classList.add("listening");
+    micBtn.setAttribute("aria-pressed", "true");
+    micHint.textContent = "Listening… speak your answer";
+  }
+  function stopListening() {
+    if (!state.recognizing) return;
+    state.recognizing = false;
+    if (state.recognition) { try { state.recognition.stop(); } catch (err) { /* noop */ } }
+    micRow.classList.remove("listening");
+    micBtn.setAttribute("aria-pressed", "false");
+    micHint.textContent = "Tap to speak your answer";
+  }
+  micBtn.addEventListener("click", () => { state.recognizing ? stopListening() : startListening(); });
+
+  /* ── Scoring engine ──────────────────────────────────────────────── */
+  /* Local heuristic stand-in — planned real grading prompt lives in mock-interview-grading-prompt.md */
+  function tierFor(overallOutOf10) {
+    if (overallOutOf10 >= 8) return "strong";
+    if (overallOutOf10 >= 6) return "good";
+    return "work";
+  }
+  const TIER_LABEL = { strong: "Strong Answer", good: "Good Attempt", work: "Needs Work", none: "No Answer" };
+
+  function evaluateAnswer(question, rawText, experienceId) {
+    const text = rawText.trim();
+    const words = text.length ? text.split(/\s+/).filter(Boolean) : [];
+    const wordCount = words.length;
+
+    if (wordCount === 0) {
+      return {
+        overall: 0, tier: "none", technical: 0, clarity: 0, confidence: 0, wordCount: 0,
+        wins: [], improvements: ["No answer was submitted — even a rough attempt scores far better than a blank."]
+      };
+    }
+
+    const lower = text.toLowerCase();
+    const kws = question.keywords;
+    const hits = kws.filter(k => lower.includes(k));
+    const coverage = hits.length / kws.length;
+
+    const EXP = EXPERIENCE[experienceId];
+    let lengthScore;
+    if (wordCount < EXP.idealMin) lengthScore = wordCount / EXP.idealMin;
+    else if (wordCount > EXP.idealMax * 1.6) lengthScore = 0.6;
+    else lengthScore = 1;
+
+    let technical = (coverage * 0.72 + lengthScore * 0.28) * 100;
+    technical = Math.max(6, Math.min(98, technical));
+    technical = Math.round(Math.max(6, Math.min(98, technical * EXP.rigor)));
+
+    const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+    const avgSentenceLen = wordCount / Math.max(sentences.length, 1);
+    const fillers = ["um", "uh", "like,", "basically", "actually,", "kind of", "sort of", "you know"];
+    const fillerHits = fillers.reduce((n, f) => n + (lower.split(f).length - 1), 0);
+    let clarity = 100;
+    if (avgSentenceLen > 30) clarity -= 18;
+    if (avgSentenceLen < 6 && sentences.length > 1) clarity -= 10;
+    clarity -= Math.min(fillerHits * 9, 45);
+    if (sentences.length >= 2) clarity += 6;
+    clarity = Math.max(8, Math.min(98, Math.round(clarity)));
+
+    const hedges = ["i think maybe", "not sure", "i guess", "might be wrong", "i don't know", "probably not"];
+    const hedgeHits = hedges.reduce((n, h) => n + (lower.split(h).length - 1), 0);
+    const structureMarkers = ["first", "second", "third", "because", "therefore", "for example", "specifically"];
+    const structureHits = structureMarkers.filter(m => lower.includes(m)).length;
+    let confidence = 74 + structureHits * 5 - hedgeHits * 16;
+    if (wordCount < EXP.idealMin * 0.5) confidence -= 12;
+    confidence = Math.max(8, Math.min(97, Math.round(confidence)));
+
+    const overallPct = technical * 0.45 + clarity * 0.25 + confidence * 0.30;
+    const overall = Math.max(1, Math.min(10, Math.round((overallPct / 10) * 2) / 2));
+    const tier = tierFor(overall);
+
+    const wins = [];
+    const improvements = [];
+    if (hits.length) wins.push(`You clearly covered: ${hits.slice(0, 4).join(", ")}.`);
+    if (clarity >= 75) wins.push("Well-structured, easy to follow — good use of complete sentences.");
+    if (confidence >= 75) wins.push("Confident, direct phrasing — no unnecessary hedging.");
+    if (technical >= 75 && wins.length < 3) wins.push("Strong technical grounding for this question.");
+    if (!wins.length) wins.push("You made a genuine attempt under time pressure — that's the hardest part to start.");
+
+    const missing = kws.filter(k => !lower.includes(k)).slice(0, 3);
+    if (missing.length) improvements.push(`Consider mentioning: ${missing.join(", ")}.`);
+    if (fillerHits > 1) improvements.push('Trim filler words ("basically", "kind of") — they dilute a confident answer.');
+    if (hedgeHits > 0) improvements.push('Avoid hedging phrases like "I\'m not sure" — state your reasoning, then flag uncertainty briefly if needed.');
+    if (wordCount < EXP.idealMin) improvements.push(`This answer is a little thin (${wordCount} words) — add one concrete example to back up your point.`);
+    if (avgSentenceLen > 30) improvements.push("A few sentences run long — breaking them up will make your reasoning easier to follow out loud.");
+    if (!improvements.length) improvements.push("Solid answer — tightening it to your single strongest example would make it even sharper.");
+
+    return { overall, tier, technical, clarity, confidence, wordCount, wins: wins.slice(0, 3), improvements: improvements.slice(0, 3) };
+  }
+
+  /* ── Submit / feedback modal ─────────────────────────────────────── */
+  const THINK_DELAY = reduced ? 150 : 1100;
+
+  submitBtn.addEventListener("click", () => handleSubmit());
+
+  function handleSubmit() {
+    if (state.submitting) return;
+    state.submitting = true;
+    stopTimer();
+    stopListening();
+    answerInput.disabled = true;
+    submitBtn.disabled = true;
+    submitBtn.setAttribute("data-loading", "true");
+
+    const q = state.questions[state.currentIndex];
+    const text = answerInput.value;
+    setTimeout(() => {
+      const evalResult = evaluateAnswer(q, text, state.experience);
+      state.answers.push({ question: q, text, eval: evalResult });
+      state.submitting = false;
+      openFeedback(evalResult, q);
+    }, THINK_DELAY);
+  }
+
+  const fbBackdrop = $("feedbackBackdrop");
+  const FB_CIRC = 188.5;
+
+  function setBar(fillEl, valEl, pct) {
+    fillEl.style.width = pct + "%";
+    valEl.textContent = pct + "%";
+  }
+
+  function openFeedback(ev, q) {
+    $("fbRingArc").style.strokeDashoffset = String(FB_CIRC * (1 - (ev.overall / 10)));
+    $("fbRingNum").textContent = ev.overall;
+    const status = $("fbStatus");
+    status.textContent = TIER_LABEL[ev.tier];
+    status.className = "fb-status " + ev.tier;
+    $("fbTitle").textContent = `Question ${state.currentIndex + 1} feedback`;
+
+    setBar($("fbBarTech"), $("fbBarTechVal"), ev.technical);
+    setBar($("fbBarClarity"), $("fbBarClarityVal"), ev.clarity);
+    setBar($("fbBarConf"), $("fbBarConfVal"), ev.confidence);
+
+    const winsList = $("fbWins");
+    winsList.innerHTML = "";
+    ev.wins.forEach(w => { const li = document.createElement("li"); li.textContent = w; winsList.appendChild(li); });
+
+    const improveList = $("fbImprove");
+    improveList.innerHTML = "";
+    ev.improvements.forEach(w => { const li = document.createElement("li"); li.textContent = w; improveList.appendChild(li); });
+
+    $("fbModelAnswer").textContent = q.modelAnswer;
+    document.querySelector(".fb-model").open = false;
+
+    const isLast = state.currentIndex === state.questions.length - 1;
+    $("fbNextBtn").textContent = isLast ? "View Final Report" : "Next Question →";
+
+    fbBackdrop.classList.add("show");
+    $("fbNextBtn").focus();
+  }
+
+  $("fbNextBtn").addEventListener("click", () => {
+    fbBackdrop.classList.remove("show");
+    const isLast = state.currentIndex === state.questions.length - 1;
+    setTimeout(() => {
+      if (isLast) { showFinal(); }
+      else { state.currentIndex++; renderQuestion(); }
+    }, 200);
+  });
+
+  /* ── Final report ────────────────────────────────────────────────── */
+  const FINAL_CIRC = 289.03;
+  const STATUS_NOTE = {
+    strong: "Interview-ready — this is a strong, well-rounded performance.",
+    good: "Good foundation — a bit more precision and you're interview-ready.",
+    work: "Solid start — focus on the improvement notes below before your next attempt."
+  };
+
+  function showFinal() {
+    const answers = state.answers;
+    const avg = key => answers.reduce((s, a) => s + a.eval[key], 0) / answers.length;
+    const avgOverall = avg("overall");
+    const avgTech = Math.round(avg("technical"));
+    const avgClarity = Math.round(avg("clarity"));
+    const avgConf = Math.round(avg("confidence"));
+    const tier = tierFor(avgOverall);
+
+    $("finalRecap").textContent =
+      `${state.roleLabel} · ${EXPERIENCE[state.experience].label} · ${answers.length} questions answered`;
+
+    const pct = Math.round(avgOverall * 10);
+    $("finalRingArc").style.strokeDashoffset = String(FINAL_CIRC * (1 - pct / 100));
+    $("finalRingNum").textContent = pct;
+    $("finalScoreBig").textContent = avgOverall.toFixed(1) + "/10";
+    $("finalStatusNote").textContent = STATUS_NOTE[tier];
+
+    setBar($("finalBarTech"), $("finalBarTechVal"), avgTech);
+    setBar($("finalBarClarity"), $("finalBarClarityVal"), avgClarity);
+    setBar($("finalBarConf"), $("finalBarConfVal"), avgConf);
+
+    const list = $("finalList");
+    list.innerHTML = "";
+    answers.forEach((a, i) => {
+      const details = document.createElement("details");
+      details.className = "qr-card glass";
+
+      const summary = document.createElement("summary");
+      summary.className = "qr-head";
+      const h4 = document.createElement("h4");
+      h4.textContent = `Q${i + 1}. ${a.question.text}`;
+      const score = document.createElement("span");
+      score.className = "qr-score " + a.eval.tier;
+      score.textContent = a.eval.tier === "none" ? "No answer" : a.eval.overall + "/10";
+      summary.appendChild(h4);
+      summary.appendChild(score);
+
+      const body = document.createElement("div");
+      body.className = "qr-body";
+
+      const yours = document.createElement("div");
+      yours.className = "qr-your";
+      const yoursLabel = document.createElement("strong");
+      yoursLabel.textContent = "Your answer: ";
+      yours.appendChild(yoursLabel);
+      yours.appendChild(document.createTextNode(a.text.trim() || "No answer submitted."));
+
+      const wins = document.createElement("div");
+      const winsLabel = document.createElement("strong");
+      winsLabel.textContent = "What worked: ";
+      wins.appendChild(winsLabel);
+      wins.appendChild(document.createTextNode(a.eval.wins.join(" ")));
+
+      const improve = document.createElement("div");
+      const improveLabel = document.createElement("strong");
+      improveLabel.textContent = "To improve: ";
+      improve.appendChild(improveLabel);
+      improve.appendChild(document.createTextNode(a.eval.improvements.join(" ")));
+
+      body.appendChild(yours);
+      body.appendChild(wins);
+      body.appendChild(improve);
+
+      details.appendChild(summary);
+      details.appendChild(body);
+      list.appendChild(details);
+    });
+
+    showStage("stage-final");
+  }
+
+  $("restartBtn").addEventListener("click", () => {
+    roleSelect.value = "";
+    $("roleError").textContent = "";
+    state.experience = "entry";
+    state.mode = "text";
+    document.querySelectorAll("#expGroup .toggle-btn").forEach(b => b.setAttribute("aria-pressed", b.dataset.exp === "entry" ? "true" : "false"));
+    document.querySelectorAll("#modeGroup .toggle-btn").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === "text" ? "true" : "false"));
+    showStage("stage-setup");
+  });
+
+  /* ── Ambient orb drift (same system as the homepage) ────────────── */
+  const rand = (min, max) => Math.random() * (max - min) + min;
+  const ORBS = ["o1", "o2", "o3", "o4"].map(id => $(id));
+  const running = new Map();
+  function startDrift(el) {
+    const w = el.offsetWidth, h = el.offsetHeight;
+    el.style.left = rand(-w * 0.35, innerWidth - w * 0.6) + "px";
+    el.style.top = rand(-h * 0.35, Math.max(innerHeight, 700) - h * 0.6) + "px";
+    const prev = running.get(el);
+    if (prev) prev.cancel();
+    if (reduced) return;
+    const dur = rand(18000, 28000);
+    const frames = [{ transform: "translate(0,0) scale(1)" }];
+    for (let i = 1; i < 5; i++) frames.push({ transform: `translate(${rand(-70, 70)}px,${rand(-60, 60)}px) scale(${rand(.93, 1.09)})` });
+    frames.push({ transform: "translate(0,0) scale(1)" });
+    running.set(el, el.animate(frames, { duration: dur, iterations: Infinity, easing: "ease-in-out", delay: -rand(0, dur) }));
+  }
+  ORBS.forEach(startDrift);
+  let resizeTimer;
+  addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => ORBS.forEach(startDrift), 250); });
+})();
+</script>
+</body>
+</html>

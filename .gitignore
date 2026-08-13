@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env / secrets (no backend today, but keep this out if one is ever added)
+.env
+.env.*
+
+# Logs
+*.log
+
+# Node (not currently used — this is a static, build-free site — but ignored
+# preemptively in case tooling is ever added)
+node_modules/
