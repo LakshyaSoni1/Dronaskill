@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lectures — Dronaskill</title>
+<meta name="description" content="Distraction-free lecture player — hand-picked YouTube courses for the skill you chose on your dashboard, with focus mode and watch tracking.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+    --saffron:     #f2ab3c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+    --good:        #34c46b;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --r-md: 14px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); overflow-x: hidden;
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+    color: var(--ink); line-height: 1.55;
+  }
+
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.18; }
+  .orb-1 { width: 520px; height: 520px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); top: 2%; left: 2%; }
+  .orb-2 { width: 460px; height: 460px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); top: 44%; right: 2%; }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590; padding: 12px 22px;
+    border-radius: 12px; cursor: pointer; text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .btn { background: var(--cta); color: var(--cta-ink); box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn-sm { padding: 9px 16px; font-size: 13px; border-radius: 10px; }
+
+  :where(a, button, select):focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px; }
+
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand span { color: var(--saffron); }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+
+  /* ── Layout ──────────────────────────────────────────────────────── */
+  .lec { padding: 26px 0 90px; }
+  .crumb { font-size: 12.5px; color: var(--ink-3); margin-bottom: 16px; }
+  .crumb a { color: var(--ink-3); text-decoration: none; }
+  .crumb a:hover { color: var(--saffron); }
+
+  .lec-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+
+  .player {
+    position: relative; aspect-ratio: 16 / 9; border-radius: var(--r-xl); overflow: hidden;
+    display: grid; place-items: center; text-align: center; padding: 24px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(242,171,60,0.14), transparent 55%),
+      radial-gradient(circle at 75% 80%, rgba(124,127,242,0.14), transparent 55%),
+      rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+  }
+  .player .play-badge {
+    width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(255,255,255,0.09); border: 1px solid var(--line); margin: 0 auto 16px;
+  }
+  .player p { font-size: 13px; color: var(--ink-3); max-width: 42ch; margin: 0 auto; }
+  .player h2 { font-size: 17px; margin-bottom: 8px; }
+
+  .skill-head { margin: 24px 0 8px; }
+  .skill-head h1 { font-size: clamp(24px, 3.6vw, 32px); margin: 12px 0 10px; }
+  .skill-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .tag { padding: 4px 11px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+  .tag.accent { background: rgba(242,171,60,0.12); border-color: rgba(242,171,60,0.28); color: var(--saffron); }
+
+  .module-list { margin-top: 26px; }
+  .module-list h3 { font-size: 15px; margin-bottom: 14px; }
+  .module {
+    display: flex; align-items: center; gap: 14px; padding: 14px 18px; margin-bottom: 8px;
+    border-radius: var(--r-md); background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft);
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .module:hover { background: rgba(255,255,255,0.065); border-color: rgba(255,255,255,0.14); }
+  .module-num {
+    flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(242,171,60,0.12); border: 1px solid rgba(242,171,60,0.24);
+    color: var(--saffron); font-size: 12.5px; font-weight: 640;
+  }
+  .module-main { flex: 1 1 auto; min-width: 0; }
+  .module-title { font-size: 14px; font-weight: 560; }
+  .module-sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .module-len { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+
+  .lec-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+
+  .side { display: grid; gap: 16px; position: sticky; top: 84px; }
+  .side-card { padding: 20px; border-radius: var(--r-xl); }
+  .side-card h3 { font-size: 12.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+  .jump-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+    color: var(--ink-2); text-decoration: none; font-size: 13px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .jump-item:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .jump-item[aria-current="true"] { background: rgba(242,171,60,0.12); color: var(--saffron); }
+  .jump-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.22); }
+  .jump-item.is-done .jump-dot { background: var(--good); }
+
+  .note {
+    padding: 14px 16px; border-radius: var(--r-md); font-size: 12.5px; color: var(--ink-2);
+    background: rgba(124,127,242,0.10); border: 1px solid rgba(124,127,242,0.24); line-height: 1.6;
+  }
+
+  /* ── Logged hours for this skill ─────────────────────────────────── */
+  .logged-box { margin-top: 4px; }
+  .logged-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .logged-top b { font-size: 15px; font-weight: 620; color: var(--saffron); }
+  .logged-top span { font-size: 12px; color: var(--ink-3); }
+  .logged-track { height: 6px; border-radius: 999px; background: rgba(242,171,60,0.16); overflow: hidden; }
+  .logged-fill { height: 100%; border-radius: 999px; background: var(--saffron); transition: width .5s ease; }
+
+  /* ── Player ──────────────────────────────────────────────────────── */
+  .player iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .player.is-live { display: block; padding: 0; background: #000; }
+
+  /* Shown instead of the iframe when the page is opened straight from disk —
+     YouTube refuses those embeds (error 153) because there is no referrer. */
+  .player.is-blocked { display: block; padding: 0; background: #000; }
+  .player-fallback { position: absolute; inset: 0; display: block; text-decoration: none; color: inherit; }
+  .player-fallback img { width: 100%; height: 100%; object-fit: cover; opacity: .28; display: block; }
+  .player-fallback .fb-inner {
+    position: absolute; inset: 0; display: grid; place-items: center; align-content: center;
+    text-align: center; padding: 26px; gap: 10px;
+  }
+  .player-fallback .fb-badge {
+    width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(255,255,255,0.12); border: 1px solid var(--line);
+  }
+  .player-fallback h2 { font-size: 17px; }
+  .player-fallback p { font-size: 12.5px; color: var(--ink-2); max-width: 46ch; }
+  .player-fallback .fb-cta {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;
+    padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 590;
+    background: var(--cta); color: var(--cta-ink);
+  }
+
+  .serve-hint {
+    margin-top: 12px; padding: 14px 16px; border-radius: var(--r-md); font-size: 12.5px;
+    color: var(--ink-2); line-height: 1.65;
+    background: rgba(242,171,60,0.09); border: 1px solid rgba(242,171,60,0.26);
+  }
+  .serve-hint[hidden] { display: none; }
+  .serve-hint b { color: var(--ink); font-weight: 600; }
+  .serve-hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px;
+    padding: 2px 7px; border-radius: 6px;
+    background: rgba(0,0,0,0.35); border: 1px solid var(--line-soft); color: var(--saffron);
+  }
+
+  .player-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--ink-3);
+  }
+  .player-foot a { color: var(--ink-3); text-decoration: none; }
+  .player-foot a:hover { color: var(--saffron); }
+  .now-playing { min-width: 0; }
+  .now-playing b { display: block; font-size: 13.5px; font-weight: 570; color: var(--ink); }
+
+  /* ── Lecture list ────────────────────────────────────────────────── */
+  .lec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .lec-head h3 { font-size: 15px; }
+  .watch-count { font-size: 12.5px; color: var(--ink-3); }
+  .watch-track { height: 4px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 14px; }
+  .watch-fill { height: 100%; border-radius: 999px; background: var(--good); transition: width .4s ease; }
+
+  .autolog {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 12px; color: var(--ink-3);
+  }
+  .autolog input { accent-color: var(--saffron); width: 14px; height: 14px; cursor: pointer; }
+
+  /* .module-num sets display:grid, which beats the UA [hidden] rule — the
+     numbered badge is the thumbnail's offline fallback, so it must really hide. */
+  .module-num[hidden] { display: none; }
+
+  .module.lec-row { align-items: flex-start; gap: 12px; }
+  .module.is-current { background: rgba(242,171,60,0.10); border-color: rgba(242,171,60,0.30); }
+  .lec-thumb {
+    flex: none; width: 92px; aspect-ratio: 16 / 9; border-radius: 9px; object-fit: cover;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--line-soft); cursor: pointer;
+  }
+  .lec-tick {
+    flex: none; width: 26px; height: 26px; margin-top: 2px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; padding: 0;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: transparent;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .lec-tick:hover { border-color: rgba(52,196,107,0.5); color: rgba(255,255,255,0.35); }
+  .lec-tick[aria-pressed="true"] { background: rgba(52,196,107,0.18); border-color: rgba(52,196,107,0.45); color: var(--good); }
+  .lec-row-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .link-btn {
+    background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; color: var(--ink-3); text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,0.2);
+  }
+  .link-btn:hover { color: var(--saffron); }
+  .lec-badge {
+    font-size: 10.5px; padding: 2px 7px; border-radius: 999px; margin-left: 8px;
+    background: rgba(124,127,242,0.14); border: 1px solid rgba(124,127,242,0.3); color: var(--indigo);
+  }
+
+  .no-lectures { padding: 26px 22px; border-radius: var(--r-md); text-align: center;
+    background: rgba(255,255,255,0.04); border: 1px dashed var(--line); }
+  .no-lectures h4 { margin: 0 0 8px; font-size: 15px; font-weight: 570; }
+  .no-lectures p { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+  .no-lectures .row { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .no-lectures a.search-yt { font-size: 12.5px; color: var(--ink-2); text-decoration: none; }
+  .no-lectures a.search-yt:hover { color: var(--saffron); }
+
+  .outline-list { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--ink-3); line-height: 1.75; }
+
+  /* ── Next-up guardrail card ──────────────────────────────────────── */
+  .nextup {
+    margin-top: 16px; padding: 16px 18px; border-radius: var(--r-md);
+    background: rgba(124,127,242,0.10); border: 1px solid rgba(124,127,242,0.26);
+  }
+  .nextup .nextup-label { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--indigo); }
+  .nextup .nextup-title { font-size: 14.5px; font-weight: 570; margin: 6px 0 14px; }
+  .nextup .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── Focus mode ──────────────────────────────────────────────────── */
+  .focus-bar {
+    position: fixed; top: 14px; right: 18px; z-index: 50; display: none;
+    align-items: center; gap: 10px; padding: 8px 10px 8px 14px; border-radius: 999px;
+  }
+  body.focus-on .focus-bar { display: flex; }
+  .focus-timer { font-size: 13px; font-weight: 600; color: var(--saffron); font-variant-numeric: tabular-nums; }
+
+  .break-note {
+    position: fixed; top: 62px; right: 18px; z-index: 50; max-width: 300px;
+    padding: 14px 16px; border-radius: var(--r-md); font-size: 12.5px; line-height: 1.55;
+    background: #14141a; border: 1px solid rgba(242,171,60,0.4); color: var(--ink);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+  }
+  .break-note[hidden] { display: none; }
+  .break-note .row { display: flex; gap: 8px; margin-top: 12px; }
+
+  body.focus-on .site-head,
+  body.focus-on footer.slim,
+  body.focus-on .crumb,
+  body.focus-on .side,
+  body.focus-on .bg,
+  body.focus-on .grid-layer,
+  body.focus-on .noise               { display: none; }
+  body.focus-on                      { background: #000; }
+  body.focus-on .lec-grid            { grid-template-columns: 1fr; }
+  body.focus-on .lec                 { padding-top: 0; }
+  body.focus-on .wrap                { width: min(1320px, 100%); }
+  body.focus-on .player              { border-radius: 0; }
+  body.focus-on .skill-head,
+  body.focus-on .module-list,
+  body.focus-on .lec-actions         { opacity: .45; transition: opacity .3s ease; }
+  body.focus-on .skill-head:hover,
+  body.focus-on .module-list:hover,
+  body.focus-on .lec-actions:hover,
+  body.focus-on .module-list:focus-within { opacity: 1; }
+
+  /* ── Toast ───────────────────────────────────────────────────────── */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+    z-index: 90; max-width: min(420px, calc(100% - 36px));
+    padding: 12px 18px; border-radius: 999px; font-size: 12.5px; color: var(--ink);
+    background: #14141a; border: 1px solid var(--line);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+  }
+  .toast[hidden] { display: none; }
+
+  /* ── Log-time modal ──────────────────────────────────────────────── */
+  .modal-back {
+    position: fixed; inset: 0; z-index: 80; display: grid; place-items: center;
+    padding: 22px; background: rgba(5,5,9,0.72);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .modal-back[hidden] { display: none; }
+  .modal {
+    width: min(460px, 100%); max-height: calc(100vh - 44px); overflow-y: auto;
+    padding: 28px 28px 24px; border-radius: var(--r-xl);
+    background: #14141a; border: 1px solid var(--line);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    animation: modalIn .25s ease both;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: none; } }
+  .modal h2 { font-size: 20px; margin-bottom: 6px; }
+  .modal .modal-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 22px; line-height: 1.55; }
+  .m-field { margin-bottom: 18px; }
+  .m-field label, .m-field .m-label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px;
+  }
+  .m-input {
+    width: 100%; padding: 11px 13px; border-radius: 11px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    color: var(--ink); font-family: inherit; font-size: 14px;
+  }
+  .m-input:focus { border-color: rgba(242,171,60,0.5); outline: none; }
+  .m-input::placeholder { color: var(--ink-3); }
+  select.m-input {
+    appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2ab3c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 13px center;
+  }
+  select.m-input option, select.m-input optgroup { background: #16161d; color: var(--ink); }
+  input[type="date"].m-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .55; cursor: pointer; }
+  .quick-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
+  .quick {
+    padding: 7px 13px; border-radius: 9px; cursor: pointer; font-family: inherit; font-size: 12.5px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); color: var(--ink-2);
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .quick:hover { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .quick[aria-pressed="true"] { background: rgba(242,171,60,0.16); border-color: rgba(242,171,60,0.4); color: var(--saffron); }
+  .m-error { font-size: 12px; color: var(--saffron); min-height: 16px; margin-top: 4px; }
+  .m-actions { display: flex; gap: 10px; margin-top: 22px; }
+  .m-actions .btn { flex: 1; }
+  .visually-hidden-label {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  .empty { padding: 70px 0 110px; display: flex; justify-content: center; }
+  .empty-card { width: min(520px, 100%); padding: 40px 34px; border-radius: var(--r-xl); text-align: center; }
+  .empty-card h1 { font-size: 26px; margin: 14px 0 12px; }
+  .empty-card .lede { margin-bottom: 26px; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 980px) { .lec-grid { grid-template-columns: 1fr; } .side { position: static; } }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/><stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="analysis.html">Analysis</a>
+      <a class="nav-link" href="lectures.html" aria-current="page">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+    </div>
+    <div class="nav-actions"><a class="nav-signin" href="index.html">Exit</a></div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ══ No profile ══ -->
+  <section class="empty wrap hidden" id="emptyState">
+    <div class="empty-card glass">
+      <span class="eyebrow">Nothing to play yet</span>
+      <h1>Build your path first.</h1>
+      <p class="lede">Lectures are picked from your skill checklist, so we need your profile before
+        there's anything to open here.</p>
+      <a class="btn" href="onboarding.html">Start onboarding</a>
+    </div>
+  </section>
+
+  <!-- ══ Lecture view ══ -->
+  <section class="lec wrap hidden" id="lecState">
+    <p class="crumb">
+      <a href="dashboard.html">Dashboard</a> <span aria-hidden="true">›</span>
+      <span id="crumbTrack"></span> <span aria-hidden="true">›</span>
+      <span id="crumbSkill"></span>
+    </p>
+
+    <div class="lec-grid">
+      <div>
+        <div class="player" id="playerSlot"></div>
+
+        <div class="player-foot">
+          <span class="now-playing" id="nowPlaying"></span>
+          <a id="openOnYt" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">Trouble playing? Open on YouTube ↗</a>
+        </div>
+
+        <p class="serve-hint" id="serveHint" hidden>
+          <b>Videos won't play here yet.</b> You've opened this file directly, and YouTube blocks
+          embedded playback from local files (error 153). To watch inside Dronaskill, close this and
+          double-click <code>start-dronaskill.cmd</code> in the project folder — it opens the site at
+          <code>http://localhost:8000</code>, where videos play normally. (Or run
+          <code>python -m http.server 8000</code> yourself.) Everything else — marking lectures
+          watched, your hours, focus mode — works either way.
+        </p>
+
+        <div id="nextUp" class="nextup hidden"></div>
+
+        <div class="skill-head">
+          <span class="eyebrow" id="skillLevel">Foundation</span>
+          <h1 id="skillName">Skill</h1>
+          <p class="lede" id="skillDesc"></p>
+          <div class="skill-tags">
+            <span class="tag accent" id="tagHours">~0 hrs</span>
+            <span class="tag" id="tagFormat">Format</span>
+            <span class="tag" id="tagLang">English</span>
+            <span class="tag" id="tagStatus">Not started</span>
+          </div>
+        </div>
+
+        <div class="module-list">
+          <div class="lec-head">
+            <div>
+              <h3>Lectures</h3>
+              <span class="watch-count" id="watchCount"></span>
+            </div>
+            <label class="autolog" for="autoLog">
+              <input type="checkbox" id="autoLog">
+              Log time automatically when I mark a lecture watched
+            </label>
+          </div>
+          <div class="watch-track"><div class="watch-fill" id="watchFill" style="width:0%"></div></div>
+          <div id="modules"></div>
+          <div class="lec-row-actions" id="lectureTools" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="lec-actions">
+          <button type="button" class="btn-ghost" id="focusBtn">Focus mode</button>
+          <button type="button" class="btn" id="logBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>
+            </svg>
+            Log study time
+          </button>
+          <button type="button" class="btn-ghost" id="completeBtn">Mark skill complete</button>
+          <a class="btn-ghost" href="dashboard.html">Back to checklist</a>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="side-card glass">
+          <h3>Time on this skill</h3>
+          <div class="logged-box">
+            <div class="logged-top">
+              <b id="loggedValue">0h</b>
+              <span id="loggedOf">of ~0 hrs estimated</span>
+            </div>
+            <div class="logged-track"><div class="logged-fill" id="loggedFill" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="side-card glass">
+          <h3>Up next on your path</h3>
+          <div id="jumpList"></div>
+        </div>
+        <div class="side-card glass">
+          <h3>What a good course covers</h3>
+          <ul class="outline-list">
+            <li>What this skill is for, and what you'll be able to build</li>
+            <li>The core ideas everything else rests on</li>
+            <li>A hands-on walkthrough of the first working thing</li>
+            <li>How it's actually used on real projects</li>
+            <li>Practice problems that force you to apply it</li>
+            <li>The mistakes almost everyone makes here</li>
+            <li>One deliverable you can put in your portfolio</li>
+            <li>What gets asked about this in a real interview round</li>
+          </ul>
+        </div>
+
+        <div class="side-card glass">
+          <h3>Break reminder</h3>
+          <label for="breakEvery" class="visually-hidden-label">Remind me to take a break every</label>
+          <select id="breakEvery" class="m-input"></select>
+          <p class="muted" style="font-size:11.5px;margin-top:9px;">Only counts time with this tab in front.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<!-- ══ Focus mode chrome ══ -->
+<div class="focus-bar glass" id="focusBar">
+  <span class="focus-timer" id="focusTimer">0:00</span>
+  <button type="button" class="btn-ghost btn-sm" id="focusExit">Exit focus</button>
+</div>
+
+<div class="break-note" id="breakNote" role="status" hidden>
+  <span id="breakText">Time to stand up for five.</span>
+  <div class="row">
+    <button type="button" class="btn-ghost btn-sm" id="breakSnooze">Snooze 10m</button>
+    <button type="button" class="btn-ghost btn-sm" id="breakDismiss">Dismiss</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<!-- ══ Add / edit a lecture ══ -->
+<div class="modal-back" id="libBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="libTitle">
+    <h2 id="libTitle">Add a lecture</h2>
+    <p class="modal-sub" id="libSub">Paste any YouTube video link. It stays on this skill and
+      counts toward your hours.</p>
+
+    <div class="m-field" id="libUrlField">
+      <label for="libUrl">YouTube link</label>
+      <input type="text" id="libUrl" class="m-input" placeholder="https://www.youtube.com/watch?v=…">
+    </div>
+
+    <div class="m-field">
+      <label for="libName">Title</label>
+      <input type="text" id="libName" class="m-input" maxlength="120" placeholder="e.g. Graphs — full walkthrough">
+    </div>
+
+    <div class="m-field">
+      <label for="libChannel">Channel <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="libChannel" class="m-input" maxlength="120" placeholder="e.g. freeCodeCamp.org">
+    </div>
+
+    <div class="m-field" style="margin-bottom:0;">
+      <label for="libMinutes">Length in minutes <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="number" id="libMinutes" class="m-input" min="0" max="1200" step="1" placeholder="Leave blank if you don't know">
+      <p class="m-error" id="libError" role="alert"></p>
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn-ghost" id="libCancel">Cancel</button>
+      <button type="button" class="btn" id="libSave">Save lecture</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Log study time ══ -->
+<div class="modal-back" id="logBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <h2 id="logTitle">Log study time</h2>
+    <p class="modal-sub">Real hours you put in. This is what fills your activity heatmap —
+      separate from the estimates attached to each skill.</p>
+
+    <div class="m-field">
+      <span class="m-label">How long?</span>
+      <div class="quick-row" id="quickRow">
+        <button type="button" class="quick" data-h="0.5" aria-pressed="false">30m</button>
+        <button type="button" class="quick" data-h="1" aria-pressed="true">1h</button>
+        <button type="button" class="quick" data-h="1.5" aria-pressed="false">1h 30m</button>
+        <button type="button" class="quick" data-h="2" aria-pressed="false">2h</button>
+        <button type="button" class="quick" data-h="3" aria-pressed="false">3h</button>
+        <button type="button" class="quick" data-h="4" aria-pressed="false">4h</button>
+      </div>
+      <label for="logHours" class="visually-hidden-label">Hours</label>
+      <input type="number" id="logHours" class="m-input" min="0.25" max="16" step="0.25" value="1">
+      <p class="m-error" id="logError" role="alert"></p>
+    </div>
+
+    <div class="m-field">
+      <label for="logSkill">What were you working on?</label>
+      <select id="logSkill" class="m-input"></select>
+    </div>
+
+    <div class="m-field">
+      <label for="logDate">When?</label>
+      <input type="date" id="logDate" class="m-input">
+    </div>
+
+    <div class="m-field" style="margin-bottom:0;">
+      <label for="logNote">Note <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="logNote" class="m-input" maxlength="140" placeholder="e.g. finished modules 1–3">
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn-ghost" id="logCancel">Cancel</button>
+      <button type="button" class="btn" id="logSave">Save session</button>
+    </div>
+  </div>
+</div>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="dashboard.html">Back to Dashboard</a>
+  </div>
+</footer>
+
+<script src="skills-data.js"></script>
+<script src="lectures-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.DRONA;
+  var L = window.DRONA_LECTURES;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var profile = null;
+  try { profile = JSON.parse(localStorage.getItem(D.STORAGE_KEY) || "null"); } catch (e) { profile = null; }
+  if (!profile || !profile.career_goal) {
+    $("emptyState").classList.remove("hidden");
+    return;
+  }
+  $("lecState").classList.remove("hidden");
+
+  var progress = D.readProgress();
+  var log = D.readLog();
+  var loggedBySkill = D.logHoursBySkill(log);
+
+  var plan = D.buildPlan({ career_goal: profile.career_goal, known_skills: [], hours_per_week: profile.hours_per_week });
+  plan.items.forEach(function (it) { it.done = !!progress[it.id]; });
+
+  /* Skill comes from the URL; otherwise the first unfinished one on the path. */
+  var params = new URLSearchParams(location.search);
+  var wanted = params.get("skill");
+  var current = null;
+  if (wanted) {
+    current = plan.items.filter(function (it) { return it.id === wanted; })[0] || null;
+  }
+  if (!current) {
+    current = plan.items.filter(function (it) { return !it.done; })[0] || plan.items[0];
+  }
+
+  /* ── Lecture state ─────────────────────────────────────────────────── */
+  var library = L.readLibrary();
+  var watched = L.readWatched();
+  var prefs   = L.readPrefs();
+  var lectures = L.lecturesFor(current.id, library);
+
+  /* The video being played lives in the URL so links are shareable; default is
+     the first one you haven't watched, else the first. */
+  var currentVideoId = null;
+  var wantedVideo = params.get("v");
+  if (wantedVideo && lectures.filter(function (x) { return x.videoId === wantedVideo; })[0]) {
+    currentVideoId = wantedVideo;
+  }
+  if (!currentVideoId && lectures.length) {
+    var firstUnwatched = lectures.filter(function (x) {
+      return !L.isWatched(watched, current.id, x.videoId);
+    })[0];
+    currentVideoId = (firstUnwatched || lectures[0]).videoId;
+  }
+
+  function lectureById(videoId) {
+    return lectures.filter(function (x) { return x.videoId === videoId; })[0] || null;
+  }
+
+  function refreshLectures() {
+    lectures = L.lecturesFor(current.id, library);
+    if (currentVideoId && !lectureById(currentVideoId)) currentVideoId = null;
+    if (!currentVideoId && lectures.length) currentVideoId = lectures[0].videoId;
+  }
+
+  /* ── Toast ─────────────────────────────────────────────────────────── */
+  var toastTimer = null;
+  function toast(message) {
+    var el = $("toast");
+    el.textContent = message;
+    el.hidden = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.hidden = true; }, 5000);
+  }
+
+  /* ── Player ────────────────────────────────────────────────────────── */
+
+  /* Rebuilt only when the video actually changes — otherwise marking a lecture
+     watched would reload the iframe and restart playback. */
+  var renderedVideoId = null;
+
+  /* Opened by double-clicking the file, the page has origin "null" and sends no
+     referrer, so YouTube refuses to play the embed ("Video player configuration
+     error — Error 153"). We can't detect that failure from JS once the iframe is
+     up, but we can detect the condition that causes it, and show something
+     useful instead of YouTube's error screen. */
+  var embedBlocked = (location.protocol === "file:");
+
+  function fallbackPlayer(item) {
+    var link = document.createElement("a");
+    link.className = "player-fallback";
+    link.href = L.watchUrl(item.videoId);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    var thumb = document.createElement("img");
+    thumb.src = L.thumbUrl(item.videoId);
+    thumb.alt = "";
+    thumb.onerror = function () { thumb.remove(); };
+
+    var inner = document.createElement("div");
+    inner.className = "fb-inner";
+
+    var badge = document.createElement("div");
+    badge.className = "fb-badge";
+    badge.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--saffron)" aria-hidden="true"><path d="M8 5.6v12.8L19 12z"/></svg>';
+
+    var h = document.createElement("h2");
+    h.textContent = item.title;
+
+    var p = document.createElement("p");
+    p.textContent = "YouTube won't play embedded video when this page is opened straight from your computer. Double-click start-dronaskill.cmd to open the site properly and watch here — or click through to YouTube.";
+
+    var cta = document.createElement("span");
+    cta.className = "fb-cta";
+    cta.textContent = "Watch on YouTube ↗";
+
+    inner.appendChild(badge); inner.appendChild(h); inner.appendChild(p); inner.appendChild(cta);
+    link.appendChild(thumb); link.appendChild(inner);
+    return link;
+  }
+
+  function renderPlayer() {
+    var slot = $("playerSlot");
+    var item = currentVideoId ? lectureById(currentVideoId) : null;
+
+    if (!item) {
+      if (renderedVideoId === "none") return;
+      renderedVideoId = "none";
+      slot.className = "player";
+      slot.innerHTML = "";
+      var box = document.createElement("div");
+      var badge = document.createElement("div");
+      badge.className = "play-badge";
+      badge.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="var(--saffron)" aria-hidden="true"><path d="M8 5.6v12.8L19 12z"/></svg>';
+      var h = document.createElement("h2");
+      h.textContent = "Nothing queued yet";
+      var p = document.createElement("p");
+      p.textContent = "Add a lecture below and it plays right here.";
+      box.appendChild(badge); box.appendChild(h); box.appendChild(p);
+      slot.appendChild(box);
+      return;
+    }
+
+    var src = L.embedUrl(item.videoId, item.start);
+    if (!src) return;                              /* never build an iframe from an unvalidated id */
+    if (renderedVideoId === item.videoId) return;
+    renderedVideoId = item.videoId;
+
+    if (embedBlocked) {
+      slot.className = "player is-blocked";
+      slot.innerHTML = "";
+      slot.appendChild(fallbackPlayer(item));
+      return;
+    }
+
+    slot.className = "player is-live";
+    slot.innerHTML = "";
+    var frame = document.createElement("iframe");
+    frame.src = src;
+    frame.title = item.title;
+    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+    frame.setAttribute("allowfullscreen", "");
+    frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    slot.appendChild(frame);
+  }
+
+  function playVideo(videoId) {
+    if (!lectureById(videoId)) return;
+    currentVideoId = videoId;
+    /* Throws SecurityError on file:// in some browsers — currentVideoId is the
+       source of truth either way, so a failure here is harmless. */
+    try {
+      history.replaceState(null, "",
+        "lectures.html?skill=" + encodeURIComponent(current.id) + "&v=" + encodeURIComponent(videoId));
+    } catch (e) { /* ignore */ }
+    render();
+    $("playerSlot").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  /* ── Auto-logging watched time ─────────────────────────────────────── */
+  var autoLoggedMinutes = 0;      /* during the current focus session */
+
+  function autoLogWatch(item) {
+    if (!prefs.autoLog) return;
+
+    /* No duration means no honest number to log — send them to the manual
+       modal instead of inventing one. */
+    if (!item.minutes) { openModal(); return; }
+
+    var note = ("Watched: " + item.title).trim().slice(0, 140);
+    var today = D.todayISO();
+    var todays = log[today] || [];
+    for (var i = 0; i < todays.length; i++) {
+      /* Second guard, for a wiped or hand-edited watch store. */
+      if (todays[i].skill === current.id && todays[i].note === note) return;
+    }
+
+    var hours = Math.max(0.25, Math.min(4, Math.round(item.minutes / 60 * 4) / 4));
+    if (!D.addSession(log, { date: today, hours: hours, skill: current.id, note: note })) return;
+
+    loggedBySkill = D.logHoursBySkill(log);
+    autoLoggedMinutes += hours * 60;
+    toast("Logged " + D.formatHours(hours) + " to " + current.name + ".");
+  }
+
+  function toggleWatched(item) {
+    var wasWatched = L.isWatched(watched, current.id, item.videoId);
+    L.setWatched(watched, current.id, item.videoId, !wasWatched);
+
+    if (!wasWatched) {
+      autoLogWatch(item);                 /* only on false -> true, so re-clicking can't double-log */
+    } else {
+      toast("Session kept in your log — remove it from Analysis if that was a mistake.");
+    }
+    render();
+  }
+
+  /* ── Lecture list ──────────────────────────────────────────────────── */
+  function lectureRow(item) {
+    var isDone = L.isWatched(watched, current.id, item.videoId);
+    var row = document.createElement("div");
+    row.className = "module lec-row" + (item.videoId === currentVideoId ? " is-current" : "");
+
+    var tick = document.createElement("button");
+    tick.type = "button";
+    tick.className = "lec-tick";
+    tick.setAttribute("aria-pressed", String(isDone));
+    tick.setAttribute("aria-label", (isDone ? "Mark not watched: " : "Mark watched: ") + item.title);
+    tick.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"/></svg>';
+    tick.addEventListener("click", function () { toggleWatched(item); });
+
+    var num = document.createElement("span");
+    num.className = "module-num";
+    num.textContent = item.n;
+    num.hidden = true;
+
+    var thumb = document.createElement("img");
+    thumb.className = "lec-thumb";
+    thumb.src = L.thumbUrl(item.videoId);
+    thumb.alt = "";
+    thumb.loading = "lazy";
+    /* Offline, or a dead id — fall back to the numbered badge. */
+    thumb.onerror = function () { thumb.remove(); num.hidden = false; };
+    thumb.addEventListener("click", function () { playVideo(item.videoId); });
+
+    var main = document.createElement("div");
+    main.className = "module-main";
+
+    var title = document.createElement("div");
+    title.className = "module-title";
+    title.textContent = item.title;
+    if (item.source === "custom") {
+      var badge = document.createElement("span");
+      badge.className = "lec-badge";
+      badge.textContent = "Yours";
+      title.appendChild(badge);
+    }
+
+    var sub = document.createElement("div");
+    sub.className = "module-sub";
+    sub.textContent = (item.channel ? item.channel + " · " : "") + L.formatMinutes(item.minutes);
+
+    var actions = document.createElement("div");
+    actions.className = "lec-row-actions";
+
+    var playBtn = document.createElement("button");
+    playBtn.type = "button";
+    playBtn.className = "link-btn";
+    playBtn.textContent = item.videoId === currentVideoId ? "Playing" : "Play";
+    playBtn.disabled = item.videoId === currentVideoId;
+    playBtn.addEventListener("click", function () { playVideo(item.videoId); });
+
+    var editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "link-btn";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", function () { openLibModal(item); });
+
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "link-btn";
+    removeBtn.textContent = "Remove";
+    removeBtn.addEventListener("click", function () {
+      L.writeLibrary(L.removeLecture(library, current.id, item.videoId));
+      refreshLectures();
+      render();
+      toast("Removed. Use “Reset to picked lectures” to bring it back.");
+    });
+
+    actions.appendChild(playBtn); actions.appendChild(editBtn); actions.appendChild(removeBtn);
+    main.appendChild(title); main.appendChild(sub); main.appendChild(actions);
+
+    var len = document.createElement("span");
+    len.className = "module-len";
+    len.textContent = L.formatMinutes(item.minutes);
+
+    row.appendChild(tick); row.appendChild(num); row.appendChild(thumb);
+    row.appendChild(main); row.appendChild(len);
+    return row;
+  }
+
+  function emptyLectures() {
+    var box = document.createElement("div");
+    box.className = "no-lectures";
+
+    var h = document.createElement("h4");
+    h.textContent = "No lectures picked for " + current.name + " yet.";
+    var p = document.createElement("p");
+    p.textContent = "Add the videos you're actually using — they'll stay here and count toward your hours.";
+
+    var row = document.createElement("div");
+    row.className = "row";
+
+    var add = document.createElement("button");
+    add.type = "button";
+    add.className = "btn btn-sm";
+    add.textContent = "Add a lecture";
+    add.addEventListener("click", function () { openLibModal(null); });
+
+    var search = document.createElement("a");
+    search.className = "search-yt";
+    search.href = L.searchUrl(current.name + " full course tutorial");
+    search.target = "_blank";
+    search.rel = "noopener noreferrer";
+    search.textContent = "Search YouTube for " + current.name + " ↗";
+
+    row.appendChild(add); row.appendChild(search);
+    box.appendChild(h); box.appendChild(p); box.appendChild(row);
+    return box;
+  }
+
+  function renderTools() {
+    var tools = $("lectureTools");
+    tools.innerHTML = "";
+    if (!lectures.length) return;
+
+    var add = document.createElement("button");
+    add.type = "button";
+    add.className = "link-btn";
+    add.textContent = "+ Add a lecture";
+    add.addEventListener("click", function () { openLibModal(null); });
+    tools.appendChild(add);
+
+    if (library[current.id]) {
+      var reset = document.createElement("button");
+      reset.type = "button";
+      reset.className = "link-btn";
+      reset.textContent = "Reset to picked lectures";
+      reset.addEventListener("click", function () {
+        L.writeLibrary(L.resetSkill(library, current.id));
+        refreshLectures();
+        render();
+        toast("Back to the hand-picked list for " + current.name + ".");
+      });
+      tools.appendChild(reset);
+    }
+
+    var search = document.createElement("a");
+    search.className = "link-btn";
+    search.href = L.searchUrl(current.name + " full course tutorial");
+    search.target = "_blank";
+    search.rel = "noopener noreferrer";
+    search.textContent = "Find more on YouTube ↗";
+    tools.appendChild(search);
+  }
+
+  /* ── Next-up guardrail ─────────────────────────────────────────────── */
+  var nextUpDismissed = false;
+
+  function renderNextUp() {
+    var card = $("nextUp");
+    card.innerHTML = "";
+
+    var anyWatched = L.watchedCount(watched, current.id, lectures) > 0;
+    if (!anyWatched || nextUpDismissed || !lectures.length) {
+      card.classList.add("hidden");
+      return;
+    }
+
+    var nextLecture = lectures.filter(function (x) {
+      return !L.isWatched(watched, current.id, x.videoId);
+    })[0];
+
+    var label = document.createElement("div");
+    label.className = "nextup-label";
+    var title = document.createElement("div");
+    title.className = "nextup-title";
+    var row = document.createElement("div");
+    row.className = "row";
+
+    function ghost(text, onClick) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn-ghost btn-sm";
+      b.textContent = text;
+      b.addEventListener("click", onClick);
+      return b;
+    }
+    function link(text, href) {
+      var a = document.createElement("a");
+      a.className = "btn-ghost btn-sm";
+      a.href = href;
+      a.textContent = text;
+      return a;
+    }
+
+    if (nextLecture) {
+      label.textContent = "Next up";
+      title.textContent = nextLecture.title + " · " + L.formatMinutes(nextLecture.minutes);
+      var play = document.createElement("button");
+      play.type = "button";
+      play.className = "btn btn-sm";
+      play.textContent = "Play next";
+      play.addEventListener("click", function () { nextUpDismissed = false; playVideo(nextLecture.videoId); });
+      row.appendChild(play);
+      row.appendChild(ghost("Take a break", function () { showBreak("Good stopping point — stand up for five."); }));
+      row.appendChild(ghost("Not now", function () { nextUpDismissed = true; renderNextUp(); }));
+    } else {
+      var index = plan.items.indexOf(current);
+      var nextSkill = plan.items.slice(index + 1).filter(function (it) { return !it.done; })[0];
+      label.textContent = "Skill finished";
+      title.textContent = "That's every lecture for " + current.name + ".";
+
+      if (!progress[current.id]) {
+        var mark = document.createElement("button");
+        mark.type = "button";
+        mark.className = "btn btn-sm";
+        mark.textContent = "Mark skill complete";
+        mark.addEventListener("click", function () {
+          D.setSkillDone(progress, current.id, true);
+          current.done = true;
+          render();
+        });
+        row.appendChild(mark);
+      }
+      if (nextSkill) {
+        row.appendChild(link("Next skill: " + nextSkill.name,
+          "lectures.html?skill=" + encodeURIComponent(nextSkill.id)));
+      } else {
+        row.appendChild(link("Back to dashboard", "dashboard.html"));
+        row.appendChild(link("See your analysis", "analysis.html"));
+      }
+      row.appendChild(ghost("Not now", function () { nextUpDismissed = true; renderNextUp(); }));
+    }
+
+    card.appendChild(label); card.appendChild(title); card.appendChild(row);
+    card.classList.remove("hidden");
+  }
+
+  /* ── Render ────────────────────────────────────────────────────────── */
+  function render() {
+    var done = !!progress[current.id];
+
+    $("crumbTrack").textContent = plan.trackLabel;
+    $("crumbSkill").textContent = current.name;
+    $("skillLevel").textContent = D.LEVEL_META[current.level].label;
+    $("skillName").textContent = current.name;
+    $("skillDesc").textContent = current.desc;
+    $("tagHours").textContent = "~" + current.hours + " hrs";
+    $("tagFormat").textContent = (profile.formats && profile.formats[0]) || "Mixed formats";
+    $("tagLang").textContent = profile.language || "English";
+    $("tagStatus").textContent = done ? "Completed" : "Not started";
+
+    renderPlayer();
+
+    var playing = currentVideoId ? lectureById(currentVideoId) : null;
+    $("serveHint").hidden = !(embedBlocked && playing);
+    var nowPlaying = $("nowPlaying");
+    nowPlaying.innerHTML = "";
+    if (playing) {
+      var b = document.createElement("b");
+      b.textContent = playing.title;
+      var meta = document.createElement("span");
+      meta.textContent = (playing.channel ? playing.channel + " · " : "") + L.formatMinutes(playing.minutes);
+      nowPlaying.appendChild(b); nowPlaying.appendChild(meta);
+      $("openOnYt").href = L.watchUrl(playing.videoId);
+      $("openOnYt").hidden = false;
+    } else {
+      $("openOnYt").hidden = true;
+    }
+
+    /* Lecture list, or the empty state for a skill nobody has picked yet. */
+    var list = $("modules");
+    list.innerHTML = "";
+    if (lectures.length) {
+      lectures.forEach(function (item) { list.appendChild(lectureRow(item)); });
+    } else {
+      list.appendChild(emptyLectures());
+    }
+    renderTools();
+
+    var seen = L.watchedCount(watched, current.id, lectures);
+    $("watchCount").textContent = lectures.length
+      ? seen + " of " + lectures.length + " watched"
+      : "Nothing picked yet";
+    $("watchFill").style.width = (lectures.length ? seen / lectures.length * 100 : 0) + "%";
+
+    renderNextUp();
+
+    $("completeBtn").textContent = done ? "Mark as not done" : "Mark skill complete";
+
+    /* Time actually logged against this skill, against its estimate. */
+    var logged = loggedBySkill[current.id] || 0;
+    $("loggedValue").textContent = D.formatHours(logged);
+    $("loggedOf").textContent = "of ~" + current.hours + " hrs estimated";
+    $("loggedFill").style.width = Math.min(100, logged / current.hours * 100) + "%";
+
+    /* Sidebar: this skill plus the next few on the path. */
+    var index = plan.items.indexOf(current);
+    var nearby = plan.items.slice(Math.max(0, index), Math.max(0, index) + 7);
+    var jump = $("jumpList");
+    jump.innerHTML = "";
+    nearby.forEach(function (it) {
+      var a = document.createElement("a");
+      a.className = "jump-item" + (it.done ? " is-done" : "");
+      a.href = "lectures.html?skill=" + encodeURIComponent(it.id);
+      if (it.id === current.id) a.setAttribute("aria-current", "true");
+      var dot = document.createElement("span");
+      dot.className = "jump-dot";
+      var label = document.createElement("span");
+      label.textContent = it.name;
+      a.appendChild(dot); a.appendChild(label);
+      jump.appendChild(a);
+    });
+  }
+
+  $("completeBtn").addEventListener("click", function () {
+    D.setSkillDone(progress, current.id, !progress[current.id]);
+    current.done = !!progress[current.id];
+    render();
+  });
+
+  /* ── Add / edit a lecture ──────────────────────────────────────────── */
+  var editing = null;
+
+  function openLibModal(item) {
+    editing = item;
+    lastFocus = document.activeElement;
+    $("libTitle").textContent = item ? "Edit lecture" : "Add a lecture";
+    $("libSub").textContent = item
+      ? "Fix the title or length. To swap the video itself, remove this one and add the new link."
+      : "Paste any YouTube video link. It stays on this skill and counts toward your hours.";
+    $("libUrlField").classList.toggle("hidden", !!item);
+    $("libUrl").value = "";
+    $("libName").value = item ? item.title : "";
+    $("libChannel").value = item ? (item.channel || "") : "";
+    $("libMinutes").value = item && item.minutes ? item.minutes : "";
+    $("libError").textContent = "";
+    $("libBack").hidden = false;
+    (item ? $("libName") : $("libUrl")).focus();
+  }
+
+  function closeLibModal() {
+    $("libBack").hidden = true;
+    editing = null;
+    if (lastFocus) lastFocus.focus();
+  }
+
+  $("libCancel").addEventListener("click", closeLibModal);
+  $("libBack").addEventListener("click", function (e) {
+    if (e.target === $("libBack")) closeLibModal();
+  });
+
+  $("libSave").addEventListener("click", function () {
+    var minutes = $("libMinutes").value === "" ? 0 : Number($("libMinutes").value);
+    if (!isFinite(minutes) || minutes < 0 || minutes > 1200) {
+      $("libError").textContent = "Length must be between 0 and 1200 minutes.";
+      return;
+    }
+
+    if (editing) {
+      /* editLecture returns null on a rejected change — never hand that to
+         writeLibrary, which would persist an empty library over the real one. */
+      var edited = L.editLecture(library, current.id, editing.videoId, {
+        title: $("libName").value,
+        channel: $("libChannel").value,
+        minutes: minutes
+      });
+      if (!edited) {
+        $("libError").textContent = "Couldn't save that change.";
+        return;
+      }
+      L.writeLibrary(edited);
+    } else {
+      var raw = $("libUrl").value;
+      var videoId = L.parseVideoId(raw);
+      if (!videoId) {
+        $("libError").textContent = L.isPlaylistOnly(raw)
+          ? "That's a playlist link — open the playlist, click the first video, and paste that URL."
+          : "That doesn't look like a YouTube video link.";
+        return;
+      }
+      var result = L.addLecture(library, current.id, {
+        videoId: videoId,
+        title: $("libName").value,
+        channel: $("libChannel").value,
+        minutes: minutes,
+        start: L.parseStart(raw)
+      });
+      if (!result) {
+        $("libError").textContent = "That video is already on this skill.";
+        return;
+      }
+      L.writeLibrary(result);
+    }
+
+    refreshLectures();
+    closeLibModal();
+    render();
+  });
+
+  /* ── Focus mode ────────────────────────────────────────────────────── */
+  var focusOn = false;
+  var focusSeconds = 0;
+  var focusTimer = null;
+  var nextBreakAt = 0;
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function formatClock(secs) {
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    var s = secs % 60;
+    return h ? h + ":" + pad(m) + ":" + pad(s) : m + ":" + pad(s);
+  }
+
+  function showBreak(message) {
+    $("breakText").textContent = message;
+    $("breakNote").hidden = false;
+  }
+
+  function tick() {
+    /* Only count time with the tab in front — without the IFrame API there is
+       no pause signal, and tab-switching is how "one hour" becomes fiction. */
+    if (document.hidden) return;
+    focusSeconds++;
+    $("focusTimer").textContent = formatClock(focusSeconds);
+    if (prefs.breakEvery && nextBreakAt && focusSeconds >= nextBreakAt) {
+      nextBreakAt = focusSeconds + prefs.breakEvery * 60;
+      showBreak(Math.round(focusSeconds / 60) + " minutes in — stand up for five.");
+    }
+  }
+
+  function enterFocus() {
+    if (focusOn) return;
+    focusOn = true;
+    focusSeconds = 0;
+    autoLoggedMinutes = 0;
+    nextBreakAt = prefs.breakEvery ? prefs.breakEvery * 60 : 0;
+    document.body.classList.add("focus-on");
+    $("focusTimer").textContent = "0:00";
+    $("focusBtn").textContent = "Exit focus mode";
+    focusTimer = setInterval(tick, 1000);
+  }
+
+  function exitFocus() {
+    if (!focusOn) return;
+    focusOn = false;
+    document.body.classList.remove("focus-on");
+    $("focusBtn").textContent = "Focus mode";
+    $("breakNote").hidden = true;
+    if (focusTimer) { clearInterval(focusTimer); focusTimer = null; }
+
+    /* Anything already auto-logged from marking lectures watched is subtracted,
+       so the timer prompt can't double-count the same stretch. */
+    var remaining = Math.round(focusSeconds / 60 - autoLoggedMinutes);
+    if (remaining >= 5) {
+      toast("You focused for " + formatClock(focusSeconds) + ". Log it from “Log study time”.");
+      pendingFocusHours = Math.max(0.25, Math.min(D.MAX_SESSION_HOURS, Math.round(remaining / 60 * 4) / 4));
+    }
+    focusSeconds = 0;
+  }
+
+  var pendingFocusHours = 0;
+
+  $("focusBtn").addEventListener("click", function () { focusOn ? exitFocus() : enterFocus(); });
+  $("focusExit").addEventListener("click", exitFocus);
+  $("breakDismiss").addEventListener("click", function () { $("breakNote").hidden = true; });
+  $("breakSnooze").addEventListener("click", function () {
+    $("breakNote").hidden = true;
+    nextBreakAt = focusSeconds + 10 * 60;
+  });
+  window.addEventListener("beforeunload", function () {
+    if (focusTimer) clearInterval(focusTimer);
+  });
+
+  /* ── Preference controls ───────────────────────────────────────────── */
+  $("autoLog").checked = prefs.autoLog;
+  $("autoLog").addEventListener("change", function () {
+    prefs.autoLog = this.checked;
+    L.writePrefs(prefs);
+  });
+
+  (function fillBreakSelect() {
+    var select = $("breakEvery");
+    var labels = { 0: "Off", 25: "Every 25 minutes", 50: "Every 50 minutes", 90: "Every 90 minutes" };
+    L.BREAK_OPTIONS.forEach(function (mins) {
+      var opt = document.createElement("option");
+      opt.value = String(mins);
+      opt.textContent = labels[mins];
+      select.appendChild(opt);
+    });
+    select.value = String(prefs.breakEvery);
+    select.addEventListener("change", function () {
+      prefs.breakEvery = Number(this.value);
+      L.writePrefs(prefs);
+      nextBreakAt = (focusOn && prefs.breakEvery) ? focusSeconds + prefs.breakEvery * 60 : 0;
+    });
+  })();
+
+  /* ── Log modal — prefilled with the skill you're looking at ────────── */
+  var lastFocus = null;
+
+  function fillSkillSelect() {
+    var select = $("logSkill");
+    select.innerHTML = "";
+    var general = document.createElement("option");
+    general.value = "";
+    general.textContent = "General study — not one skill";
+    select.appendChild(general);
+    plan.items.forEach(function (it) {
+      var opt = document.createElement("option");
+      opt.value = it.id;
+      opt.textContent = it.name;
+      select.appendChild(opt);
+    });
+  }
+
+  function setQuick(hours) {
+    document.querySelectorAll(".quick").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(Number(b.dataset.h) === Number(hours)));
+    });
+  }
+
+  function openModal() {
+    lastFocus = document.activeElement;
+    fillSkillSelect();
+    $("logSkill").value = current.id;      /* the whole point of logging from here */
+    $("logDate").value = D.todayISO();
+    $("logDate").max = D.todayISO();
+    /* A just-finished focus session prefills its own length, minus anything
+       already auto-logged from marking lectures watched. */
+    var hours = pendingFocusHours || 1;
+    $("logHours").value = String(hours);
+    $("logNote").value = pendingFocusHours ? "Focus session" : "";
+    pendingFocusHours = 0;
+    $("logError").textContent = "";
+    setQuick(hours);
+    $("logBack").hidden = false;
+    $("logHours").focus();
+  }
+
+  function closeModal() {
+    $("logBack").hidden = true;
+    if (lastFocus) lastFocus.focus();
+  }
+
+  document.querySelectorAll(".quick").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $("logHours").value = btn.dataset.h;
+      setQuick(btn.dataset.h);
+      $("logError").textContent = "";
+    });
+  });
+  $("logHours").addEventListener("input", function () { setQuick(this.value); });
+
+  $("logBtn").addEventListener("click", openModal);
+  $("logCancel").addEventListener("click", closeModal);
+  $("logBack").addEventListener("click", function (e) {
+    if (e.target === $("logBack")) closeModal();
+  });
+  /* One handler for the whole page: innermost layer first. Note that while the
+     video iframe has keyboard focus, keydown never reaches us — the visible
+     "Exit focus" button is the primary way out, Esc is the shortcut. */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (!$("logBack").hidden) { closeModal(); return; }
+    if (!$("libBack").hidden) { closeLibModal(); return; }
+    if (focusOn) exitFocus();
+  });
+
+  $("logSave").addEventListener("click", function () {
+    var hours = Number($("logHours").value);
+    if (!isFinite(hours) || hours <= 0) {
+      $("logError").textContent = "Enter how long you studied.";
+      return;
+    }
+    if (hours > D.MAX_SESSION_HOURS) {
+      $("logError").textContent = "That's over " + D.MAX_SESSION_HOURS + " hours — log it as separate sessions.";
+      return;
+    }
+
+    var saved = D.addSession(log, {
+      date: $("logDate").value,
+      hours: hours,
+      skill: $("logSkill").value,
+      note: $("logNote").value
+    });
+    if (!saved) {
+      $("logError").textContent = "That date is in the future — pick today or earlier.";
+      return;
+    }
+
+    loggedBySkill = D.logHoursBySkill(log);
+    closeModal();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
