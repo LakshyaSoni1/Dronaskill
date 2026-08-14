@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Analysis — Dronaskill</title>
+<meta name="description" content="A graphical breakdown of your learning progress — activity heatmap, level meters, domain coverage and a burn-up projection.">
+<style>
+  :root {
+    --bg:          #07070d;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-md: 14px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  /* ── Chart tokens ───────────────────────────────────────────────────
+     The site is dark-only, so one selected set of steps — not a flipped
+     light palette. Surface is the glass card as it composites over --bg
+     (#16161b); every ramp step below was validated against that surface.
+
+     Saffron ordinal ramp (validated: monotone L, adjacent ΔL >= 0.06,
+     nearest-surface step 2.24:1, hue spread 3°).
+     ─────────────────────────────────────────────────────────────────── */
+  .viz {
+    --surface-1:     #16161b;   /* chart surface — used for gaps and rings */
+    --text-primary:  rgba(255,255,255,0.92);
+    --text-secondary:rgba(255,255,255,0.60);
+    --text-muted:    rgba(255,255,255,0.38);
+    --grid:          rgba(255,255,255,0.09);
+
+    --heat-0:        rgba(255,255,255,0.045);  /* no activity — track, not a ramp step */
+    --heat-1:        #6b4a12;
+    --heat-2:        #a3721c;
+    --heat-3:        #d4972a;
+    --heat-4:        #f9c266;
+
+    --series-1:      #f2ab3c;   /* the one series: your progress */
+    --track-1:       rgba(242,171,60,0.16);  /* lighter step of the same ramp */
+    --de-emphasis:   #6e6e78;   /* projection / context, never a series */
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); overflow-x: hidden;
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+    color: var(--ink); line-height: 1.55;
+  }
+
+  /* ── Ambient background ──────────────────────────────────────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.18; }
+  .orb-1 { width: 540px; height: 540px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); top: 2%; left: 3%; }
+  .orb-2 { width: 470px; height: 470px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); top: 44%; right: 2%; }
+  .orb-3 { width: 430px; height: 430px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); bottom: 3%; left: 28%; }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590; padding: 12px 22px;
+    border-radius: 12px; cursor: pointer; text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .btn { background: var(--cta); color: var(--cta-ink); box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn-sm { padding: 9px 16px; font-size: 13px; border-radius: 10px; }
+
+  :where(a, button, select, summary):focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px; }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand span { color: var(--saffron); }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+
+  /* ── Page layout ─────────────────────────────────────────────────── */
+  .an { padding: 26px 0 90px; }
+  .crumb { font-size: 12.5px; color: var(--ink-3); margin-bottom: 14px; }
+  .crumb a { color: var(--ink-3); text-decoration: none; }
+  .crumb a:hover { color: var(--saffron); }
+
+  .an-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+  .an-head h1 { font-size: clamp(26px, 4vw, 36px); margin: 12px 0 8px; }
+
+  /* One filter row, above everything it scopes. */
+  .filter-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 16px; border-radius: var(--r-md); margin-bottom: 20px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft);
+  }
+  .filter-row .filter-label { font-size: 12px; color: var(--ink-3); }
+  .seg { display: flex; gap: 4px; padding: 4px; border-radius: 11px; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); }
+  .seg button {
+    padding: 6px 13px; border: 0; border-radius: 8px; background: none; color: var(--ink-2);
+    font-family: inherit; font-size: 12.5px; font-weight: 560; cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--cta); color: var(--cta-ink); }
+  .sample-toggle { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+  .sample-toggle input { accent-color: var(--saffron); width: 15px; height: 15px; cursor: pointer; }
+  .sample-badge {
+    display: none; padding: 4px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+    background: rgba(124,127,242,0.14); border: 1px solid rgba(124,127,242,0.34); color: #b3b5f7;
+  }
+  .sample-badge.on { display: inline-flex; }
+  .source-note {
+    font-size: 12.5px; color: var(--ink-3); line-height: 1.55;
+    margin: -8px 0 20px; padding-left: 2px;
+  }
+  .source-note a { color: var(--saffron); text-decoration: none; }
+  .source-note a:hover { text-decoration: underline; }
+
+  /* ── Cards & KPI row ─────────────────────────────────────────────── */
+  .card { padding: 24px 26px; border-radius: var(--r-xl); margin-bottom: 20px; }
+  .card-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .card-head h2 { font-size: 17px; }
+  .card-sub { font-size: 12.5px; color: var(--ink-3); margin-bottom: 20px; line-height: 1.55; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .kpi { padding: 20px 22px; border-radius: var(--r-xl); }
+  .kpi .k-label { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; }
+  .kpi .k-value { font-size: 30px; font-weight: 640; letter-spacing: -0.03em; line-height: 1.05; color: var(--ink); }
+  .kpi .k-value .k-unit { font-size: 15px; font-weight: 560; color: var(--ink-2); letter-spacing: 0; margin-left: 3px; }
+  .kpi .k-delta { margin-top: 7px; font-size: 12px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+  .kpi .k-delta .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--series-1); flex: none; }
+
+  /* Hero figure — exactly one on the page. */
+  .hero-card { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+  .hero-fig { flex: none; }
+  .hero-fig .h-value { font-size: 56px; font-weight: 650; letter-spacing: -0.04em; line-height: 1; color: var(--saffron); }
+  .hero-fig .h-label { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+  .hero-text { flex: 1 1 280px; min-width: 240px; }
+  .hero-text h2 { font-size: 18px; margin-bottom: 8px; }
+
+  /* ── Heatmap ─────────────────────────────────────────────────────── */
+  .heat-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .heat-inner { display: inline-block; min-width: 100%; }
+  .heat-months { display: flex; margin-left: 32px; margin-bottom: 5px; height: 14px; }
+  /* One slot per column (13px cell + 3px gap). Fixed basis with min-width:0 so a
+     label never widens its slot and shunts the row out of step with the grid;
+     the text simply overflows right into the empty slots that follow. */
+  .heat-month {
+    flex: 0 0 16px; min-width: 0; overflow: visible; white-space: nowrap;
+    font-size: 10.5px; color: var(--ink-3); line-height: 14px;
+  }
+  .heat-body { display: flex; gap: 6px; }
+  .heat-days { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; width: 26px; padding-top: 0; }
+  .heat-day-label { font-size: 10px; color: var(--ink-3); line-height: 13px; }
+  .heat-cols { display: flex; gap: 3px; }
+  .heat-col { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; }
+  .heat-cell {
+    width: 13px; height: 13px; border-radius: 3px; background: var(--heat-0);
+    border: 0; padding: 0; cursor: default; position: relative;
+  }
+  .heat-cell.lv1 { background: var(--heat-1); }
+  .heat-cell.lv2 { background: var(--heat-2); }
+  .heat-cell.lv3 { background: var(--heat-3); }
+  .heat-cell.lv4 { background: var(--heat-4); }
+  .heat-cell.blank { background: none; }
+  /* Hit target grows past the 13px mark without moving the grid. */
+  .heat-cell:not(.blank)::after { content: ""; position: absolute; inset: -5px; }
+  .heat-cell:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+  .heat-foot { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+  .heat-legend { display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 11.5px; color: var(--ink-3); }
+  .heat-legend .sw { width: 13px; height: 13px; border-radius: 3px; }
+
+  /* ── Meters (level progress) ─────────────────────────────────────── */
+  .meter-row { margin-bottom: 18px; }
+  .meter-row:last-child { margin-bottom: 0; }
+  .meter-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 7px; }
+  .meter-name { font-size: 13.5px; font-weight: 560; }
+  .meter-val { margin-left: auto; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .meter-track { height: 10px; border-radius: 999px; background: var(--track-1); overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 999px; background: var(--series-1); transition: width .7s cubic-bezier(.4,0,.2,1); }
+  .meter-note { font-size: 11.5px; color: var(--ink-3); margin-top: 6px; }
+
+  /* ── Horizontal bars (domain coverage) ───────────────────────────── */
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 62px; align-items: center; gap: 14px; margin-bottom: 11px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { font-size: 12.5px; color: var(--ink-2); text-align: right; overflow-wrap: anywhere; }
+  .bar-track { height: 18px; background: var(--track-1); border-radius: 0 4px 4px 0; position: relative; }
+  .bar-fill {
+    height: 100%; background: var(--series-1); border-radius: 0 4px 4px 0;
+    transition: width .7s cubic-bezier(.4,0,.2,1); min-width: 2px;
+  }
+  .bar-value { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  /* ── Line chart ──────────────────────────────────────────────────── */
+  .chart-svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart-legend { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); }
+  .legend-key { width: 16px; height: 2px; border-radius: 2px; flex: none; }
+  .legend-key.solid { background: var(--series-1); }
+  .legend-key.dashed { background: repeating-linear-gradient(90deg, var(--de-emphasis) 0 5px, transparent 5px 9px); }
+
+  /* ── Tooltip ─────────────────────────────────────────────────────── */
+  .tip {
+    position: fixed; z-index: 60; pointer-events: none; opacity: 0;
+    padding: 9px 12px; border-radius: 10px; max-width: 240px;
+    background: rgba(14,14,19,0.96); border: 1px solid var(--line);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+    font-size: 12px; color: var(--ink); line-height: 1.5;
+    transition: opacity .12s ease;
+  }
+  .tip.on { opacity: 1; }
+  .tip b { display: block; font-weight: 620; margin-bottom: 2px; }
+  .tip span { color: var(--ink-3); }
+
+  /* ── Table twins ─────────────────────────────────────────────────── */
+  details.table-twin { margin-top: 18px; border-top: 1px solid var(--line-soft); padding-top: 14px; }
+  details.table-twin summary {
+    cursor: pointer; list-style: none; font-size: 12.5px; color: var(--ink-2);
+    display: flex; align-items: center; gap: 7px;
+  }
+  details.table-twin summary::-webkit-details-marker { display: none; }
+  details.table-twin summary::before { content: "▸"; color: var(--saffron); transition: transform .2s ease; }
+  details.table-twin[open] summary::before { transform: rotate(90deg); }
+  details.table-twin summary:hover { color: var(--ink); }
+  .twin-scroll { overflow-x: auto; margin-top: 12px; }
+  table.data {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  table.data th, table.data td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+  table.data th { color: var(--ink-3); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; }
+  table.data td { color: var(--ink-2); }
+  table.data td:first-child { color: var(--ink); }
+  table.data tbody tr:last-child th, table.data tbody tr:last-child td { border-bottom: 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .two-col > .card { margin-bottom: 0; }
+
+  .del-btn {
+    padding: 4px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 11.5px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); color: var(--ink-3);
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .del-btn:hover { background: rgba(224,80,80,0.14); border-color: rgba(224,80,80,0.38); color: #ef9b9b; }
+  .del-btn[disabled] { opacity: .35; cursor: not-allowed; }
+
+  /* ── Empty state ─────────────────────────────────────────────────── */
+  .empty { padding: 70px 0 110px; display: flex; justify-content: center; }
+  .empty-card { width: min(520px, 100%); padding: 40px 34px; border-radius: var(--r-xl); text-align: center; }
+  .empty-card h1 { font-size: 26px; margin: 14px 0 12px; }
+  .empty-card .lede { margin-bottom: 26px; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 560px) {
+    .card { padding: 20px 18px; }
+    .bar-row { grid-template-columns: 110px 1fr 54px; gap: 10px; }
+    .sample-toggle { margin-left: 0; }
+    .hero-fig .h-value { font-size: 46px; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/><stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="analysis.html" aria-current="page">Analysis</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+    </div>
+    <div class="nav-actions"><a class="nav-signin" href="index.html">Exit</a></div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ══ No profile ══ -->
+  <section class="empty wrap hidden" id="emptyState">
+    <div class="empty-card glass">
+      <span class="eyebrow">Nothing to analyse</span>
+      <h1>No profile yet.</h1>
+      <p class="lede">Deep analysis reads your skill checklist, so there's nothing to chart until
+        you've been through onboarding.</p>
+      <a class="btn" href="onboarding.html">Start onboarding</a>
+    </div>
+  </section>
+
+  <!-- ══ Analysis ══ -->
+  <section class="an wrap viz hidden" id="anState">
+    <p class="crumb"><a href="dashboard.html">Dashboard</a> <span aria-hidden="true">›</span> Deep analysis</p>
+
+    <div class="an-head">
+      <div>
+        <span class="eyebrow" id="trackEyebrow">Deep analysis</span>
+        <h1>How your learning is actually going.</h1>
+        <p class="lede" id="headSub"></p>
+      </div>
+      <a class="btn-ghost btn-sm" href="dashboard.html">Back to checklist</a>
+    </div>
+
+    <!-- One filter row, scoping every time-based chart below -->
+    <div class="filter-row">
+      <span class="filter-label">Time range</span>
+      <div class="seg" role="group" aria-label="Time range">
+        <button type="button" data-range="13" aria-pressed="false">3 months</button>
+        <button type="button" data-range="26" aria-pressed="true">6 months</button>
+        <button type="button" data-range="53" aria-pressed="false">12 months</button>
+      </div>
+      <span class="filter-label" style="margin-left:8px;">Hours</span>
+      <div class="seg" role="group" aria-label="Hours source">
+        <button type="button" data-source="logged" aria-pressed="true">Logged</button>
+        <button type="button" data-source="estimated" aria-pressed="false">Estimated</button>
+      </div>
+
+      <span class="sample-badge" id="sampleBadge">Sample data</span>
+      <label class="sample-toggle">
+        <input type="checkbox" id="sampleToggle">
+        Preview with sample activity
+      </label>
+    </div>
+
+    <p class="source-note" id="sourceNote"></p>
+
+    <!-- Hero + KPIs -->
+    <div class="card glass hero-card">
+      <div class="hero-fig">
+        <div class="h-value" id="heroValue">0%</div>
+        <div class="h-label">of your path complete</div>
+      </div>
+      <div class="hero-text">
+        <h2 id="heroTitle">Getting started</h2>
+        <p class="lede" style="font-size:13.5px;" id="heroLine"></p>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi glass">
+        <div class="k-label" id="kHoursLabel">Hours logged</div>
+        <div class="k-value" id="kHours">0</div>
+        <div class="k-delta"><span class="dot"></span><span id="kHoursSub">of 0 total</span></div>
+      </div>
+      <div class="kpi glass">
+        <div class="k-label">Active days</div>
+        <div class="k-value" id="kDays">0</div>
+        <div class="k-delta"><span class="dot"></span><span id="kDaysSub">in this range</span></div>
+      </div>
+      <div class="kpi glass">
+        <div class="k-label">Longest streak</div>
+        <div class="k-value" id="kStreak">0<span class="k-unit">weeks</span></div>
+        <div class="k-delta"><span class="dot"></span><span id="kStreakSub">current: 0 weeks</span></div>
+      </div>
+      <div class="kpi glass">
+        <div class="k-label">Projected finish</div>
+        <div class="k-value" id="kFinish" style="font-size:24px;">—</div>
+        <div class="k-delta"><span class="dot"></span><span id="kFinishSub">at your stated pace</span></div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card glass">
+      <div class="card-head"><h2>Activity heatmap</h2></div>
+      <p class="card-sub">Every square is a day. Darker to brighter means more study hours banked
+        that day — one square lights up when you tick a skill off your checklist.</p>
+
+      <div class="heat-scroll">
+        <div class="heat-inner">
+          <div class="heat-months" id="heatMonths" aria-hidden="true"></div>
+          <div class="heat-body">
+            <div class="heat-days" aria-hidden="true">
+              <span class="heat-day-label"></span>
+              <span class="heat-day-label">Mon</span>
+              <span class="heat-day-label"></span>
+              <span class="heat-day-label">Wed</span>
+              <span class="heat-day-label"></span>
+              <span class="heat-day-label">Fri</span>
+              <span class="heat-day-label"></span>
+            </div>
+            <div class="heat-cols" id="heatCols"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="heat-foot">
+        <span class="muted" style="font-size:12px;" id="heatSummary"></span>
+        <div class="heat-legend">
+          <span>Less</span>
+          <span class="sw" style="background:var(--heat-0)"></span>
+          <span class="sw" style="background:var(--heat-1)"></span>
+          <span class="sw" style="background:var(--heat-2)"></span>
+          <span class="sw" style="background:var(--heat-3)"></span>
+          <span class="sw" style="background:var(--heat-4)"></span>
+          <span>More</span>
+        </div>
+      </div>
+
+      <details class="table-twin">
+        <summary>View as table</summary>
+        <div class="twin-scroll">
+          <table class="data">
+            <thead><tr><th>Date</th><th>Hours</th><th>Skills completed</th></tr></thead>
+            <tbody id="heatTable"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <div class="two-col">
+      <!-- Level meters -->
+      <div class="card glass">
+        <div class="card-head"><h2>Progress by level</h2></div>
+        <p class="card-sub">Foundation first. A high advanced score on a thin foundation is the
+          pattern that fails interviews.</p>
+        <div id="meters"></div>
+        <details class="table-twin">
+          <summary>View as table</summary>
+          <div class="twin-scroll">
+            <table class="data">
+              <thead><tr><th>Level</th><th>Done</th><th>Total</th><th>Hours left</th></tr></thead>
+              <tbody id="levelTable"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <!-- Domain coverage -->
+      <div class="card glass">
+        <div class="card-head"><h2>Coverage by domain</h2></div>
+        <p class="card-sub">Which parts of your track you've actually touched. Percent of the
+          skills in each domain that are ticked off.</p>
+        <div id="domainBars"></div>
+        <details class="table-twin">
+          <summary>View as table</summary>
+          <div class="twin-scroll">
+            <table class="data">
+              <thead><tr><th>Domain</th><th>Done</th><th>Total</th><th>Percent</th></tr></thead>
+              <tbody id="domainTable"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Session history -->
+    <div class="card glass">
+      <div class="card-head">
+        <h2>Study sessions</h2>
+        <a class="btn btn-sm" href="dashboard.html" style="margin-left:auto;">Log a session</a>
+      </div>
+      <p class="card-sub">Every session you've logged, newest first. These are the measured
+        hours behind the "Logged" view above.</p>
+      <div class="twin-scroll">
+        <table class="data">
+          <thead><tr><th>Date</th><th>Time</th><th>Skill</th><th>Note</th><th></th></tr></thead>
+          <tbody id="sessionTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Burn-up -->
+    <div class="card glass">
+      <div class="card-head"><h2>Hours banked over time</h2></div>
+      <p class="card-sub">Cumulative study hours you've completed, against where your stated
+        weekly pace would put you.</p>
+
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-key solid"></span>Actual hours banked</span>
+        <span class="legend-item"><span class="legend-key dashed"></span>Your stated pace</span>
+      </div>
+
+      <div id="burnupWrap"></div>
+
+      <details class="table-twin">
+        <summary>View as table</summary>
+        <div class="twin-scroll">
+          <table class="data">
+            <thead><tr><th>Week ending</th><th>Actual hours</th><th>Pace target</th></tr></thead>
+            <tbody id="burnupTable"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+  </section>
+</main>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="dashboard.html">Back to Dashboard</a>
+  </div>
+</footer>
+
+<script src="skills-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.DRONA;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var profile = null;
+  try { profile = JSON.parse(localStorage.getItem(D.STORAGE_KEY) || "null"); } catch (e) { profile = null; }
+  if (!profile || !profile.career_goal) {
+    $("emptyState").classList.remove("hidden");
+    return;
+  }
+  $("anState").classList.remove("hidden");
+
+  var realProgress = D.readProgress();
+  var realLog = D.readLog();
+  var weeks = 26;            /* time range, in weeks — set by the filter row */
+  var useSample = false;
+  /* "logged" = measured sessions; "estimated" = catalogue hours of completed
+     skills. Never mixed in one chart. Default to whichever the learner has. */
+  var source = Object.keys(realLog).length ? "logged" : "estimated";
+
+  /* ── Sample activity ─────────────────────────────────────────────────
+     Purely in-memory, never written to localStorage, and badged on screen.
+     It exists so the charts are testable before a learner has real history.
+     ─────────────────────────────────────────────────────────────────── */
+  function sampleProgress(plan) {
+    var out = {};
+    var rand = (function (seed) {          /* deterministic, so it doesn't jitter on re-render */
+      return function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    })(20260814);
+
+    var n = Math.round(plan.items.length * 0.55);   /* leave the tail of the path unfinished */
+    if (!n) return out;
+
+    /* Walk a realistic cadence rather than spreading evenly: a completion every
+       3–8 days, with the occasional 10–18 day break. That gives the heatmap real
+       clusters and the streak counter consecutive active weeks — an even spread
+       produces one isolated cell per fortnight and a permanent 1-week streak. */
+    var gaps = [];
+    for (var g = 0; g < n - 1; g++) {
+      gaps.push(rand() < 0.15 ? 10 + Math.floor(rand() * 9) : 3 + Math.floor(rand() * 6));
+    }
+    var span = gaps.reduce(function (s, v) { return s + v; }, 0);
+
+    /* Anchor the walk so the newest completion lands on today. */
+    var day = new Date();
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - span);
+
+    for (var i = 0; i < n; i++) {
+      out[plan.items[i].id] = D.todayISO(day);
+      if (i < gaps.length) day.setDate(day.getDate() + gaps[i]);
+    }
+    return out;
+  }
+
+  /* Matching sample sessions — denser than completions, because you study most
+     days and only finish a skill occasionally. */
+  function sampleLog(plan, progress) {
+    var out = {};
+    var rand = (function (seed) {
+      return function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    })(773311);
+
+    /* progress is { skillId: date } — it's the values we need, not the keys. */
+    var dates = Object.keys(progress).map(function (id) { return progress[id]; }).sort();
+    if (!dates.length) return out;
+
+    var start = parseISO(dates[0]);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var ids = plan.items.map(function (it) { return it.id; });
+
+    for (var d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+      var dow = d.getDay();
+      /* Weekends lighter, ~35% of days skipped entirely. */
+      var chance = (dow === 0 || dow === 6) ? 0.4 : 0.72;
+      if (rand() > chance) continue;
+
+      var iso = D.todayISO(d);
+      var sessions = rand() < 0.22 ? 2 : 1;
+      out[iso] = [];
+      for (var s = 0; s < sessions; s++) {
+        out[iso].push({
+          hours: [0.5, 1, 1, 1.5, 2, 2, 3][Math.floor(rand() * 7)],
+          skill: ids[Math.floor(rand() * ids.length)],
+          note: ""
+        });
+      }
+    }
+    return out;
+  }
+
+  /* ── Derived model ─────────────────────────────────────────────────────
+     `byDay` is the one thing the charts consume, and it comes from exactly one
+     source at a time — measured sessions or completion estimates, never a blend.
+     ─────────────────────────────────────────────────────────────────────── */
+  function model() {
+    var basePlan = D.buildPlan({
+      career_goal: profile.career_goal,
+      known_skills: [],
+      hours_per_week: profile.hours_per_week
+    });
+    var progress = useSample ? sampleProgress(basePlan) : realProgress;
+    var log = useSample ? sampleLog(basePlan, progress) : realLog;
+
+    basePlan.items.forEach(function (it) {
+      it.doneOn = progress[it.id] || null;
+      it.done = !!it.doneOn;
+    });
+
+    var done = basePlan.items.filter(function (it) { return it.done; });
+    var perWeek = profile.hours_per_week || 8;
+
+    var byDay = {}, hoursDone;
+    if (source === "logged") {
+      Object.keys(log).forEach(function (date) {
+        var hours = 0, labels = [];
+        log[date].forEach(function (s) {
+          hours += s.hours;
+          labels.push(
+            (s.skill && D.SKILLS[s.skill] ? D.SKILLS[s.skill].name : "General study") +
+            " (" + D.formatHours(s.hours) + ")"
+          );
+        });
+        byDay[date] = { hours: hours, skills: labels };
+      });
+      hoursDone = D.totalLoggedHours(log);
+    } else {
+      done.forEach(function (it) {
+        if (!byDay[it.doneOn]) byDay[it.doneOn] = { hours: 0, skills: [] };
+        byDay[it.doneOn].hours += it.hours;
+        byDay[it.doneOn].skills.push(it.name);
+      });
+      hoursDone = done.reduce(function (s, it) { return s + it.hours; }, 0);
+    }
+
+    var hoursLeft = Math.max(0, basePlan.totalHours - hoursDone);
+
+    return {
+      plan: basePlan, items: basePlan.items, done: done, byDay: byDay, log: log,
+      hoursDone: hoursDone, hoursLeft: hoursLeft, perWeek: perWeek,
+      totalHours: basePlan.totalHours,
+      pct: basePlan.totalCount ? Math.round(done.length / basePlan.totalCount * 100) : 0,
+      weeksLeft: Math.ceil(hoursLeft / perWeek)
+    };
+  }
+
+  /* ── Date helpers ────────────────────────────────────────────────────── */
+  var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  function parseISO(s) {
+    var p = s.split("-");
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  }
+  function prettyDate(s) {
+    var d = parseISO(s);
+    return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
+  }
+  /* Sunday-anchored grid start, `n` weeks back from this week. */
+  function gridStart(n) {
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - d.getDay());     /* back to this week's Sunday */
+    d.setDate(d.getDate() - (n - 1) * 7);
+    return d;
+  }
+
+  /* ── Tooltip ─────────────────────────────────────────────────────────── */
+  var tip = $("tip");
+  function showTip(target, html) {
+    tip.innerHTML = html;
+    tip.classList.add("on");
+    var r = target.getBoundingClientRect();
+    var t = tip.getBoundingClientRect();
+    var left = r.left + r.width / 2 - t.width / 2;
+    left = Math.max(10, Math.min(left, innerWidth - t.width - 10));
+    var top = r.top - t.height - 10;
+    if (top < 10) top = r.bottom + 10;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  }
+  function hideTip() { tip.classList.remove("on"); }
+  addEventListener("scroll", hideTip, { passive: true });
+
+  function bindTip(el, html) {
+    el.addEventListener("mouseenter", function () { showTip(el, html); });
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", function () { showTip(el, html); });
+    el.addEventListener("blur", hideTip);
+  }
+
+  /* ── Heatmap ─────────────────────────────────────────────────────────── */
+  function renderHeatmap(m) {
+    var cols = $("heatCols");
+    var monthsRow = $("heatMonths");
+    cols.innerHTML = "";
+    monthsRow.innerHTML = "";
+
+    var start = gridStart(weeks);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+
+    /* Bucket thresholds come from the data, so the ramp always spans the range. */
+    var values = Object.keys(m.byDay).map(function (k) { return m.byDay[k].hours; });
+    var max = values.length ? Math.max.apply(null, values) : 0;
+    function level(h) {
+      if (!h) return 0;
+      if (!max) return 1;
+      var r = h / max;
+      return r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
+    }
+
+    var activeDays = 0, rangeHours = 0, rows = [], lastMonth = -1;
+
+    for (var w = 0; w < weeks; w++) {
+      var col = document.createElement("div");
+      col.className = "heat-col";
+
+      /* Month label sits above the first column that opens a new month. */
+      var colDate = new Date(start); colDate.setDate(start.getDate() + w * 7);
+      var label = document.createElement("span");
+      label.className = "heat-month";
+      if (colDate.getMonth() !== lastMonth) {
+        lastMonth = colDate.getMonth();
+        label.textContent = MONTHS[lastMonth];
+      }
+      monthsRow.appendChild(label);
+
+      for (var dow = 0; dow < 7; dow++) {
+        var d = new Date(start);
+        d.setDate(start.getDate() + w * 7 + dow);
+
+        var cell = document.createElement("div");
+        cell.className = "heat-cell";
+
+        if (d > today) {
+          cell.className += " blank";
+          col.appendChild(cell);
+          continue;
+        }
+
+        var iso = D.todayISO(d);
+        var entry = m.byDay[iso];
+        var hours = entry ? entry.hours : 0;
+        if (hours) { activeDays++; rangeHours += hours; rows.push([iso, entry]); }
+
+        cell.className += " lv" + level(hours);
+        cell.tabIndex = 0;
+        cell.setAttribute("role", "img");
+        cell.setAttribute("aria-label",
+          prettyDate(iso) + ": " + (hours ? hours + " hours, " + entry.skills.length + " skills" : "no activity"));
+
+        bindTip(cell, hours
+          ? "<b>" + hours + " hrs · " + prettyDate(iso) + "</b><span>" + entry.skills.join(", ") + "</span>"
+          : "<b>No activity</b><span>" + prettyDate(iso) + "</span>");
+
+        col.appendChild(cell);
+      }
+      cols.appendChild(col);
+    }
+
+    $("heatSummary").textContent = activeDays
+      ? activeDays + " active day" + (activeDays === 1 ? "" : "s") + " · " + rangeHours + " hours banked in this range"
+      : "No activity in this range yet — tick a skill on your dashboard and it lands here.";
+
+    /* Table twin — newest first. */
+    var tbody = $("heatTable");
+    tbody.innerHTML = "";
+    rows.sort(function (a, b) { return a[0] < b[0] ? 1 : -1; });
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="3">No activity in this range.</td></tr>';
+    } else {
+      rows.forEach(function (r) {
+        var tr = document.createElement("tr");
+        [prettyDate(r[0]), String(r[1].hours), r[1].skills.join(", ")].forEach(function (v, i) {
+          var td = document.createElement("td");
+          td.textContent = v;
+          if (i === 2) td.style.whiteSpace = "normal";
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    return { activeDays: activeDays, rangeHours: rangeHours };
+  }
+
+  /* ── Streaks ─────────────────────────────────────────────────────────────
+     The unit follows the data source. Logged sessions happen most days, so days
+     are the right grain. Completions are tens of hours apart, so a day-streak
+     there would read 1 forever — those get counted in weeks instead.
+     ─────────────────────────────────────────────────────────────────────── */
+  function weekKey(d) {
+    var s = new Date(d);
+    s.setHours(0, 0, 0, 0);
+    s.setDate(s.getDate() - s.getDay());   /* Sunday that opens the week */
+    return D.todayISO(s);
+  }
+
+  function streaks(m) {
+    var byWeek = source !== "logged";
+    var step = byWeek ? 7 : 1;
+    var unit = byWeek ? "week" : "day";
+
+    var active = {};
+    Object.keys(m.byDay).forEach(function (iso) {
+      active[byWeek ? weekKey(parseISO(iso)) : iso] = true;
+    });
+    var keys = Object.keys(active).sort();
+    if (!keys.length) return { best: 0, current: 0, unit: unit };
+
+    var best = 1, run = 1;
+    for (var i = 1; i < keys.length; i++) {
+      var gapDays = Math.round((parseISO(keys[i]) - parseISO(keys[i - 1])) / 86400000);
+      run = gapDays === step ? run + 1 : 1;
+      if (run > best) best = run;
+    }
+
+    /* Count back from now, stepping back one period first if the current one is
+       still empty — an unfinished today/this-week shouldn't break the streak. */
+    var cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+    var key = function (d) { return byWeek ? weekKey(d) : D.todayISO(d); };
+    if (!active[key(cursor)]) cursor.setDate(cursor.getDate() - step);
+    var current = 0;
+    while (active[key(cursor)]) { current++; cursor.setDate(cursor.getDate() - step); }
+
+    return { best: best, current: current, unit: unit };
+  }
+
+  /* ── Level meters ────────────────────────────────────────────────────── */
+  function renderMeters(m) {
+    var box = $("meters");
+    var tbody = $("levelTable");
+    box.innerHTML = "";
+    tbody.innerHTML = "";
+
+    D.LEVEL_ORDER.forEach(function (level) {
+      var items = m.items.filter(function (it) { return it.level === level; });
+      if (!items.length) return;
+      var done = items.filter(function (it) { return it.done; });
+      var pct = Math.round(done.length / items.length * 100);
+      var hoursLeft = items.reduce(function (s, it) { return it.done ? s : s + it.hours; }, 0);
+      var meta = D.LEVEL_META[level];
+
+      var row = document.createElement("div");
+      row.className = "meter-row";
+
+      var top = document.createElement("div");
+      top.className = "meter-top";
+      var name = document.createElement("span");
+      name.className = "meter-name";
+      name.textContent = meta.label;
+      var val = document.createElement("span");
+      val.className = "meter-val";
+      val.textContent = done.length + " / " + items.length + "  ·  " + pct + "%";
+      top.appendChild(name); top.appendChild(val);
+
+      var track = document.createElement("div");
+      track.className = "meter-track";
+      var fill = document.createElement("div");
+      fill.className = "meter-fill";
+      fill.style.width = pct + "%";
+      track.appendChild(fill);
+
+      var note = document.createElement("p");
+      note.className = "meter-note";
+      note.textContent = hoursLeft ? hoursLeft + " hrs left here" : "Level complete";
+
+      row.appendChild(top); row.appendChild(track); row.appendChild(note);
+      bindTip(track, "<b>" + meta.label + " — " + pct + "%</b><span>" + meta.note + "</span>");
+      box.appendChild(row);
+
+      var tr = document.createElement("tr");
+      [meta.label, String(done.length), String(items.length), String(hoursLeft)].forEach(function (v) {
+        var td = document.createElement("td");
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Domain coverage ─────────────────────────────────────────────────── */
+  function renderDomains(m) {
+    var box = $("domainBars");
+    var tbody = $("domainTable");
+    box.innerHTML = "";
+    tbody.innerHTML = "";
+
+    var byDomain = {};
+    m.items.forEach(function (it) {
+      var key = it.domain || "Other";
+      if (!byDomain[key]) byDomain[key] = { total: 0, done: 0 };
+      byDomain[key].total++;
+      if (it.done) byDomain[key].done++;
+    });
+
+    Object.keys(byDomain)
+      .map(function (k) {
+        var d = byDomain[k];
+        return { name: k, done: d.done, total: d.total, pct: Math.round(d.done / d.total * 100) };
+      })
+      .sort(function (a, b) { return b.pct - a.pct || b.total - a.total; })
+      .forEach(function (d) {
+        var row = document.createElement("div");
+        row.className = "bar-row";
+
+        var label = document.createElement("span");
+        label.className = "bar-label";
+        label.textContent = d.name;
+
+        var track = document.createElement("div");
+        track.className = "bar-track";
+        var fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = d.pct + "%";
+        track.appendChild(fill);
+
+        var value = document.createElement("span");
+        value.className = "bar-value";
+        value.textContent = d.pct + "%";
+
+        row.appendChild(label); row.appendChild(track); row.appendChild(value);
+        bindTip(track, "<b>" + d.name + "</b><span>" + d.done + " of " + d.total + " skills done</span>");
+        box.appendChild(row);
+
+        var tr = document.createElement("tr");
+        [d.name, String(d.done), String(d.total), d.pct + "%"].forEach(function (v) {
+          var td = document.createElement("td");
+          td.textContent = v;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+  }
+
+  /* ── Burn-up line chart ──────────────────────────────────────────────── */
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(name, attrs) {
+    var el = document.createElementNS(SVGNS, name);
+    Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+
+  function renderBurnup(m) {
+    var wrap = $("burnupWrap");
+    var tbody = $("burnupTable");
+    wrap.innerHTML = "";
+    tbody.innerHTML = "";
+
+    /* Weekly buckets across the selected range. */
+    var start = gridStart(weeks);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+
+    var points = [], cumulative = 0;
+    /* Hours banked before the window still count toward the running total. */
+    Object.keys(m.byDay).forEach(function (iso) {
+      if (parseISO(iso) < start) cumulative += m.byDay[iso].hours;
+    });
+    var opening = cumulative;
+
+    for (var w = 0; w < weeks; w++) {
+      var wStart = new Date(start); wStart.setDate(start.getDate() + w * 7);
+      var wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6);
+      Object.keys(m.byDay).forEach(function (iso) {
+        var d = parseISO(iso);
+        if (d >= wStart && d <= wEnd) cumulative += m.byDay[iso].hours;
+      });
+      points.push({
+        weekEnd: wEnd,
+        actual: cumulative,
+        pace: opening + (w + 1) * m.perWeek,
+        future: wStart > today
+      });
+    }
+
+    var visible = points.filter(function (p) { return !p.future; });
+    if (!visible.length) visible = points.slice(0, 1);
+
+    var W = 760, H = 250, padL = 46, padR = 16, padT = 14, padB = 30;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+
+    var maxY = Math.max(
+      m.totalHours * 0.25,
+      Math.max.apply(null, points.map(function (p) { return Math.max(p.actual, p.future ? 0 : p.pace); }))
+    );
+    /* Round the axis top to a clean number. */
+    var stepY = maxY > 400 ? 200 : maxY > 200 ? 100 : maxY > 80 ? 50 : 20;
+    maxY = Math.ceil(maxY / stepY) * stepY || stepY;
+
+    var x = function (i) { return padL + (points.length === 1 ? 0 : i / (points.length - 1) * plotW); };
+    var y = function (v) { return padT + plotH - (v / maxY) * plotH; };
+
+    var svg = svgEl("svg", {
+      class: "chart-svg", viewBox: "0 0 " + W + " " + H,
+      preserveAspectRatio: "xMidYMid meet", role: "img",
+      "aria-label": "Cumulative study hours banked over time against your stated weekly pace"
+    });
+
+    /* Gridlines + y ticks — solid hairlines, one step off the surface. */
+    for (var v = 0; v <= maxY; v += stepY) {
+      svg.appendChild(svgEl("line", {
+        x1: padL, x2: W - padR, y1: y(v), y2: y(v),
+        stroke: "var(--grid)", "stroke-width": 1
+      }));
+      var tick = svgEl("text", {
+        x: padL - 9, y: y(v) + 4, "text-anchor": "end",
+        fill: "var(--text-muted)", "font-size": 10.5,
+        "font-family": "inherit", style: "font-variant-numeric: tabular-nums"
+      });
+      tick.textContent = v.toLocaleString();
+      svg.appendChild(tick);
+    }
+
+    /* x ticks — a handful of month marks, never one per week. */
+    var tickEvery = Math.ceil(points.length / 6);
+    points.forEach(function (p, i) {
+      if (i % tickEvery !== 0) return;
+      var t = svgEl("text", {
+        x: x(i), y: H - 8, "text-anchor": "middle",
+        fill: "var(--text-muted)", "font-size": 10.5, "font-family": "inherit"
+      });
+      t.textContent = MONTHS[p.weekEnd.getMonth()] + " " + p.weekEnd.getDate();
+      svg.appendChild(t);
+    });
+
+    function path(sel, upto) {
+      return points.slice(0, upto).map(function (p, i) {
+        return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(sel(p)).toFixed(1);
+      }).join(" ");
+    }
+
+    /* Pace line — context, dashed, de-emphasis gray. Drawn first, under the series. */
+    svg.appendChild(svgEl("path", {
+      d: path(function (p) { return p.pace; }, points.length),
+      fill: "none", stroke: "var(--de-emphasis)", "stroke-width": 2,
+      "stroke-dasharray": "5 4", "stroke-linecap": "round", "stroke-linejoin": "round"
+    }));
+
+    /* Actual — area wash at ~10% plus a 2px line. */
+    var areaD = path(function (p) { return p.actual; }, visible.length) +
+      " L" + x(visible.length - 1).toFixed(1) + " " + y(0).toFixed(1) +
+      " L" + x(0).toFixed(1) + " " + y(0).toFixed(1) + " Z";
+    svg.appendChild(svgEl("path", { d: areaD, fill: "var(--series-1)", "fill-opacity": 0.10, stroke: "none" }));
+    svg.appendChild(svgEl("path", {
+      d: path(function (p) { return p.actual; }, visible.length),
+      fill: "none", stroke: "var(--series-1)", "stroke-width": 2,
+      "stroke-linecap": "round", "stroke-linejoin": "round"
+    }));
+
+    /* End marker with a 2px surface ring, plus the one direct label. */
+    var lastI = visible.length - 1;
+    var last = visible[lastI];
+    svg.appendChild(svgEl("circle", {
+      cx: x(lastI), cy: y(last.actual), r: 4.5,
+      fill: "var(--series-1)", stroke: "var(--surface-1)", "stroke-width": 2
+    }));
+    /* Sit the label above the end point, or below it when that would clip the top. */
+    var labelY = y(last.actual) - 11;
+    if (labelY < padT + 10) labelY = y(last.actual) + 18;
+    var endLabel = svgEl("text", {
+      x: x(lastI) - 10, y: labelY, "text-anchor": "end",
+      fill: "var(--text-primary)", "font-size": 12, "font-weight": 600, "font-family": "inherit"
+    });
+    endLabel.textContent = last.actual.toLocaleString() + " hrs";
+    svg.appendChild(endLabel);
+
+    /* Hover layer: one wide invisible band per week, so the hit target is comfortable. */
+    var bandW = plotW / Math.max(1, points.length - 1);
+    points.forEach(function (p, i) {
+      if (p.future) return;
+      var band = svgEl("rect", {
+        x: Math.max(padL, x(i) - bandW / 2), y: padT,
+        width: Math.max(bandW, 24), height: plotH,
+        fill: "transparent", style: "cursor: crosshair"
+      });
+      band.addEventListener("mouseenter", function () {
+        crosshair.setAttribute("x1", x(i)); crosshair.setAttribute("x2", x(i));
+        crosshair.setAttribute("opacity", 1);
+        showTip(band, "<b>Week ending " + p.weekEnd.getDate() + " " + MONTHS[p.weekEnd.getMonth()] + "</b>" +
+          "<span>Banked: " + p.actual + " hrs · Pace target: " + p.pace + " hrs</span>");
+      });
+      band.addEventListener("mouseleave", function () {
+        crosshair.setAttribute("opacity", 0);
+        hideTip();
+      });
+      svg.appendChild(band);
+    });
+
+    var crosshair = svgEl("line", {
+      x1: padL, x2: padL, y1: padT, y2: padT + plotH,
+      stroke: "var(--grid)", "stroke-width": 1, opacity: 0
+    });
+    svg.appendChild(crosshair);
+
+    wrap.appendChild(svg);
+
+    /* Table twin — newest first, one row per week. */
+    visible.slice().reverse().forEach(function (p) {
+      var tr = document.createElement("tr");
+      [
+        p.weekEnd.getDate() + " " + MONTHS[p.weekEnd.getMonth()] + " " + p.weekEnd.getFullYear(),
+        String(p.actual), String(p.pace)
+      ].forEach(function (v) {
+        var td = document.createElement("td");
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Headline numbers ────────────────────────────────────────────────── */
+  function renderHead(m, heat, st) {
+    $("trackEyebrow").textContent = m.plan.trackLabel;
+    $("headSub").textContent = (profile.name ? profile.name + " · " : "") +
+      m.plan.trackLabel + " · " + m.perWeek + " hrs a week";
+
+    $("heroValue").textContent = m.pct + "%";
+    $("heroTitle").textContent =
+      m.pct === 0   ? "Nothing logged yet" :
+      m.pct < 35    ? "Building foundations" :
+      m.pct < 70    ? "Deep in the core" :
+      m.pct < 100   ? "Nearly job-ready" : "Path complete";
+    $("heroLine").textContent = m.done.length + " of " + m.plan.totalCount +
+      " skills done, " + m.hoursDone.toLocaleString() + " of " + m.totalHours.toLocaleString() +
+      " hours banked. " + (m.hoursLeft
+        ? m.hoursLeft.toLocaleString() + " hours left — about " + m.weeksLeft + " weeks at your pace."
+        : "Nothing left on this track.");
+
+    $("kHoursLabel").textContent = source === "logged" ? "Hours logged" : "Hours banked (est.)";
+    $("kHours").textContent = m.hoursDone.toLocaleString();
+    $("kHoursSub").textContent = "of " + m.totalHours.toLocaleString() + " total on this path";
+
+    $("kDays").textContent = heat.activeDays;
+    $("kDaysSub").textContent = heat.rangeHours.toLocaleString() + " hrs in this range";
+
+    var plural = function (n, u) { return n + " " + u + (n === 1 ? "" : "s"); };
+    $("kStreak").innerHTML = st.best + '<span class="k-unit">' +
+      st.unit + (st.best === 1 ? "" : "s") + "</span>";
+    $("kStreakSub").textContent = "current: " + plural(st.current, st.unit) + " in a row";
+
+    if (m.hoursLeft <= 0) {
+      $("kFinish").textContent = "Done";
+      $("kFinishSub").textContent = "every skill ticked off";
+    } else {
+      var finish = new Date();
+      finish.setDate(finish.getDate() + m.weeksLeft * 7);
+      $("kFinish").textContent = MONTHS[finish.getMonth()] + " " + finish.getFullYear();
+      $("kFinishSub").textContent = m.weeksLeft + " weeks at " + m.perWeek + " hrs/wk";
+    }
+  }
+
+  /* ── Session history ─────────────────────────────────────────────────── */
+  function renderSessions(m) {
+    var tbody = $("sessionTable");
+    tbody.innerHTML = "";
+    var sessions = D.sessionList(m.log);
+
+    if (!sessions.length) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 5;
+      td.style.whiteSpace = "normal";
+      td.textContent = "No sessions logged yet. Use “Log study time” on your dashboard or "
+        + "any lecture page, and they'll appear here and on the heatmap above.";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    sessions.forEach(function (s) {
+      var tr = document.createElement("tr");
+      [
+        prettyDate(s.date),
+        D.formatHours(s.hours),
+        s.skill ? D.SKILLS[s.skill].name : "General study",
+        s.note || "—"
+      ].forEach(function (v, i) {
+        var td = document.createElement("td");
+        td.textContent = v;
+        if (i === 3) td.style.whiteSpace = "normal";
+        tr.appendChild(td);
+      });
+
+      var actions = document.createElement("td");
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "del-btn";
+      del.textContent = "Delete";
+      if (useSample) {
+        del.disabled = true;
+        del.title = "Sample data — nothing to delete";
+      } else {
+        del.setAttribute("aria-label", "Delete " + D.formatHours(s.hours) + " session on " + prettyDate(s.date));
+        del.addEventListener("click", function () {
+          D.removeSession(realLog, s.date, s.index);
+          render();
+        });
+      }
+      actions.appendChild(del);
+      tr.appendChild(actions);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderSourceNote(m) {
+    var note = $("sourceNote");
+    var logged = Object.keys(m.log).length;
+    if (source === "logged") {
+      note.innerHTML = logged
+        ? "Showing <strong>measured</strong> hours from " + D.sessionList(m.log).length +
+          " logged session" + (D.sessionList(m.log).length === 1 ? "" : "s") + "."
+        : "No sessions logged yet, so these charts are empty. "
+          + '<a href="dashboard.html">Log study time</a>, or switch to Estimated.';
+    } else {
+      note.innerHTML = "Showing <strong>estimated</strong> hours — each completed skill's "
+        + "catalogue estimate, dated to the day you ticked it off. Not measured time.";
+    }
+  }
+
+  /* ── Render ──────────────────────────────────────────────────────────── */
+  function render() {
+    var m = model();
+    var heat = renderHeatmap(m);
+    var st = streaks(m);
+    renderHead(m, heat, st);
+    renderSourceNote(m);
+    renderMeters(m);
+    renderDomains(m);
+    renderSessions(m);
+    renderBurnup(m);
+  }
+
+  document.querySelectorAll(".seg button[data-source]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".seg button[data-source]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      source = btn.dataset.source;
+      render();
+    });
+  });
+
+  document.querySelectorAll(".seg button[data-range]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".seg button[data-range]").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      weeks = Number(btn.dataset.range);
+      render();
+    });
+  });
+
+  $("sampleToggle").addEventListener("change", function () {
+    useSample = this.checked;
+    $("sampleBadge").classList.toggle("on", useSample);
+    /* Sample mode always has sessions; going back to real data may not. */
+    if (!useSample && !Object.keys(realLog).length) source = "estimated";
+    syncSourceButtons();
+    render();
+  });
+
+  function syncSourceButtons() {
+    document.querySelectorAll(".seg button[data-source]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.source === source));
+    });
+  }
+
+  syncSourceButtons();
+  render();
+})();
+</script>
+</body>
+</html>

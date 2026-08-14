@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding — Dronaskill</title>
+<meta name="description" content="Six quick slides — pick from dropdowns and checkboxes, and Dronaskill builds your personal skill checklist and lecture dashboard.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background (identical system to the homepage) ─────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); top: 8%; left: 6%; }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); top: 46%; right: 4%; }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); bottom: 4%; left: 22%; }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn[disabled], .btn-ghost[disabled] { opacity: .38; pointer-events: none; }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+
+  /* ── Wizard shell ────────────────────────────────────────────────── */
+  .wizard-wrap { padding: 34px 0 80px; display: flex; justify-content: center; }
+  .wizard { width: min(760px, 100%); padding: 0; border-radius: var(--r-xl); overflow: hidden; }
+
+  .wizard-head { padding: 22px 34px 18px; border-bottom: 1px solid var(--line-soft); }
+  .step-meter { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .step-count { font-size: 11.5px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .step-dots { display: flex; gap: 6px; }
+  .step-dot {
+    width: 26px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.12);
+    transition: background .3s ease;
+  }
+  .step-dot.is-done { background: rgba(242,171,60,0.45); }
+  .step-dot.is-current { background: var(--saffron); }
+  .progress-track { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--cta); transition: width .4s cubic-bezier(.4,0,.2,1); }
+
+  .wizard-body { padding: 30px 34px 6px; min-height: 330px; }
+  .wizard-foot {
+    padding: 18px 34px 24px; display: flex; align-items: center; gap: 12px;
+    border-top: 1px solid var(--line-soft); margin-top: 26px;
+  }
+  .wizard-foot .spacer { margin-left: auto; }
+  .foot-note { font-size: 11.5px; color: var(--ink-3); }
+
+  /* ── Slides ──────────────────────────────────────────────────────── */
+  .slide { display: none; }
+  .slide.is-active { display: block; animation: fadeUp .38s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .slide h2 { font-size: clamp(22px, 3.2vw, 28px); margin: 12px 0 10px; }
+  .slide > .lede { margin-bottom: 26px; max-width: 56ch; }
+
+  .field { margin-bottom: 22px; }
+  .field > label, .field-label {
+    display: block; font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+    color: var(--ink-2); margin-bottom: 9px;
+  }
+  .field-hint { margin-top: 8px; font-size: 11.5px; color: var(--ink-3); }
+  .field-error { margin-top: 8px; font-size: 12px; color: var(--saffron); min-height: 15px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+
+  .text-input, .select-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    color: var(--ink); font-family: inherit; font-size: 14px;
+  }
+  .text-input::placeholder { color: var(--ink-3); }
+  .text-input:focus, .select-input:focus { border-color: rgba(242,171,60,0.5); outline: none; }
+  .select-input {
+    appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2ab3c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  .select-input option, .select-input optgroup { background: #16161d; color: var(--ink); }
+  .select-input optgroup { font-weight: 650; }
+
+  /* ── Checkbox cards ──────────────────────────────────────────────── */
+  .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(228px, 1fr)); gap: 9px; }
+  .check-card {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+    border-radius: 12px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line-soft); cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .check-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.16); }
+  .check-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .check-box {
+    flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 6px;
+    border: 1.5px solid rgba(255,255,255,0.28); display: grid; place-items: center;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .check-box svg { opacity: 0; transition: opacity .15s ease; }
+  .check-card:has(input:checked) { background: rgba(242,171,60,0.10); border-color: rgba(242,171,60,0.38); }
+  .check-card:has(input:checked) .check-box { background: var(--saffron); border-color: var(--saffron); }
+  .check-card:has(input:checked) .check-box svg { opacity: 1; }
+  .check-card:has(input:focus-visible) { outline: 2px solid var(--saffron); outline-offset: 2px; }
+  .check-title { font-size: 13.5px; font-weight: 560; color: var(--ink); line-height: 1.35; }
+  .check-sub { display: block; margin-top: 3px; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+
+  /* skills slide */
+  .skill-group { margin-bottom: 24px; }
+  .skill-group-head {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--line-soft);
+  }
+  .skill-group-head h3 { font-size: 13.5px; letter-spacing: 0; }
+  .skill-group-head .muted { font-size: 11.5px; }
+  .skills-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .link-btn {
+    background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
+    font-size: 12.5px; color: var(--saffron); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .link-btn:hover { color: #ffd08a; }
+  .count-pill {
+    margin-left: auto; padding: 4px 12px; border-radius: 999px; font-size: 12px;
+    background: rgba(242,171,60,0.12); border: 1px solid rgba(242,171,60,0.28); color: var(--saffron);
+  }
+
+  /* ── Review slide ────────────────────────────────────────────────── */
+  .review-list { display: grid; grid-template-columns: 150px 1fr; gap: 0 16px; }
+  .review-list dt {
+    font-size: 11.5px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--ink-3); padding: 12px 0; border-bottom: 1px solid var(--line-soft);
+  }
+  .review-list dd {
+    margin: 0; font-size: 13.5px; color: var(--ink); padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft); display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  }
+  .review-list dt:last-of-type, .review-list dd:last-of-type { border-bottom: 0; }
+  .chip-static {
+    padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.06);
+    border: 1px solid var(--line); font-size: 12px; color: var(--ink-2);
+  }
+  .plan-preview {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;
+    margin: 22px 0 6px;
+  }
+  .stat-tile { padding: 16px; border-radius: var(--r-md); background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft); }
+  .stat-tile b { display: block; font-size: 24px; font-weight: 640; letter-spacing: -0.03em; color: var(--saffron); line-height: 1.1; }
+  .stat-tile span { display: block; margin-top: 4px; font-size: 11.5px; color: var(--ink-3); }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 620px) {
+    .wizard-head, .wizard-body, .wizard-foot { padding-inline: 20px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .review-list { grid-template-columns: 1fr; gap: 0; }
+    .review-list dt { padding-bottom: 2px; border-bottom: 0; }
+    .review-list dd { padding-top: 0; }
+    .step-dots { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="tick" viewBox="0 0 24 24">
+      <path d="M5 12.6l4.6 4.6L19 7.4" fill="none" stroke="#1a1206" stroke-width="3.2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="onboarding.html" aria-current="page">Onboarding</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="analysis.html">Analysis</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="wizard-wrap wrap">
+    <div class="wizard glass">
+
+      <div class="wizard-head">
+        <div class="step-meter">
+          <span class="step-count" id="stepCount">Step 1 of 6</span>
+          <div class="step-dots" id="stepDots" aria-hidden="true"></div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="wizard-body">
+
+        <!-- ══ SLIDE 1 — About you ══ -->
+        <section class="slide is-active" data-slide="0" aria-label="About you">
+          <span class="eyebrow">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2.6l2.1 5.3 5.3 2.1-5.3 2.1-2.1 5.3-2.1-5.3L4.6 10l5.3-2.1z"/>
+            </svg>
+            Learner profile
+          </span>
+          <h2>First, who are we teaching?</h2>
+          <p class="lede">Six slides, all dropdowns and checkboxes. At the end you get a skill
+            checklist built for your goal, and a dashboard to work through it.</p>
+
+          <div class="field">
+            <label for="nameInput">Your name</label>
+            <input type="text" id="nameInput" class="text-input" placeholder="e.g. Ananya" autocomplete="given-name">
+            <p class="field-hint">Only used to greet you on the dashboard.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="eduSelect">Current education level</label>
+              <select id="eduSelect" class="select-input"></select>
+              <p class="field-error" id="eduError" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="yearSelect">Year</label>
+              <select id="yearSelect" class="select-input"></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="streamSelect">Stream / specialisation</label>
+            <select id="streamSelect" class="select-input"></select>
+          </div>
+        </section>
+
+        <!-- ══ SLIDE 2 — Goal ══ -->
+        <section class="slide" data-slide="1" aria-label="Career goal">
+          <span class="eyebrow">Direction</span>
+          <h2>What are you aiming for?</h2>
+          <p class="lede">This one choice decides your entire skill checklist — pick the closest
+            fit. You can come back and change it any time.</p>
+
+          <div class="field">
+            <label for="goalSelect">Career goal</label>
+            <select id="goalSelect" class="select-input"></select>
+            <p class="field-hint" id="goalBlurb">Pick a goal to see what it involves.</p>
+            <p class="field-error" id="goalError" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Why this goal? <span class="muted">(pick any that apply)</span></span>
+            <div class="check-grid" id="motivationGrid"></div>
+          </div>
+        </section>
+
+        <!-- ══ SLIDE 3 — Known skills ══ -->
+        <section class="slide" data-slide="2" aria-label="Skills you already have">
+          <span class="eyebrow">Starting point</span>
+          <h2>Tick what you already know.</h2>
+          <p class="lede">Anything you tick is marked done in your checklist, so we don't send you
+            back through it. Be honest — "I could build something small with it" is the bar.</p>
+
+          <div class="skills-toolbar">
+            <button type="button" class="link-btn" id="skillsNone">Clear all</button>
+            <span class="muted" style="font-size:12px;">Starting from zero? Just hit Next.</span>
+            <span class="count-pill" id="skillsCount">0 selected</span>
+          </div>
+
+          <div id="skillsGroups"></div>
+        </section>
+
+        <!-- ══ SLIDE 4 — Time ══ -->
+        <section class="slide" data-slide="3" aria-label="Time commitment">
+          <span class="eyebrow">Pace</span>
+          <h2>How much time can you actually give?</h2>
+          <p class="lede">We'd rather plan around a real four hours a week than an imaginary twenty.
+            This sets the weekly load on your dashboard.</p>
+
+          <div class="field">
+            <label for="hoursSelect">Study time per week</label>
+            <select id="hoursSelect" class="select-input"></select>
+            <p class="field-error" id="hoursError" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="timelineSelect">Target timeline</label>
+            <select id="timelineSelect" class="select-input"></select>
+          </div>
+
+          <div class="field">
+            <label for="daysSelect">Best time of day to study</label>
+            <select id="daysSelect" class="select-input">
+              <option value="Early morning">Early morning</option>
+              <option value="Between classes">Between classes</option>
+              <option value="Evening" selected>Evening</option>
+              <option value="Late night">Late night</option>
+              <option value="Weekends only">Weekends only</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- ══ SLIDE 5 — How you learn ══ -->
+        <section class="slide" data-slide="4" aria-label="Learning preferences">
+          <span class="eyebrow">Format</span>
+          <h2>How do you learn best?</h2>
+          <p class="lede">We'll bias your lecture feed toward these formats. Pick as many as you like.</p>
+
+          <div class="field">
+            <span class="field-label">Preferred formats</span>
+            <div class="check-grid" id="formatGrid"></div>
+            <p class="field-error" id="formatError" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="langSelect">Preferred language for lectures</label>
+            <select id="langSelect" class="select-input"></select>
+          </div>
+        </section>
+
+        <!-- ══ SLIDE 6 — Review ══ -->
+        <section class="slide" data-slide="5" aria-label="Review">
+          <span class="eyebrow">Almost there</span>
+          <h2>Here's your plan.</h2>
+          <p class="lede" id="reviewRecap"></p>
+
+          <div class="plan-preview">
+            <div class="stat-tile"><b id="statSkills">—</b><span>skills in your path</span></div>
+            <div class="stat-tile"><b id="statDone">—</b><span>already ticked off</span></div>
+            <div class="stat-tile"><b id="statHours">—</b><span>hours remaining</span></div>
+            <div class="stat-tile"><b id="statWeeks">—</b><span>weeks at your pace</span></div>
+          </div>
+
+          <dl class="review-list" id="reviewList" style="margin-top: 8px;"></dl>
+        </section>
+
+      </div>
+
+      <div class="wizard-foot">
+        <button type="button" class="btn-ghost" id="backBtn">Back</button>
+        <span class="foot-note spacer" id="footNote">Saved on this device</span>
+        <button type="button" class="btn" id="nextBtn">
+          <span id="nextLabel">Next</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script src="skills-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.DRONA;
+  var $ = function (id) { return document.getElementById(id); };
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var SLIDES = document.querySelectorAll(".slide");
+  var TOTAL = SLIDES.length;
+  var step = 0;
+
+  /* ── Load any previously saved profile so returning users see their answers ── */
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(D.STORAGE_KEY) || "null"); } catch (e) { saved = null; }
+  saved = saved || {};
+
+  /* ── Helpers to build controls ───────────────────────────────────────── */
+  function fillSelect(select, values, placeholder, selected) {
+    select.innerHTML = "";
+    if (placeholder) {
+      var ph = document.createElement("option");
+      ph.value = ""; ph.textContent = placeholder; ph.disabled = true;
+      select.appendChild(ph);
+    }
+    values.forEach(function (v) {
+      var opt = document.createElement("option");
+      if (typeof v === "object") { opt.value = String(v.value); opt.textContent = v.label; }
+      else { opt.value = v; opt.textContent = v; }
+      select.appendChild(opt);
+    });
+    select.value = selected != null && selected !== "" ? String(selected) : (placeholder ? "" : select.value);
+    if (select.selectedIndex === -1) select.selectedIndex = 0;
+  }
+
+  function checkCard(name, value, title, sub, checked) {
+    var label = document.createElement("label");
+    label.className = "check-card";
+
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.name = name;
+    input.value = value;
+    input.checked = !!checked;
+
+    var box = document.createElement("span");
+    box.className = "check-box";
+    box.innerHTML = '<svg width="12" height="12" aria-hidden="true"><use href="#tick"/></svg>';
+
+    var text = document.createElement("span");
+    var strong = document.createElement("span");
+    strong.className = "check-title";
+    strong.textContent = title;
+    text.appendChild(strong);
+    if (sub) {
+      var small = document.createElement("span");
+      small.className = "check-sub";
+      small.textContent = sub;
+      text.appendChild(small);
+    }
+
+    label.appendChild(input);
+    label.appendChild(box);
+    label.appendChild(text);
+    return label;
+  }
+
+  function checkedValues(container) {
+    return Array.prototype.map.call(
+      container.querySelectorAll("input[type=checkbox]:checked"),
+      function (i) { return i.value; }
+    );
+  }
+
+  /* ── Slide 1 — about you ─────────────────────────────────────────────── */
+  fillSelect($("eduSelect"), D.EDUCATION, "Select your level…", saved.education_level);
+  fillSelect($("yearSelect"), D.YEARS, null, saved.year || "Not applicable");
+  fillSelect($("streamSelect"), D.STREAMS, null, saved.stream || "Computer Science / IT");
+  $("nameInput").value = saved.name || "";
+
+  /* ── Slide 2 — goal (grouped dropdown) + motivations ─────────────────── */
+  (function buildGoalSelect() {
+    var select = $("goalSelect");
+    select.innerHTML = "";
+    var ph = document.createElement("option");
+    ph.value = ""; ph.textContent = "Select a goal…"; ph.disabled = true;
+    select.appendChild(ph);
+
+    var groups = {};
+    D.TRACKS.forEach(function (t) {
+      if (!groups[t.group]) {
+        groups[t.group] = document.createElement("optgroup");
+        groups[t.group].label = t.group;
+        select.appendChild(groups[t.group]);
+      }
+      var opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = t.label;
+      groups[t.group].appendChild(opt);
+    });
+    select.value = saved.career_goal || "";
+  })();
+
+  D.MOTIVATIONS.forEach(function (m) {
+    $("motivationGrid").appendChild(
+      checkCard("motivation", m, m, null, (saved.motivations || []).indexOf(m) !== -1)
+    );
+  });
+
+  var lastRenderedTrack = null;
+  function onGoalChange() {
+    var track = D.getTrack($("goalSelect").value);
+    $("goalBlurb").textContent = track ? track.blurb : "Pick a goal to see what it involves.";
+    $("goalError").textContent = "";
+  }
+  $("goalSelect").addEventListener("change", onGoalChange);
+  onGoalChange();
+
+  /* ── Slide 3 — known skills, rebuilt whenever the goal changes ───────── */
+  function renderSkills() {
+    var goal = $("goalSelect").value;
+    if (!goal || goal === lastRenderedTrack) { updateSkillCount(); return; }
+
+    /* Keep ticks that still exist in the new track. */
+    var previously = {};
+    checkedValues($("skillsGroups")).forEach(function (id) { previously[id] = true; });
+    if (lastRenderedTrack === null) {
+      (saved.known_skills || []).forEach(function (id) { previously[id] = true; });
+    }
+
+    lastRenderedTrack = goal;
+    var container = $("skillsGroups");
+    container.innerHTML = "";
+
+    var ids = D.trackSkillIds(goal);
+    D.LEVEL_ORDER.forEach(function (level) {
+      var inLevel = ids.filter(function (id) { return D.SKILLS[id].level === level; });
+      if (!inLevel.length) return;
+
+      var group = document.createElement("div");
+      group.className = "skill-group";
+
+      var head = document.createElement("div");
+      head.className = "skill-group-head";
+      var h3 = document.createElement("h3");
+      h3.textContent = D.LEVEL_META[level].label;
+      var note = document.createElement("span");
+      note.className = "muted";
+      note.textContent = D.LEVEL_META[level].note;
+      head.appendChild(h3);
+      head.appendChild(note);
+      group.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "check-grid";
+      inLevel.forEach(function (id) {
+        var s = D.SKILLS[id];
+        grid.appendChild(checkCard("known", id, s.name, s.hours + " hrs", previously[id]));
+      });
+      group.appendChild(grid);
+      container.appendChild(group);
+    });
+
+    updateSkillCount();
+  }
+
+  function updateSkillCount() {
+    var n = checkedValues($("skillsGroups")).length;
+    $("skillsCount").textContent = n + " selected";
+  }
+  $("skillsGroups").addEventListener("change", updateSkillCount);
+  $("skillsNone").addEventListener("click", function () {
+    $("skillsGroups").querySelectorAll("input:checked").forEach(function (i) { i.checked = false; });
+    updateSkillCount();
+  });
+
+  /* ── Slide 4 — pace ──────────────────────────────────────────────────── */
+  fillSelect($("hoursSelect"), D.HOURS_PER_WEEK, "How much time…", saved.hours_per_week);
+  fillSelect($("timelineSelect"), D.TIMELINES, null, saved.timeline);
+  if (saved.study_time) $("daysSelect").value = saved.study_time;
+
+  /* ── Slide 5 — formats + language ────────────────────────────────────── */
+  D.FORMATS.forEach(function (f) {
+    var pre = saved.formats ? saved.formats.indexOf(f) !== -1 : f.indexOf("Short focused") === 0;
+    $("formatGrid").appendChild(checkCard("format", f, f, null, pre));
+  });
+  fillSelect($("langSelect"), D.LANGUAGES, null, saved.language || "English");
+
+  /* ── Collecting the profile ──────────────────────────────────────────── */
+  function collect() {
+    return {
+      name: $("nameInput").value.trim(),
+      education_level: $("eduSelect").value,
+      year: $("yearSelect").value,
+      stream: $("streamSelect").value,
+      career_goal: $("goalSelect").value,
+      motivations: checkedValues($("motivationGrid")),
+      known_skills: checkedValues($("skillsGroups")),
+      hours_per_week: Number($("hoursSelect").value) || 8,
+      timeline: $("timelineSelect").value,
+      study_time: $("daysSelect").value,
+      formats: checkedValues($("formatGrid")),
+      language: $("langSelect").value,
+      completed_at: new Date().toISOString()
+    };
+  }
+
+  /* ── Validation, per slide ───────────────────────────────────────────── */
+  function validate(index) {
+    if (index === 0) {
+      if (!$("eduSelect").value) {
+        $("eduError").textContent = "Pick your current education level.";
+        $("eduSelect").focus();
+        return false;
+      }
+      $("eduError").textContent = "";
+    }
+    if (index === 1) {
+      if (!$("goalSelect").value) {
+        $("goalError").textContent = "Choose a goal — everything after this is built from it.";
+        $("goalSelect").focus();
+        return false;
+      }
+      $("goalError").textContent = "";
+    }
+    if (index === 3) {
+      if (!$("hoursSelect").value) {
+        $("hoursError").textContent = "Pick a realistic weekly commitment.";
+        $("hoursSelect").focus();
+        return false;
+      }
+      $("hoursError").textContent = "";
+    }
+    if (index === 4) {
+      if (!checkedValues($("formatGrid")).length) {
+        $("formatError").textContent = "Pick at least one format you're happy to learn from.";
+        return false;
+      }
+      $("formatError").textContent = "";
+    }
+    return true;
+  }
+
+  /* ── Review slide ────────────────────────────────────────────────────── */
+  function renderReview() {
+    var profile = collect();
+    var plan = D.buildPlan(profile);
+
+    $("statSkills").textContent = plan.totalCount;
+    $("statDone").textContent = plan.doneCount;
+    $("statHours").textContent = plan.remainingHours;
+    $("statWeeks").textContent = plan.weeksToFinish;
+
+    $("reviewRecap").textContent =
+      (profile.name ? profile.name + ", your " : "Your ") + plan.trackLabel +
+      " path has " + plan.totalCount + " skills. You've already got " + plan.doneCount +
+      ", so " + (plan.totalCount - plan.doneCount) + " are left — roughly " +
+      plan.weeksToFinish + " weeks at " + profile.hours_per_week + " hrs a week.";
+
+    var rows = [
+      ["Education", [profile.education_level, profile.year, profile.stream]
+        .filter(function (v) { return v && v !== "Not applicable"; }).join(" · ")],
+      ["Goal", plan.trackLabel],
+      ["Why", profile.motivations.length ? profile.motivations : ["Not specified"]],
+      ["Already knows", profile.known_skills.length
+        ? profile.known_skills.map(function (id) { return D.SKILLS[id].name; })
+        : ["Starting from scratch"]],
+      ["Pace", profile.hours_per_week + " hrs/week · " + profile.timeline],
+      ["Study time", profile.study_time],
+      ["Formats", profile.formats],
+      ["Language", profile.language]
+    ];
+
+    var dl = $("reviewList");
+    dl.innerHTML = "";
+    rows.forEach(function (row) {
+      var dt = document.createElement("dt");
+      dt.textContent = row[0];
+      var dd = document.createElement("dd");
+      if (Array.isArray(row[1])) {
+        row[1].forEach(function (item) {
+          var chip = document.createElement("span");
+          chip.className = "chip-static";
+          chip.textContent = item;
+          dd.appendChild(chip);
+        });
+      } else {
+        dd.textContent = row[1] || "—";
+      }
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    });
+  }
+
+  /* ── Step machine ────────────────────────────────────────────────────── */
+  (function buildDots() {
+    var dots = $("stepDots");
+    for (var i = 0; i < TOTAL; i++) {
+      var dot = document.createElement("span");
+      dot.className = "step-dot";
+      dots.appendChild(dot);
+    }
+  })();
+
+  function show(index) {
+    step = index;
+    SLIDES.forEach(function (s, i) { s.classList.toggle("is-active", i === index); });
+
+    $("stepCount").textContent = "Step " + (index + 1) + " of " + TOTAL;
+    $("progressFill").style.width = ((index + 1) / TOTAL * 100) + "%";
+    Array.prototype.forEach.call($("stepDots").children, function (dot, i) {
+      dot.classList.toggle("is-done", i < index);
+      dot.classList.toggle("is-current", i === index);
+    });
+
+    $("backBtn").disabled = index === 0;
+    $("nextLabel").textContent = index === TOTAL - 1 ? "Build my dashboard" : "Next";
+    $("footNote").textContent = index === TOTAL - 1
+      ? "Saved on this device · syncs once accounts ship"
+      : "You can go back and change anything";
+
+    scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  }
+
+  $("nextBtn").addEventListener("click", function () {
+    if (!validate(step)) return;
+
+    if (step === TOTAL - 1) { finish(); return; }
+
+    var next = step + 1;
+    if (next === 2) renderSkills();     /* skills depend on the goal chosen on slide 2 */
+    if (next === TOTAL - 1) renderReview();
+    show(next);
+  });
+
+  $("backBtn").addEventListener("click", function () {
+    if (step > 0) show(step - 1);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    if (e.target.tagName === "BUTTON" || e.target.type === "checkbox") return;
+    e.preventDefault();
+    $("nextBtn").click();
+  });
+
+  /* ── Finish: save profile + seed progress, then open the dashboard ───── */
+  function finish() {
+    var profile = collect();
+    localStorage.setItem(D.STORAGE_KEY, JSON.stringify(profile));
+
+    /* Seed the checklist: everything ticked during onboarding starts done. */
+    var progress = {};
+    profile.known_skills.forEach(function (id) { progress[id] = true; });
+    localStorage.setItem(D.PROGRESS_KEY, JSON.stringify(progress));
+
+    location.href = "dashboard.html";
+  }
+
+  show(0);
+})();
+</script>
+</body>
+</html>

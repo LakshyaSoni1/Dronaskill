@@ -284,23 +284,71 @@
   .fb-status.work { background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--ink-2); }
   .fb-meta h3 { font-size: 14.5px; font-weight: 600; color: var(--ink); }
 
-  .bars { margin-top: 20px; display: grid; gap: 13px; }
-  .bar-row { display: grid; grid-template-columns: 128px 1fr 38px; align-items: center; gap: 12px; }
+  .bars { margin-top: 20px; display: grid; gap: 11px; }
+  .bar-row { display: grid; grid-template-columns: 140px 1fr 42px; align-items: center; gap: 12px; }
   .bar-lbl { font-size: 12.5px; color: var(--ink-2); }
-  .bar-track { display: block; position: relative; height: 10px; border-radius: 3px; background: var(--track); }
+  .bar-track { display: block; position: relative; height: 9px; border-radius: 4px; background: var(--track); overflow: hidden; }
   .bar-fill { display: block; height: 100%; width: 0; border-radius: 0 4px 4px 0; transition: width .8s cubic-bezier(.22,.9,.3,1); background: var(--series-gold); }
   .bar-fill.gold { background: var(--series-gold); }
   .bar-fill.blue { background: var(--series-blue); }
   .bar-fill.aqua { background: var(--series-aqua); }
-  .bar-val { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+  .bar-fill.red { background: #ef4444; }
+  .bar-fill.green { background: #22c55e; }
+  .bar-fill.purple { background: #a855f7; }
+  .bar-val { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; font-weight: 560; }
 
-  .fb-section { margin-top: 20px; }
-  .fb-section h4 { font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
-  .fb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+  .fb-section { margin-top: 18px; }
+  .fb-section h4 { font-size: 11.5px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 9px; display: flex; align-items: center; gap: 6px; }
+  .fb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: 12.8px; color: var(--ink-2); line-height: 1.55; }
   .fb-list li { display: flex; gap: 9px; align-items: flex-start; }
   .fb-list li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex: none; }
-  .fb-list.good li::before { background: var(--good); }
+  .fb-list.good li::before { background: #22c55e; }
+  .fb-list.incorrect li::before { background: #ef4444; }
+  .fb-list.missing li::before { background: #f59e0b; }
   .fb-list.improve li::before { background: var(--saffron); }
+
+  .actionable-callout {
+    margin-top: 18px; padding: 14px 16px; border-radius: var(--r-md);
+    background: rgba(242,171,60,0.08); border: 1px solid rgba(242,171,60,0.25);
+    border-left: 4px solid var(--saffron); font-size: 13px; color: var(--ink); line-height: 1.55;
+  }
+  .actionable-callout strong { color: var(--saffron); display: block; margin-bottom: 3px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+
+  .voice-metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 10px;
+  }
+  .vm-card {
+    padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.035);
+    border: 1px solid var(--line-soft); text-align: center;
+  }
+  .vm-card b { display: block; font-size: 16px; color: var(--ink); font-weight: 650; }
+  .vm-card span { display: block; font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  .ai-speaking-badge {
+    display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px;
+    background: rgba(124,127,242,0.18); border: 1px solid rgba(124,127,242,0.35); color: #a5a7f7; font-size: 12px; font-weight: 600;
+  }
+  .ai-speaking-badge .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #a5a7f7; animation: dotPulse 1s ease-in-out infinite; }
+  @keyframes dotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }
+
+  .tts-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--ink-2);
+    padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all .2s ease;
+  }
+  .tts-btn:hover { background: rgba(255,255,255,0.12); color: var(--ink); }
+  .tts-btn.active { background: rgba(124,127,242,0.25); border-color: rgba(124,127,242,0.5); color: #fff; }
+
+  .stats-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .stat-card-box { padding: 22px; border-radius: var(--r-xl); }
+  .stat-card-box h3 { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  .pill-count-row { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .pill-count { flex: 1; min-width: 120px; padding: 12px 14px; border-radius: var(--r-md); background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft); text-align: center; }
+  .pill-count.correct { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.08); }
+  .pill-count.incorrect { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); }
+  .pill-count b { display: block; font-size: 22px; font-weight: 700; color: var(--ink); }
+  .pill-count span { font-size: 11.5px; color: var(--ink-2); }
 
   .fb-model { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
   .fb-model summary { cursor: pointer; list-style: none; font-size: 13px; color: var(--ink); font-weight: 560; display: flex; align-items: center; gap: 7px; }
@@ -407,6 +455,8 @@
       <a class="nav-link" href="index.html">Home</a>
       <a class="nav-link" href="index.html#verify">Verify</a>
       <a class="nav-link" href="index.html#features">Learn</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
       <a class="nav-link" href="index.html#internships">Internships</a>
       <a class="nav-link" href="mock-interview.html" aria-current="page">Practice</a>
       <a class="nav-link" href="index.html#dashboard">Dashboard</a>
@@ -497,7 +547,13 @@
         </div>
 
         <div class="q-card glass">
-          <span class="chip" id="qChip">Role · Level</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <span class="chip" id="qChip" style="margin-bottom:0">Role · Level</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="ai-speaking-badge" id="aiSpeakingBadge" style="display:none;"><span class="pulse-dot"></span> AI Interviewer Speaking…</span>
+              <button class="tts-btn active" id="ttsToggleBtn" type="button">🔊 AI Voice ON</button>
+            </div>
+          </div>
           <h3 id="qText">Question text</h3>
           <details class="hint" id="hintBox">
             <summary>Stuck? Click for a structural tip</summary>
@@ -534,7 +590,7 @@
         <div class="submit-row">
           <button type="button" class="btn" id="submitBtn">
             <span class="btn-label">Submit Answer for AI Review</span>
-            <span class="load-row"><span class="spinner" aria-hidden="true"></span> Analyzing your answer…</span>
+            <span class="load-row"><span class="spinner" aria-hidden="true"></span> AI evaluating answer accuracy…</span>
           </button>
         </div>
       </div>
@@ -568,25 +624,72 @@
       </div>
     </div>
 
+    <!-- 2-Column Detailed Analytics Grid -->
+    <div class="stats-grid-2col">
+      <div class="stat-card-box glass">
+        <h3>📊 Performance Breakdown</h3>
+        <p style="font-size:12.5px; color:var(--ink-2)">Answer Accuracy & Relevance Summary</p>
+        <div class="pill-count-row">
+          <div class="pill-count correct">
+            <b id="finalCorrectCount">0</b>
+            <span>Correct Answers</span>
+          </div>
+          <div class="pill-count incorrect">
+            <b id="finalIncorrectCount">0</b>
+            <span>Needs Work</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card-box glass">
+        <h3>🎯 Focus Areas</h3>
+        <div style="font-size:12.5px; color:var(--ink-2); display:grid; gap:8px;">
+          <div><strong style="color:var(--good)">Strongest Concept:</strong> <span id="finalStrongArea">N/A</span></div>
+          <div><strong style="color:var(--saffron)">Weakest Concept:</strong> <span id="finalWeakArea">N/A</span></div>
+        </div>
+      </div>
+    </div>
+
     <div class="final-bars glass">
-      <div class="cell-head"><h3>Average performance</h3><span class="sub">across all 5 answers</span></div>
+      <div class="cell-head"><h3>Multi-Dimensional Performance Averages</h3><span class="sub">Across all 5 questions</span></div>
       <div class="bars">
         <div class="bar-row">
-          <span class="bar-lbl">Technical accuracy</span>
-          <span class="bar-track"><span class="bar-fill gold" id="finalBarTech" style="width:0%"></span></span>
-          <span class="bar-val" id="finalBarTechVal">0%</span>
+          <span class="bar-lbl">Factual Accuracy</span>
+          <span class="bar-track"><span class="bar-fill gold" id="finalBarAccuracy" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarAccuracyVal">0%</span>
         </div>
         <div class="bar-row">
-          <span class="bar-lbl">Clarity</span>
-          <span class="bar-track"><span class="bar-fill blue" id="finalBarClarity" style="width:0%"></span></span>
+          <span class="bar-lbl">Relevance</span>
+          <span class="bar-track"><span class="bar-fill green" id="finalBarRelevance" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarRelevanceVal">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">Completeness</span>
+          <span class="bar-track"><span class="bar-fill blue" id="finalBarCompleteness" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarCompletenessVal">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">Clarity & Structure</span>
+          <span class="bar-track"><span class="bar-fill aqua" id="finalBarClarity" style="width:0%"></span></span>
           <span class="bar-val" id="finalBarClarityVal">0%</span>
         </div>
         <div class="bar-row">
+          <span class="bar-lbl">Communication</span>
+          <span class="bar-track"><span class="bar-fill purple" id="finalBarComm" style="width:0%"></span></span>
+          <span class="bar-val" id="finalBarCommVal">0%</span>
+        </div>
+        <div class="bar-row">
           <span class="bar-lbl">Confidence</span>
-          <span class="bar-track"><span class="bar-fill aqua" id="finalBarConf" style="width:0%"></span></span>
+          <span class="bar-track"><span class="bar-fill gold" id="finalBarConf" style="width:0%"></span></span>
           <span class="bar-val" id="finalBarConfVal">0%</span>
         </div>
       </div>
+    </div>
+
+    <!-- Personalized Improvement Plan Callout -->
+    <div class="actionable-callout glass" style="margin-bottom:24px;" id="finalImprovementPlan">
+      <strong>Actionable Personalized Improvement Plan</strong>
+      <p id="finalImprovementText">Analyzing overall performance to generate your improvement path...</p>
     </div>
 
     <div class="final-list" id="finalList"></div>
@@ -619,31 +722,65 @@
       </div>
     </div>
 
+    <!-- 6 Dimension Scoring Bars -->
     <div class="fb-bars">
       <div class="bar-row">
-        <span class="bar-lbl">Technical accuracy</span>
-        <span class="bar-track"><span class="bar-fill gold" id="fbBarTech" style="width:0%"></span></span>
-        <span class="bar-val" id="fbBarTechVal">0%</span>
+        <span class="bar-lbl">Factual Accuracy</span>
+        <span class="bar-track"><span class="bar-fill gold" id="fbBarAccuracy" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarAccuracyVal">0%</span>
       </div>
       <div class="bar-row">
-        <span class="bar-lbl">Clarity</span>
-        <span class="bar-track"><span class="bar-fill blue" id="fbBarClarity" style="width:0%"></span></span>
+        <span class="bar-lbl">Relevance</span>
+        <span class="bar-track"><span class="bar-fill green" id="fbBarRelevance" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarRelevanceVal">0%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">Completeness</span>
+        <span class="bar-track"><span class="bar-fill blue" id="fbBarCompleteness" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarCompletenessVal">0%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">Clarity & Structure</span>
+        <span class="bar-track"><span class="bar-fill aqua" id="fbBarClarity" style="width:0%"></span></span>
         <span class="bar-val" id="fbBarClarityVal">0%</span>
       </div>
       <div class="bar-row">
+        <span class="bar-lbl">Communication</span>
+        <span class="bar-track"><span class="bar-fill purple" id="fbBarComm" style="width:0%"></span></span>
+        <span class="bar-val" id="fbBarCommVal">0%</span>
+      </div>
+      <div class="bar-row">
         <span class="bar-lbl">Confidence</span>
-        <span class="bar-track"><span class="bar-fill aqua" id="fbBarConf" style="width:0%"></span></span>
+        <span class="bar-track"><span class="bar-fill gold" id="fbBarConf" style="width:0%"></span></span>
         <span class="bar-val" id="fbBarConfVal">0%</span>
       </div>
     </div>
 
-    <div class="fb-section">
-      <h4>What you did well</h4>
-      <ul class="fb-list good" id="fbWins"></ul>
+    <!-- Direct Actionable Feedback Callout -->
+    <div class="actionable-callout" id="fbActionableCallout">
+      <strong>Interviewer Assessment</strong>
+      <span id="fbActionableText">Evaluation summary...</span>
     </div>
-    <div class="fb-section">
-      <h4>Areas for improvement</h4>
-      <ul class="fb-list improve" id="fbImprove"></ul>
+
+    <!-- Categorized Feedback Sections -->
+    <div class="fb-section" id="fbCorrectSec">
+      <h4>✅ Correct Points Covered</h4>
+      <ul class="fb-list good" id="fbCorrect"></ul>
+    </div>
+
+    <div class="fb-section" id="fbIncorrectSec">
+      <h4>❌ Misconceptions & Incorrect Statements</h4>
+      <ul class="fb-list incorrect" id="fbIncorrect"></ul>
+    </div>
+
+    <div class="fb-section" id="fbMissingSec">
+      <h4>💡 Missing Core Concepts</h4>
+      <ul class="fb-list missing" id="fbMissing"></ul>
+    </div>
+
+    <div class="fb-section" id="fbVoiceSec" style="display:none">
+      <h4>🎙 Voice Performance Analytics</h4>
+      <div class="voice-metrics-grid" id="fbVoiceGrid"></div>
     </div>
 
     <details class="fb-model">
@@ -677,162 +814,234 @@
     senior:       { label: "Senior",                          short: "Senior",       timer: 120, idealMin: 50, idealMax: 180, rigor: 0.94 }
   };
 
-  /* ── Question bank ───────────────────────────────────────────────── */
+  /* ── Question bank with metadata & misconception triggers ───────── */
   const QUESTION_BANK = {
     frontend: { label: "Frontend Developer", questions: [
-      { id: "fe1", text: "Walk me through how you would optimize a React application that's re-rendering too often.",
+      { id: "fe1", type: "technical", text: "Walk me through how you would optimize a React application that's re-rendering too often.",
         hint: "Structure your answer around: identify (profiler / why-did-you-render), isolate (memoization), and prevent (state colocation). Name 2–3 concrete React APIs.",
         keywords: ["memo", "usememo", "usecallback", "re-render", "profiler", "key", "state", "virtual dom"],
+        expectedConcepts: ["React DevTools Profiler to identify bottlenecks", "React.memo for pure components", "useMemo for expensive calculations", "useCallback to stabilize function props", "State colocation closer to usage"],
+        incorrectTriggers: ["usememo creates state", "memoization prevents all re-renders", "re-render deletes component", "state moves to window", "document.getelementbyid"],
         modelAnswer: `I'd start with the React DevTools Profiler to find which components re-render unnecessarily and why. Common fixes: wrap pure components in React.memo, memoize expensive calculations with useMemo, and stabilize callback props with useCallback so children don't see new references every render. I'd also check for state that's colocated too high in the tree — moving it closer to where it's used avoids re-rendering unrelated siblings. Finally, I'd verify list keys are stable, since unstable keys force full remounts.` },
-      { id: "fe2", text: "What's the difference between CSS specificity and the cascade, and how do you avoid specificity wars on a large team?",
+      { id: "fe2", type: "technical", text: "What's the difference between CSS specificity and the cascade, and how do you avoid specificity wars on a large team?",
         hint: "Define both terms first, then talk about conventions (BEM / utility classes) and tooling that prevent the problem at the source.",
         keywords: ["specificity", "cascade", "bem", "utility classes", "!important", "source order", "css modules", "naming convention"],
+        expectedConcepts: ["Specificity is selector scoring", "Cascade includes origin, source order, and specificity", "BEM or flat selector architecture", "Avoid excessive !important usage"],
+        incorrectTriggers: ["specificity doesn't matter", "cascade means javascript styling", "inline styles always have lowest specificity"],
         modelAnswer: `Specificity is the scoring system the browser uses to decide which rule wins when multiple selectors match the same element; the cascade is the broader set of rules — source order, origin, and specificity — that resolves conflicts overall. On a large team I avoid specificity wars by keeping selectors flat (one class per rule, BEM-style naming or utility classes) and banning !important outside of true overrides, so no one ever needs to out-specificity a previous rule.` },
-      { id: "fe3", text: "How would you make a complex data table accessible to keyboard and screen reader users?",
+      { id: "fe3", type: "technical", text: "How would you make a complex data table accessible to keyboard and screen reader users?",
         hint: "Cover semantic markup, keyboard navigation (roving tabindex), and ARIA roles/labels — in that priority order.",
         keywords: ["aria", "semantic html", "keyboard navigation", "tabindex", "screen reader", "role", "scope", "focus"],
+        expectedConcepts: ["Semantic table elements (th with scope)", "Roving tabindex or arrow key navigation", "ARIA attributes like aria-sort or role", "Visible focus styling"],
+        incorrectTriggers: ["div table is better than semantic table", "screen readers don't need th tags", "tabindex 100 is good practice"],
         modelAnswer: `I'd start with semantic table markup — proper <th> elements with scope attributes — since that alone gives screen readers a lot for free. For keyboard users I'd implement roving tabindex so arrow keys move focus within the grid instead of tabbing through every cell. Where native semantics run out, like sortable headers, I'd add ARIA roles and aria-sort, and always test with an actual screen reader, not just an automated audit.` },
-      { id: "fe4", text: "Explain how the browser's critical rendering path works and one thing you'd change to speed up first paint.",
+      { id: "fe4", type: "technical", text: "Explain how the browser's critical rendering path works and one thing you'd change to speed up first paint.",
         hint: "Trace it in order: HTML→DOM, CSS→CSSOM, combine into render tree, layout, paint. Then pick one concrete lever.",
         keywords: ["dom", "cssom", "render tree", "layout", "paint", "critical css", "render-blocking", "preload"],
+        expectedConcepts: ["HTML to DOM parsing", "CSS to CSSOM parsing", "Render tree generation", "Layout & Paint stages", "Inlining critical CSS or preloading key assets"],
+        incorrectTriggers: ["javascript parses cssom", "paint happens before dom", "rendering path is only on the server"],
         modelAnswer: `The browser parses HTML into the DOM and CSS into the CSSOM, combines them into a render tree, computes layout, then paints pixels. Anything render-blocking — like a large stylesheet in <head> — delays that first paint. One concrete fix I'd reach for is inlining critical above-the-fold CSS and deferring the rest, or using rel=preload for the font and hero image so the browser starts fetching them before it discovers them in the CSSOM.` },
-      { id: "fe5", text: "Tell me about a time you disagreed with a design decision. How did you handle it?",
+      { id: "fe5", type: "behavioral", text: "Tell me about a time you disagreed with a design decision. How did you handle it?",
         hint: "Use STAR — situation, task, action, result — and end on what changed because of the conversation.",
         keywords: ["situation", "disagreed", "communicated", "compromise", "data", "user testing", "outcome"],
+        expectedConcepts: ["Specific situation described", "Action taken with data or user feedback", "Constructive compromise or outcome", "Professional alignment"],
+        incorrectTriggers: ["ignored the designer", "changed code without telling anyone", "refused to build"],
         modelAnswer: `On a past project the design called for a multi-step signup modal that I felt would hurt conversion. Instead of just pushing back, I built a quick prototype of a single-step alternative and we ran it past five users informally. Two clearly struggled with the modal version, which gave the designer concrete evidence rather than just my opinion, and we shipped the simpler version — conversion on that flow improved about 9% the following month.` },
-      { id: "fe6", text: "How do you decide between client-side rendering, server-side rendering, and static generation for a new page?",
+      { id: "fe6", type: "technical", text: "How do you decide between client-side rendering, server-side rendering, and static generation for a new page?",
         hint: "Anchor the decision on two axes: how often the content changes, and how much SEO / first-paint speed matters for that page.",
         keywords: ["seo", "hydration", "static generation", "ssr", "csr", "caching", "content freshness", "revalidate"],
+        expectedConcepts: ["SEO requirements assessment", "Content update frequency", "Static generation for static/marketing pages", "SSR for dynamic indexable content", "CSR for private/authenticated dashboards"],
+        incorrectTriggers: ["csr is always better for seo", "static generation cannot scale", "ssr doesn't support html"],
         modelAnswer: `It comes down to how often the content changes and how much first-paint speed or SEO matters. A marketing page that rarely changes is a great fit for static generation — it's fast and cacheable at the edge. A logged-in dashboard with per-user data doesn't need SEO and benefits more from client-side rendering. Anything in between, like a product page that changes daily and needs to be indexable, is where I'd reach for server-side rendering with revalidation.` }
     ]},
     backend: { label: "Backend Developer", questions: [
-      { id: "be1", text: "How would you design a rate limiter for a public API?",
+      { id: "be1", type: "technical", text: "How would you design a rate limiter for a public API?",
         hint: "Name an algorithm (token bucket / sliding window), then say where the state lives (in-memory vs Redis) for a multi-instance deployment.",
         keywords: ["token bucket", "sliding window", "redis", "distributed", "429", "throttle", "per-user", "leaky bucket"],
+        expectedConcepts: ["Rate limiting algorithm (Token Bucket or Sliding Window)", "Centralized state store (Redis for multi-instance)", "HTTP 429 Too Many Requests status code", "Identification key (API Key or User ID over shared IP)"],
+        incorrectTriggers: ["in-memory variable works for 100 servers", "return 200 on rate limit exceeded", "no algorithm needed"],
         modelAnswer: `I'd use a token bucket algorithm — each client gets a bucket that refills at a fixed rate, and requests are rejected with a 429 once it's empty. Since the API likely runs on multiple instances, I'd keep bucket state in Redis rather than in-memory, using atomic operations so instances share one source of truth. I'd key it per API key or user ID rather than per IP, since IPs get shared behind NATs.` },
-      { id: "be2", text: "Explain the difference between SQL and NoSQL and when you'd pick each.",
+      { id: "be2", type: "technical", text: "Explain the difference between SQL and NoSQL and when you'd pick each.",
         hint: "Compare on schema flexibility, consistency guarantees, and query patterns — give one concrete example of each.",
         keywords: ["schema", "consistency", "acid", "joins", "horizontal scaling", "document store", "relational", "eventual consistency"],
+        expectedConcepts: ["SQL: Fixed schema, ACID compliance, structured relational data", "NoSQL: Flexible schema, horizontal scale focus, document/key-value", "Concrete relational vs document store example"],
+        incorrectTriggers: ["sql has no schema", "nosql is always faster for relational joins", "sql cannot store text"],
         modelAnswer: `SQL databases enforce a fixed schema and give you strong ACID guarantees and joins, which is great when data is relational and correctness matters, like financial records. NoSQL stores trade some of that consistency and structure for flexible schemas and easier horizontal scaling, which suits high-write, loosely-structured data like activity logs or product catalogs with varying attributes.` },
-      { id: "be3", text: "What happens when two requests try to update the same row at the same time, and how do you prevent a lost update?",
+      { id: "be3", type: "technical", text: "What happens when two requests try to update the same row at the same time, and how do you prevent a lost update?",
         hint: "Mention both optimistic locking (version column) and pessimistic locking (SELECT FOR UPDATE), and when you'd choose each.",
         keywords: ["race condition", "optimistic locking", "pessimistic locking", "version column", "select for update", "transaction", "isolation level"],
+        expectedConcepts: ["Race condition / lost update definition", "Optimistic locking with version column", "Pessimistic locking with SELECT ... FOR UPDATE", "Tradeoff analysis based on contention frequency"],
+        incorrectTriggers: ["ignore race conditions", "first request always gets deleted", "locking is impossible in SQL"],
         modelAnswer: `Without protection, the second write can silently overwrite the first — a lost update. I'd use optimistic locking for most cases: add a version column, and the update only succeeds if the version still matches what was read, retrying on conflict. For high-contention rows where retries would be wasteful, I'd use pessimistic locking instead, wrapping the read in SELECT ... FOR UPDATE inside a transaction so the second request blocks until the first commits.` },
-      { id: "be4", text: "How would you design a database schema for an internship application system, similar to what Dronaskill would need?",
+      { id: "be4", type: "technical", text: "How would you design a database schema for an internship application system, similar to what Dronaskill would need?",
         hint: "Identify the core entities first (students, companies, postings, applications), then talk about the relationships between them.",
         keywords: ["entities", "foreign key", "normalization", "one-to-many", "many-to-many", "applications table", "indexes"],
+        expectedConcepts: ["Core entities: Students, Companies, Internship Postings, Applications", "Join table for many-to-many relationship (Applications)", "Foreign key relationships", "Indexing foreign key columns"],
+        incorrectTriggers: ["store all data in one single table", "no primary keys needed", "applications should duplicate all student info"],
         modelAnswer: `The core entities are students, companies, internship postings, and applications. A student can apply to many postings and a posting can receive many applications, so applications is a join table with a status column and timestamps, foreign-keyed to both. I'd index applications on student_id and posting_id separately for fast lookups either direction, and keep verification data on the student record rather than duplicating it per application.` },
-      { id: "be5", text: "Describe a time a production system went down. What did you do?",
+      { id: "be5", type: "behavioral", text: "Describe a time a production system went down. What did you do?",
         hint: "STAR format, and be specific about the diagnostic steps you took, not just the fix.",
         keywords: ["incident", "root cause", "rollback", "monitoring", "postmortem", "logs", "alert", "mitigate"],
+        expectedConcepts: ["Immediate triage & rollback/mitigation", "Root cause diagnosis using logs/metrics", "Prevention of recurrence via postmortem/tests"],
+        incorrectTriggers: ["blamed coworker", "deleted logs to hide it", "ignored alerts"],
         modelAnswer: `A deploy once caused our checkout API's error rate to spike. I checked the monitoring dashboard first, saw the spike lined up exactly with the deploy timestamp, and rolled back immediately rather than trying to debug live in production. Once traffic recovered, I reproduced the issue in staging — a missing null check on a new optional field — fixed it, and wrote a short postmortem so we added a staging smoke test for that endpoint.` },
-      { id: "be6", text: "What's the difference between horizontal and vertical scaling, and which would you reach for first for a growing API?",
+      { id: "be6", type: "technical", text: "What's the difference between horizontal and vertical scaling, and which would you reach for first for a growing API?",
         hint: "Give a real tradeoff, not just a definition — cost, downtime, and ceiling for each.",
         keywords: ["horizontal scaling", "vertical scaling", "load balancer", "stateless", "single point of failure", "downtime", "cost"],
+        expectedConcepts: ["Vertical: Increase CPU/RAM on single node (simple, hardware ceiling)", "Horizontal: Add more nodes behind load balancer (stateless requirement, redundancy)", "Pragmatic scaling path"],
+        incorrectTriggers: ["vertical scaling requires load balancer", "horizontal scaling is cheaper for single request", "stateless means no database"],
         modelAnswer: `Vertical scaling means giving one server more CPU or RAM — it's simple and requires no architecture changes, but it has a ceiling and that server is a single point of failure. Horizontal scaling means running more instances behind a load balancer, which scales further and adds redundancy, but only works cleanly if the API is stateless. For a growing API I'd usually reach for vertical scaling first since it buys time cheaply, while making sure the app stays stateless so horizontal scaling is an option later.` }
     ]},
     fullstack: { label: "Full-Stack Developer", questions: [
-      { id: "fs1", text: "How do you keep a REST API's response shape and the frontend types in sync as both evolve?",
+      { id: "fs1", type: "technical", text: "How do you keep a REST API's response shape and the frontend types in sync as both evolve?",
         hint: "Talk about a single source of truth — codegen from an OpenAPI / schema — rather than manually mirroring types.",
         keywords: ["openapi", "schema", "codegen", "typescript", "contract", "versioning", "shared types"],
+        expectedConcepts: ["Single source of truth (OpenAPI / JSON Schema)", "Automated TypeScript codegen", "Build-time safety checks", "API versioning for breaking changes"],
+        incorrectTriggers: ["hand-write types twice forever", "don't use types on frontend", "never change backend fields"],
         modelAnswer: `I try to make the API schema the single source of truth — an OpenAPI spec or a shared schema file — and generate TypeScript types from it on both sides rather than hand-writing them twice. That way a backend field rename fails the frontend build immediately instead of surfacing as a runtime bug. For breaking changes I'd version the endpoint rather than mutate the existing contract underneath consumers.` },
-      { id: "fs2", text: "Walk me through what happens end-to-end when a user submits a form on your app.",
+      { id: "fs2", type: "technical", text: "Walk me through what happens end-to-end when a user submits a form on your app.",
         hint: "Trace the full path: client validation, network request, server validation, database write, response, UI update.",
         keywords: ["validation", "http request", "api", "database", "response", "state update", "error handling", "optimistic ui"],
+        expectedConcepts: ["Client-side UX validation", "HTTP request transmission", "Server-side mandatory validation", "Database transaction write", "Response & frontend state update"],
+        incorrectTriggers: ["trust client validation only", "write to DB directly from browser", "no error handling"],
         modelAnswer: `Client-side, I validate for immediate feedback, then send the request to the API. The server re-validates — never trusting the client — then writes to the database inside a transaction if multiple tables are touched. It returns a response, and the frontend updates state based on success or failure, showing a specific error message rather than a generic one if something fails.` },
-      { id: "fs3", text: "How do you decide what logic belongs on the client versus the server?",
+      { id: "fs3", type: "technical", text: "How do you decide what logic belongs on the client versus the server?",
         hint: "Anchor on trust and cost: anything security- or money-related belongs server-side; UI responsiveness logic can live client-side.",
         keywords: ["security", "trust boundary", "validation", "business logic", "latency", "authorization", "source of truth"],
+        expectedConcepts: ["Server-side: Security, auth, financial, data integrity", "Client-side: Instant feedback, UI state, rendering", "Untrusted client boundary principle"],
+        incorrectTriggers: ["put authentication logic in client JS", "all logic belongs on client", "server is only for static files"],
         modelAnswer: `Anything that affects security, money, or data integrity has to be enforced server-side, since client code can always be bypassed. Client-side logic is for responsiveness — instant form validation, optimistic UI updates — but I always treat it as a UX nicety layered on top of server-side enforcement, never a replacement for it.` },
-      { id: "fs4", text: "You need to add a feature end-to-end in a week with a tight deadline. How do you plan the work?",
+      { id: "fs4", type: "coding", text: "You need to add a feature end-to-end in a week with a tight deadline. How do you plan the work?",
         hint: "Talk about slicing vertically (a thin end-to-end path first) rather than finishing one layer completely before starting the next.",
         keywords: ["vertical slice", "mvp", "scope", "prioritize", "api contract first", "incremental", "deadline"],
+        expectedConcepts: ["Vertical slicing over horizontal layer building", "Early API contract agreement", "Core MVP prioritization and scope control"],
+        incorrectTriggers: ["build backend completely for 4 days then start UI", "work overtime without cutting scope"],
         modelAnswer: `I'd slice the feature vertically rather than horizontally — get one thin path working end-to-end, from database to UI, on day one, even if it's ugly. That surfaces integration problems immediately instead of on day six. I'd agree on the API contract early, build backend and frontend against that contract in parallel, and cut scope on polish before I'd cut scope on the core path actually working.` },
-      { id: "fs5", text: "How do you approach debugging an issue that only happens in production, not locally?",
+      { id: "fs5", type: "technical", text: "How do you approach debugging an issue that only happens in production, not locally?",
         hint: "List concrete tools: logs, error tracking, reproducing with production-like data/config, feature flags to isolate.",
         keywords: ["logs", "error tracking", "sentry", "reproduce", "environment parity", "feature flag", "staging"],
+        expectedConcepts: ["Inspect structured production logs & error trackers", "Identify environment/config parity differences", "Safely reproduce in staging or with feature flags"],
+        incorrectTriggers: ["add console.log in production and redeploy 10 times", "ignore production errors if local works"],
         modelAnswer: `First I check error tracking and logs to narrow down which request or user path triggers it, since production has real data and traffic patterns local doesn't. If I can't reproduce locally, I check for environment differences — config, feature flags, data shape — since "works on my machine" is usually an environment-parity problem, not a code mystery.` },
-      { id: "fs6", text: "Tell me about a project where you had to learn a new technology quickly to ship it.",
+      { id: "fs6", type: "behavioral", text: "Tell me about a project where you had to learn a new technology quickly to ship it.",
         hint: "STAR format — be specific about how you learned it, not just 'I read the docs' — and the concrete result.",
         keywords: ["situation", "learned quickly", "documentation", "prototype", "shipped", "deadline", "outcome"],
+        expectedConcepts: ["Isolated throwaway prototyping", "Targeted documentation reading", "Risk mitigation and successful delivery"],
+        incorrectTriggers: ["guessed API signatures without reading docs", "shipped broken code without testing"],
         modelAnswer: `I needed to add real-time updates to a project and had never used WebSockets before. I spent the first afternoon building a tiny throwaway prototype outside the main codebase just to understand connection handling and reconnection logic, then integrated it once I trusted I understood the failure modes. It shipped on time and taught me to always prototype the risky unknown piece in isolation before wiring it into a real feature.` }
     ]},
     ml: { label: "Data Scientist / ML Engineer", questions: [
-      { id: "ml1", text: "How do you detect and handle overfitting in a model you're training?",
+      { id: "ml1", type: "technical", text: "How do you detect and handle overfitting in a model you're training?",
         hint: "Name the symptom (train/val gap), then 2–3 concrete remedies (regularization, more data, early stopping, simpler model).",
         keywords: ["overfitting", "validation loss", "regularization", "dropout", "early stopping", "cross-validation", "generalization"],
+        expectedConcepts: ["Gap between training and validation loss", "Regularization (L1/L2, Dropout)", "Early stopping based on validation metrics", "More training data or model simplification"],
+        incorrectTriggers: ["overfitting means validation loss is 0", "train model longer to fix overfitting", "add 100 more layers to overfit less"],
         modelAnswer: `The clearest signal is a growing gap between training and validation loss — the model keeps improving on data it's seen while getting worse on data it hasn't. To address it I'd try regularization or dropout first since they're cheap, then early stopping based on validation loss, and if the gap persists, either get more training data or simplify the model — a model too large for the dataset will always find a way to memorize it.` },
-      { id: "ml2", text: "Explain precision and recall, and describe a scenario where you'd optimize for one over the other.",
+      { id: "ml2", type: "technical", text: "Explain precision and recall, and describe a scenario where you'd optimize for one over the other.",
         hint: "Give the definitions, then use a concrete example — fraud detection or medical screening are classic ones.",
         keywords: ["precision", "recall", "false positive", "false negative", "f1 score", "threshold", "trade-off"],
+        expectedConcepts: ["Precision: True Positives / (True Positives + False Positives)", "Recall: True Positives / (True Positives + False Negatives)", "Concrete tradeoff example (Fraud/Medical = Recall, Spam = Precision)"],
+        incorrectTriggers: ["precision and recall are always identical", "high precision means no false negatives", "recall ignores true positives"],
         modelAnswer: `Precision is what fraction of the things you flagged as positive actually are positive; recall is what fraction of the true positives you actually caught. In fraud detection I'd usually optimize for recall — missing real fraud is expensive — even if it means more false positives to review manually. For spam filtering on a primary inbox, I'd weight precision higher, since a false positive means a real email gets lost.` },
-      { id: "ml3", text: "How would you explain a 'black box' model's prediction to a non-technical stakeholder?",
+      { id: "ml3", type: "technical", text: "How would you explain a 'black box' model's prediction to a non-technical stakeholder?",
         hint: "Mention a concrete interpretability tool (SHAP / LIME / feature importance) and translate the output into plain language.",
         keywords: ["shap", "lime", "feature importance", "interpretability", "explainability", "plain language"],
+        expectedConcepts: ["Explainability tools (SHAP / LIME / Feature Importance)", "Translation into business domain impact", "Answering stakeholder trust/decision questions"],
+        incorrectTriggers: ["tell stakeholder to learn calculus", "black box models cannot be explained at all", "show raw gradient matrices"],
         modelAnswer: `I'd run a tool like SHAP on the specific prediction to see which features pushed it up or down, then translate that into plain language — "this applicant was flagged mainly because of X and Y, not because of Z" — rather than showing raw coefficient values. The goal is to answer the stakeholder's actual question, which is usually "can I trust this and why," not "how does gradient boosting work."` },
-      { id: "ml4", text: "Walk me through your process for cleaning a messy real-world dataset before modeling.",
+      { id: "ml4", type: "technical", text: "Walk me through your process for cleaning a messy real-world dataset before modeling.",
         hint: "Structure it as steps: understand the data, handle missing values, handle outliers, check for leakage — in that order.",
         keywords: ["missing values", "outliers", "data leakage", "exploratory analysis", "imputation", "distribution", "duplicates"],
+        expectedConcepts: ["Exploratory Data Analysis (EDA) first", "Handling missing values & outliers systematically", "Data leakage verification (future information check)"],
+        incorrectTriggers: ["delete 90% of rows with missing values blindly", "fill missing values with 0 always", "ignore data leakage"],
         modelAnswer: `I start with exploratory analysis — distributions, missing value counts, obvious duplicates — before touching anything, so I understand what I'm dealing with. For missing values I check whether they're random or meaningful before choosing to impute or drop. I specifically check for data leakage, like a feature that wouldn't actually be available at prediction time, since that's the mistake that quietly inflates offline metrics and fails in production.` },
-      { id: "ml5", text: "How do you decide a model is ready to go into production?",
+      { id: "ml5", type: "technical", text: "How do you decide a model is ready to go into production?",
         hint: "Go beyond 'good accuracy' — mention a baseline comparison, business metric alignment, and a monitoring plan.",
         keywords: ["baseline", "business metric", "a/b test", "monitoring", "drift", "offline evaluation", "rollback"],
+        expectedConcepts: ["Beating simple heuristic baselines", "Business metric alignment over raw accuracy", "Shadow deployment / A/B testing & drift monitoring"],
+        incorrectTriggers: ["99% train accuracy means ready for prod", "no monitoring needed once deployed", "never test against baseline"],
         modelAnswer: `Accuracy alone isn't enough — I want to see it beat a simple baseline by a meaningful margin, and I want the offline metric to actually correlate with the business outcome we care about. Before full rollout I'd push for an A/B test against the current system, and I wouldn't call it done without a monitoring plan for data drift, since a model that's right today can quietly become wrong as real-world data shifts.` },
-      { id: "ml6", text: "Tell me about a time your model or analysis was wrong. What did you learn?",
+      { id: "ml6", type: "behavioral", text: "Tell me about a time your model or analysis was wrong. What did you learn?",
         hint: "STAR format — own the mistake plainly, then focus on the process change you made afterward, not just the fix.",
         keywords: ["mistake", "root cause", "wrong assumption", "process change", "validated", "learned"],
+        expectedConcepts: ["Clear ownership of prediction/data failure", "Root cause identification (e.g. train/serve skew or leakage)", "Systemic process improvement"],
+        incorrectTriggers: ["blamed the dataset author", "hid the evaluation metrics", "didn't change process"],
         modelAnswer: `I once shipped a churn model that looked strong offline but performed much worse in production. It turned out one feature was computed slightly differently in the production pipeline than in training — a subtle leakage issue I hadn't caught. Since then I always add a check that compares feature distributions between training and serving before trusting offline metrics.` }
     ]},
     pm: { label: "Product Manager", questions: [
-      { id: "pm1", text: "How would you prioritize a backlog when engineering, sales, and support all want different things shipped first?",
+      { id: "pm1", type: "behavioral", text: "How would you prioritize a backlog when engineering, sales, and support all want different things shipped first?",
         hint: "Name a concrete prioritization framework (RICE, impact/effort) and mention how you communicate the 'no's.",
         keywords: ["rice", "impact", "effort", "prioritize", "framework", "stakeholders", "trade-off", "communicate"],
+        expectedConcepts: ["Objective framework usage (RICE / Impact vs Effort)", "Transparent stakeholder alignment", "Direct, empathetic communication of deprioritized asks"],
+        incorrectTriggers: ["do whatever sales says first", "pick randomly", "tell support to stop asking"],
         modelAnswer: `I'd score each request against a shared framework like RICE — reach, impact, confidence, effort — so the conversation is about the criteria, not whoever argues loudest. I'd bring stakeholders into that scoring rather than doing it behind closed doors, so when something doesn't make the cut, it's clear why, and I follow up individually with the people whose asks got deprioritized so they don't hear it for the first time in a backlog review.` },
-      { id: "pm2", text: "How do you know if a feature you shipped was actually successful?",
+      { id: "pm2", type: "technical", text: "How do you know if a feature you shipped was actually successful?",
         hint: "Say you'd define the success metric before shipping, not after — and name what that metric would actually be.",
         keywords: ["success metric", "north star", "before launch", "adoption", "retention", "define upfront"],
+        expectedConcepts: ["Pre-launch success metric definition", "Activation/adoption AND 30-day retention tracking", "Behavioral change verification"],
+        incorrectTriggers: ["pick metric after seeing data", "page views alone mean success", "ask engineering if they liked it"],
         modelAnswer: `I define the success metric before we build it, not after, because it's too easy to retroactively pick whatever number looks good. For a new feature I'd usually look at adoption in the first two weeks and then retention of that behavior at 30 days — a feature people try once and abandon isn't actually solving their problem, even if the initial adoption number looks great.` },
-      { id: "pm3", text: "Walk me through how you'd validate a new product idea before committing engineering resources to it.",
+      { id: "pm3", type: "behavioral", text: "Walk me through how you'd validate a new product idea before committing engineering resources to it.",
         hint: "Mention cheap validation methods before expensive ones — user interviews, a landing page or prototype — before a full build.",
         keywords: ["user interviews", "prototype", "mvp", "landing page", "validate", "assumption", "cheap test"],
+        expectedConcepts: ["Problem validation via user interviews", "Low-fidelity / cheap validation (Prototypes, landing pages)", "Incremental evidence gathering"],
+        incorrectTriggers: ["build full product for 6 months then ask users", "assume my idea is perfect", "no testing needed"],
         modelAnswer: `Before any engineering time goes in, I'd talk to five to ten target users to understand if the problem is real and how they solve it today. If that's promising, I'd build the cheapest possible test of the actual solution — a clickable prototype or even a landing page measuring signups — before committing to a full build, so we're spending engineering time on something we already have evidence for.` },
-      { id: "pm4", text: "Tell me about a time you had to say no to a stakeholder's feature request. How did you handle it?",
+      { id: "pm4", type: "behavioral", text: "Tell me about a time you had to say no to a stakeholder's feature request. How did you handle it?",
         hint: "STAR format — show you gave a reason grounded in data or strategy, not just 'not now.'",
         keywords: ["said no", "data", "strategy", "stakeholder", "reasoning", "alternative", "roadmap"],
+        expectedConcepts: ["Data-backed reasoning", "Alternative workarounds offered", "Preserving stakeholder relationship"],
+        incorrectTriggers: ["said no without explanation", "argued aggressively", "ignored the email"],
         modelAnswer: `A sales lead wanted a custom integration built for one large prospect. I pulled the data on how many other deals were actually blocked by the same gap — it was just that one account — and showed the roadmap items it would displace. Instead of a flat no, I offered a manual workaround for that account while the general integration stayed prioritized based on broader demand, and the sales lead appreciated seeing the reasoning rather than just a rejection.` },
-      { id: "pm5", text: "How would you design an onboarding flow for a first-time user of a mock-interview product like Dronaskill?",
+      { id: "pm5", type: "technical", text: "How would you design an onboarding flow for a first-time user of a mock-interview product like Dronaskill?",
         hint: "Focus on getting the user to their first 'aha moment' — a real value experience — as fast as possible, minimizing setup friction.",
         keywords: ["onboarding", "aha moment", "friction", "first value", "activation", "drop-off", "minimal steps"],
+        expectedConcepts: ["Fast time-to-value ('aha moment')", "Friction reduction in setup", "Progressive profile disclosure"],
+        incorrectTriggers: ["require 20-page form before trying app", "force credit card first", "no guidance at all"],
         modelAnswer: `I'd minimize setup before the user experiences real value — asking for a role and experience level is fine, but I wouldn't gate the first practice question behind a long profile form. The goal is to get them to a completed mock question and real feedback as fast as possible, since that's the "aha moment" that proves the product works; everything else, like full profile completion, can happen after that hook lands.` },
-      { id: "pm6", text: "How do you work with engineering when a project is going to miss its deadline?",
+      { id: "pm6", type: "behavioral", text: "How do you work with engineering when a project is going to miss its deadline?",
         hint: "Emphasize early communication and offering trade-offs (scope/time/quality) rather than just reporting bad news late.",
         keywords: ["early communication", "scope", "trade-off", "transparency", "replan", "stakeholders informed"],
+        expectedConcepts: ["Early risk detection & psychological safety", "Tradeoff matrix (Scope vs Time vs Quality)", "Transparent stakeholder updates"],
+        incorrectTriggers: ["hide delay until launch day", "force team to work 100hr weeks", "blame devs"],
         modelAnswer: `I'd rather hear it's at risk two weeks early than on time the day before launch, so I try to build a relationship with engineering where flagging risk early feels safe, not like an admission of failure. Once it's flagged, I bring options, not just the problem — cut scope, extend the deadline, or add resources — and let the team and stakeholders make an informed trade-off instead of finding out passively.` }
     ]},
     design: { label: "UI/UX Designer", questions: [
-      { id: "ux1", text: "Walk me through your design process from a new problem brief to a shipped feature.",
+      { id: "ux1", type: "technical", text: "Walk me through your design process from a new problem brief to a shipped feature.",
         hint: "Name distinct stages — research, ideation, wireframes, prototype, test, handoff — don't jump straight to visuals.",
         keywords: ["research", "wireframe", "prototype", "usability testing", "iterate", "handoff", "user needs"],
+        expectedConcepts: ["User research & problem definition", "Wireframing & iterative prototyping", "Usability testing validation", "Developer handoff & edge case specs"],
+        incorrectTriggers: ["jump straight to final UI polish on day 1", "never test with users", "don't specify empty states"],
         modelAnswer: `I start by making sure I actually understand the problem — talking to users or reviewing existing research — before opening a design tool. Then low-fidelity wireframes to explore structure fast, a clickable prototype for the direction that feels right, and a round of usability testing before it's ever considered final. I iterate based on what testing surfaces, and handoff includes states I know engineering will ask about — empty, loading, error — not just the happy path.` },
-      { id: "ux2", text: "How do you balance what users say they want with what the data shows they actually do?",
+      { id: "ux2", type: "technical", text: "How do you balance what users say they want with what the data shows they actually do?",
         hint: "Give a concrete example of when self-reported preference and behavioral data diverged, and how you resolved it.",
         keywords: ["qualitative", "quantitative", "behavioral data", "self-reported", "analytics", "reconcile", "usability testing"],
+        expectedConcepts: ["Qualitative data for problem discovery", "Quantitative data for behavioral validation", "Reconciling stated vs actual user behavior"],
+        incorrectTriggers: ["always ignore user interviews", "always ignore analytics", "assume users know exact UI solutions"],
         modelAnswer: `Users are a good source for the problem, not always for the solution — what people say they want and what actually gets used can diverge. I treat interviews and surveys as qualitative signal for what's broken, and analytics as the check on whether a design actually solved it. When they conflict, I trust behavior over stated preference, but I try to understand why the gap exists rather than just picking one source and ignoring the other.` },
-      { id: "ux3", text: "How would you design an empty state for a dashboard, like the analytics dashboard on a learning platform, before the user has any data?",
+      { id: "ux3", type: "technical", text: "How would you design an empty state for a dashboard, like the analytics dashboard on a learning platform, before the user has any data?",
         hint: "Focus on making the empty state teach and motivate the first action, not just say 'no data yet.'",
         keywords: ["empty state", "first action", "onboarding", "motivate", "sample data", "clear cta"],
+        expectedConcepts: ["Educate user on dashboard value", "Sample/preview data visualization", "Single clear primary call to action"],
+        incorrectTriggers: ["leave blank white screen", "show technical error code", "hide dashboard completely"],
         modelAnswer: `A blank dashboard that just says "no data yet" wastes a real opportunity — I'd show what the filled-in version looks like, using sample data clearly labeled as an example, so the user understands what they're working toward. Then a single clear call to action that starts the behavior that would populate it, so the empty state is doing onboarding work, not just apologizing for being empty.` },
-      { id: "ux4", text: "Tell me about a time user testing completely changed your design direction.",
+      { id: "ux4", type: "behavioral", text: "Tell me about a time user testing completely changed your design direction.",
         hint: "STAR format — be specific about what you observed in testing, not just that 'testing showed issues.'",
         keywords: ["user testing", "observed", "changed direction", "assumption wrong", "redesigned", "outcome"],
+        expectedConcepts: ["Observed friction points during testing", "Humility to abandon flawed initial assumptions", "Redesign & measured improvement"],
+        incorrectTriggers: ["ignored testing failure", "blamed users for using app wrong", "refused to change design"],
         modelAnswer: `I designed a multi-step wizard for account setup that I was confident about, but in testing, three of five users tried to skip ahead and got confused about how many steps were left. I redesigned it as a single scrollable form with clear section headers instead, which testing showed people completed faster and with fewer errors — it taught me to test my confident designs just as rigorously as my uncertain ones.` },
-      { id: "ux5", text: "How do you ensure your designs are accessible to users with disabilities?",
+      { id: "ux5", type: "technical", text: "How do you ensure your designs are accessible to users with disabilities?",
         hint: "Mention concrete, checkable things — contrast ratios, focus states, not relying on color alone — not just 'I care about accessibility.'",
         keywords: ["contrast ratio", "wcag", "focus state", "color alone", "alt text", "screen reader", "keyboard"],
+        expectedConcepts: ["WCAG AA color contrast verification", "Non-color status indicators", "Keyboard focus state design", "Screen reader testing"],
+        incorrectTriggers: ["accessibility is optional", "rely on low contrast grey text", "disable focus outlines"],
         modelAnswer: `I check color contrast ratios against WCAG AA as part of my normal design review, not as an afterthought, and I never rely on color alone to convey status — an error state gets an icon and text, not just red. I design visible focus states for every interactive element, and for anything complex I try navigating my own prototype with just a keyboard before it goes to engineering.` },
-      { id: "ux6", text: "How do you handle disagreement with a product manager about a design decision under a tight deadline?",
+      { id: "ux6", type: "behavioral", text: "How do you handle disagreement with a product manager about a design decision under a tight deadline?",
         hint: "Show you'd anchor on user evidence when possible, and know when to disagree-and-commit rather than stalling the team.",
         keywords: ["disagree and commit", "user evidence", "deadline", "compromise", "prioritize", "timebox"],
+        expectedConcepts: ["Reframing opinion into user evidence", "Timeboxed resolution", "Disagree and commit when necessary"],
+        incorrectTriggers: ["stop working until PM surrenders", "redesign behind PM's back", "quit project"],
         modelAnswer: `I'd bring whatever user evidence I have first, since that reframes it from opinion versus opinion into a shared question about the user. If we're genuinely out of time to resolve it with more research, I'll state my concern clearly once, then disagree and commit rather than stall the team — and I'd flag it as something worth revisiting with real usage data once it ships.` }
     ]}
   };
@@ -842,7 +1051,8 @@
     roleId: null, roleLabel: "", experience: "entry", mode: "text",
     questions: [], currentIndex: 0, answers: [],
     timerId: null, timeLeft: 0, submitting: false,
-    recognition: null, recognizing: false, voiceSupported: true, voiceBase: ""
+    recognition: null, recognizing: false, voiceSupported: true, voiceBase: "",
+    ttsEnabled: true, speaking: false, speechStartTime: 0
   };
 
   /* ── Stage switching ─────────────────────────────────────────────── */
@@ -906,6 +1116,48 @@
     renderQuestion();
   });
 
+  /* ── Text-to-Speech AI Voice Engine ─────────────────────────────── */
+  const ttsToggleBtn = $("ttsToggleBtn");
+  const aiSpeakingBadge = $("aiSpeakingBadge");
+
+  ttsToggleBtn.addEventListener("click", () => {
+    state.ttsEnabled = !state.ttsEnabled;
+    ttsToggleBtn.classList.toggle("active", state.ttsEnabled);
+    ttsToggleBtn.textContent = state.ttsEnabled ? "🔊 AI Voice ON" : "🔇 AI Voice OFF";
+    if (!state.ttsEnabled && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      aiSpeakingBadge.style.display = "none";
+    }
+  });
+
+  function speakText(text, onEndCallback) {
+    if (!state.ttsEnabled || !("speechSynthesis" in window)) {
+      if (onEndCallback) onEndCallback();
+      return;
+    }
+    window.speechSynthesis.cancel(); // stop previous
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    // Pick a natural English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(v => v.lang.startsWith("en") && (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Daniel")));
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.onstart = () => {
+      state.speaking = true;
+      aiSpeakingBadge.style.display = "inline-flex";
+    };
+    utterance.onend = utterance.onerror = () => {
+      state.speaking = false;
+      aiSpeakingBadge.style.display = "none";
+      if (onEndCallback) onEndCallback();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
   /* ── Question rendering ─────────────────────────────────────────── */
   const answerInput = $("answerInput");
   const respCard = $("respCard");
@@ -916,7 +1168,7 @@
     const total = state.questions.length;
     $("qLabel").textContent = `Question ${state.currentIndex + 1} of ${total}`;
     $("progressFill").style.width = (state.currentIndex / total) * 100 + "%";
-    $("qChip").textContent = `${state.roleLabel} · ${EXPERIENCE[state.experience].short}`;
+    $("qChip").textContent = `${state.roleLabel} · ${EXPERIENCE[state.experience].short} · ${q.type.toUpperCase()}`;
     $("qText").textContent = q.text;
     $("hintText").textContent = q.hint;
     $("hintBox").open = false;
@@ -941,6 +1193,16 @@
     submitBtn.removeAttribute("data-loading");
 
     startTimer(EXPERIENCE[state.experience].timer);
+
+    // If Voice Mode & TTS enabled, AI speaks the question prompt aloud!
+    if (state.mode === "voice" && state.ttsEnabled) {
+      speakText(`Question ${state.currentIndex + 1}: ${q.text}`, () => {
+        // Auto-start recording after AI finishes asking!
+        if (state.mode === "voice" && state.voiceSupported) {
+          startListening();
+        }
+      });
+    }
   }
 
   answerInput.addEventListener("input", updateWordCount);
@@ -976,7 +1238,7 @@
     $("timerBox").classList.toggle("low", state.timeLeft <= Math.max(state.timerTotal * 0.2, 20));
   }
 
-  /* ── Voice answer (Web Speech API, graceful fallback) ───────────── */
+  /* ── Voice Speech-to-Text & Voice Analytics Setup ─────────────── */
   const micBtn = $("micBtn");
   const micRow = $("micRow");
   const micHint = $("micHint");
@@ -1021,17 +1283,24 @@
 
   function startListening() {
     if (!state.recognition) { showVoiceUnavailable(); return; }
+    if (state.speaking && window.speechSynthesis) {
+      window.speechSynthesis.cancel(); // stop AI voice when candidate speaks
+      aiSpeakingBadge.style.display = "none";
+    }
     state.voiceBase = answerInput.value ? answerInput.value + " " : "";
     finalTranscript = "";
+    state.speechStartTime = Date.now();
     try { state.recognition.start(); } catch (err) { /* already running */ }
     state.recognizing = true;
     micRow.classList.add("listening");
     micBtn.setAttribute("aria-pressed", "true");
     micHint.textContent = "Listening… speak your answer";
   }
+
   function stopListening() {
     if (!state.recognizing) return;
     state.recognizing = false;
+    state.speechDurationSec = Math.max(1, Math.round((Date.now() - (state.speechStartTime || Date.now())) / 1000));
     if (state.recognition) { try { state.recognition.stop(); } catch (err) { /* noop */ } }
     micRow.classList.remove("listening");
     micBtn.setAttribute("aria-pressed", "false");
@@ -1039,8 +1308,7 @@
   }
   micBtn.addEventListener("click", () => { state.recognizing ? stopListening() : startListening(); });
 
-  /* ── Scoring engine ──────────────────────────────────────────────── */
-  /* Local heuristic stand-in — planned real grading prompt lives in mock-interview-grading-prompt.md */
+  /* ── Multi-Dimensional AI Evaluation Engine ─────────────────────── */
   function tierFor(overallOutOf10) {
     if (overallOutOf10 >= 8) return "strong";
     if (overallOutOf10 >= 6) return "good";
@@ -1048,77 +1316,254 @@
   }
   const TIER_LABEL = { strong: "Strong Answer", good: "Good Attempt", work: "Needs Work", none: "No Answer" };
 
-  function evaluateAnswer(question, rawText, experienceId) {
+  function isGibberishOrIrrelevant(text) {
+    const cleaned = text.trim();
+    if (!cleaned) return true;
+
+    const words = cleaned.toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return true;
+
+    // Check for keyboard smashes and non-words
+    const vowels = /[aeiouy]/;
+    let gibberishWordCount = 0;
+
+    words.forEach(w => {
+      const pureWord = w.replace(/[^a-z]/g, "");
+      if (!pureWord) return;
+
+      // Rule A: Long string with no vowels (e.g., "sdfghjkl", "qwerty")
+      if (pureWord.length >= 5 && !vowels.test(pureWord)) {
+        gibberishWordCount++;
+        return;
+      }
+      // Rule B: Very long word with extremely low vowel ratio or repetitive pattern (e.g. "jakbdfjhwabeseifhb")
+      if (pureWord.length >= 8) {
+        const vowelCount = (pureWord.match(/[aeiouy]/g) || []).length;
+        const ratio = vowelCount / pureWord.length;
+        if (ratio < 0.18 || ratio > 0.70) {
+          gibberishWordCount++;
+          return;
+        }
+      }
+      // Rule C: Repeated 4+ same character or keyboard row patterns
+      if (/(.)\1{3,}/.test(pureWord) || /asdf|qwerty|zxcv|ghjkl|dfgh/.test(pureWord)) {
+        gibberishWordCount++;
+      }
+    });
+
+    // If more than 35% of words are gibberish, or it's a single illegible string
+    if (gibberishWordCount / words.length >= 0.35 || (words.length === 1 && gibberishWordCount >= 1)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function evaluateAnswer(question, rawText, experienceId, isVoiceMode, voiceDurationSec) {
     const text = rawText.trim();
     const words = text.length ? text.split(/\s+/).filter(Boolean) : [];
     const wordCount = words.length;
 
     if (wordCount === 0) {
       return {
-        overall: 0, tier: "none", technical: 0, clarity: 0, confidence: 0, wordCount: 0,
-        wins: [], improvements: ["No answer was submitted — even a rough attempt scores far better than a blank."]
+        accuracy: 0, relevance: 0, completeness: 0, clarity: 0, communication: 0, confidence: 0,
+        overall: 0, tier: "none", wordCount: 0,
+        correctPoints: [],
+        incorrectPoints: ["No response submitted — even a partial attempt scores higher than leaving it blank."],
+        missingPoints: question.expectedConcepts || [],
+        actionableSummary: "You submitted an empty response. Make sure to articulate your thoughts clearly during the interview.",
+        voiceMetrics: null
+      };
+    }
+
+    // Check for illegible gibberish or keyboard mashing -> Lowest score assignment!
+    if (isGibberishOrIrrelevant(text)) {
+      return {
+        accuracy: 0, relevance: 0, completeness: 0, clarity: 0, communication: 0, confidence: 0,
+        overall: 0, tier: "work", wordCount,
+        correctPoints: [],
+        incorrectPoints: ["Response flagged as illegible gibberish or off-topic keyboard noise (e.g., random characters)."],
+        missingPoints: question.expectedConcepts || ["A legible, structured answer addressing the interview prompt."],
+        actionableSummary: "Your answer was flagged as illegible or off-topic gibberish. The AI evaluator assigned the lowest possible rating (0/10). Please speak or type a coherent response relevant to the question.",
+        voiceMetrics: isVoiceMode ? { wpm: 0, duration: `${voiceDurationSec || 0}s`, fillers: 0, paceStatus: "Illegible Speech" } : null
       };
     }
 
     const lower = text.toLowerCase();
-    const kws = question.keywords;
-    const hits = kws.filter(k => lower.includes(k));
-    const coverage = hits.length / kws.length;
-
     const EXP = EXPERIENCE[experienceId];
-    let lengthScore;
-    if (wordCount < EXP.idealMin) lengthScore = wordCount / EXP.idealMin;
-    else if (wordCount > EXP.idealMax * 1.6) lengthScore = 0.6;
-    else lengthScore = 1;
 
-    let technical = (coverage * 0.72 + lengthScore * 0.28) * 100;
-    technical = Math.max(6, Math.min(98, technical));
-    technical = Math.round(Math.max(6, Math.min(98, technical * EXP.rigor)));
+    // 1. Accuracy Evaluation (Concept match vs Misconception detection)
+    const expected = question.expectedConcepts || [];
+    const matchedConcepts = expected.filter(concept => {
+      const parts = concept.toLowerCase().split(/\s+/);
+      const matchedParts = parts.filter(p => p.length > 3 && lower.includes(p));
+      return matchedParts.length >= Math.min(2, parts.length);
+    });
 
+    const incorrectTriggers = question.incorrectTriggers || [];
+    const detectedMisconceptions = incorrectTriggers.filter(trig => lower.includes(trig.toLowerCase()));
+
+    // Generic incorrect statement detectors
+    const genericWrongPatterns = [
+      { pattern: "re-render deletes", text: "Stating that re-rendering deletes component state is incorrect." },
+      { pattern: "sql has no schema", text: "Claiming SQL databases lack schemas is factually wrong." },
+      { pattern: "nosql has acid joins", text: "NoSQL databases generally trade ACID joins for horizontal scalability." },
+      { pattern: "overfitting means val loss is lower", text: "Overfitting means validation loss is higher than training loss." },
+      { pattern: "document.getelementbyid", text: "Bypassing React Virtual DOM with direct DOM manipulation is bad practice in React." }
+    ];
+    genericWrongPatterns.forEach(g => {
+      if (lower.includes(g.pattern) && !detectedMisconceptions.includes(g.text)) {
+        detectedMisconceptions.push(g.text);
+      }
+    });
+
+    let conceptRatio = expected.length ? (matchedConcepts.length / expected.length) : 0;
+    const kws = question.keywords || [];
+    const kwHits = kws.filter(k => lower.includes(k));
+    const kwRatio = kws.length ? (kwHits.length / kws.length) : 0;
+
+    let rawAccuracy = (conceptRatio * 0.65 + kwRatio * 0.35) * 100;
+    if (matchedConcepts.length === 0 && kwHits.length === 0) {
+      rawAccuracy = 0;
+    }
+
+    // Heavy penalty for factual errors & misconceptions
+    if (detectedMisconceptions.length > 0) {
+      rawAccuracy -= (detectedMisconceptions.length * 35);
+    }
+    const accuracy = Math.max(0, Math.min(98, Math.round(rawAccuracy)));
+
+    // 2. Relevance Evaluation (Does it address the prompt?)
+    let relevance = 0;
+    if (kwHits.length >= 1 || matchedConcepts.length >= 1) {
+      relevance = 40;
+      if (kwHits.length >= 2) relevance += 30;
+      if (kwHits.length >= 4) relevance += 20;
+      if (wordCount >= EXP.idealMin * 0.6) relevance += 8;
+    }
+    relevance = Math.max(0, Math.min(98, Math.round(relevance)));
+
+    // 3. Completeness Evaluation
+    let completeness = Math.round((matchedConcepts.length / Math.max(1, expected.length)) * 100);
+    if (wordCount < EXP.idealMin) completeness = Math.round(completeness * (wordCount / EXP.idealMin));
+
+    // 4. Clarity & Structure Evaluation
     const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
     const avgSentenceLen = wordCount / Math.max(sentences.length, 1);
-    const fillers = ["um", "uh", "like,", "basically", "actually,", "kind of", "sort of", "you know"];
-    const fillerHits = fillers.reduce((n, f) => n + (lower.split(f).length - 1), 0);
-    let clarity = 100;
-    if (avgSentenceLen > 30) clarity -= 18;
-    if (avgSentenceLen < 6 && sentences.length > 1) clarity -= 10;
-    clarity -= Math.min(fillerHits * 9, 45);
-    if (sentences.length >= 2) clarity += 6;
-    clarity = Math.max(8, Math.min(98, Math.round(clarity)));
+    let clarity = 85;
+    if (avgSentenceLen > 28) clarity -= 20; // run-on sentences
+    if (avgSentenceLen < 5 && sentences.length > 1) clarity -= 10;
+    if (sentences.length >= 2) clarity += 10;
 
+    // 5. Communication Evaluation (Fillers, professional vocabulary)
+    const fillers = ["um", "uh", "like", "basically", "actually", "kind of", "sort of", "you know"];
+    const fillerHits = fillers.reduce((n, f) => n + (lower.split(f).length - 1), 0);
+    let communication = 90 - Math.min(fillerHits * 8, 45);
+    if (wordCount >= EXP.idealMin) communication += 5;
+
+    // 6. Confidence Evaluation
     const hedges = ["i think maybe", "not sure", "i guess", "might be wrong", "i don't know", "probably not"];
     const hedgeHits = hedges.reduce((n, h) => n + (lower.split(h).length - 1), 0);
-    const structureMarkers = ["first", "second", "third", "because", "therefore", "for example", "specifically"];
+    const structureMarkers = ["first", "second", "because", "therefore", "for example", "specifically"];
     const structureHits = structureMarkers.filter(m => lower.includes(m)).length;
-    let confidence = 74 + structureHits * 5 - hedgeHits * 16;
-    if (wordCount < EXP.idealMin * 0.5) confidence -= 12;
-    confidence = Math.max(8, Math.min(97, Math.round(confidence)));
+    let confidence = 75 + structureHits * 5 - hedgeHits * 18;
+    if (wordCount < EXP.idealMin * 0.5) confidence -= 15;
 
-    const overallPct = technical * 0.45 + clarity * 0.25 + confidence * 0.30;
-    const overall = Math.max(1, Math.min(10, Math.round((overallPct / 10) * 2) / 2));
+    // STRICT ZERO PENALTY: If zero relevant concepts and zero keywords match, ALL parameters must drop to 0!
+    if (matchedConcepts.length === 0 && kwHits.length === 0) {
+      completeness = 0;
+      clarity = 0;
+      communication = 0;
+      confidence = 0;
+    } else {
+      completeness = Math.max(0, Math.min(98, completeness));
+      clarity = Math.max(0, Math.min(98, Math.round(clarity)));
+      communication = Math.max(0, Math.min(98, Math.round(communication)));
+      confidence = Math.max(0, Math.min(98, Math.round(confidence)));
+    }
+
+    // Question-type priority weightings
+    let overallPct = 0;
+    if (question.type === "technical") {
+      overallPct = accuracy * 0.50 + completeness * 0.25 + relevance * 0.15 + clarity * 0.10;
+    } else if (question.type === "behavioral") {
+      overallPct = relevance * 0.35 + completeness * 0.30 + communication * 0.20 + clarity * 0.15;
+    } else { // coding / problem-solving
+      overallPct = accuracy * 0.45 + completeness * 0.30 + relevance * 0.15 + clarity * 0.10;
+    }
+
+    // STRICT CAP: Prevent high clarity/communication from inflating an inaccurate or irrelevant answer!
+    if (accuracy === 0 && relevance === 0) {
+      overallPct = 0;
+    } else {
+      if (accuracy < 40) {
+        overallPct = Math.min(overallPct, accuracy + 15);
+      }
+      if (relevance < 40) {
+        overallPct = Math.min(overallPct, relevance + 15);
+      }
+    }
+
+    const overallScore100 = Math.max(0, Math.min(98, Math.round(overallPct)));
+    const overall = (accuracy === 0 && relevance === 0) ? 0.5 : Math.max(0.5, Math.min(10, Math.round((overallScore100 / 10) * 2) / 2));
     const tier = tierFor(overall);
 
-    const wins = [];
-    const improvements = [];
-    if (hits.length) wins.push(`You clearly covered: ${hits.slice(0, 4).join(", ")}.`);
-    if (clarity >= 75) wins.push("Well-structured, easy to follow — good use of complete sentences.");
-    if (confidence >= 75) wins.push("Confident, direct phrasing — no unnecessary hedging.");
-    if (technical >= 75 && wins.length < 3) wins.push("Strong technical grounding for this question.");
-    if (!wins.length) wins.push("You made a genuine attempt under time pressure — that's the hardest part to start.");
+    // Categorize Points
+    let correctPoints = matchedConcepts.map(c => `Covered: ${c}`);
+    if (kwHits.length > 0 && correctPoints.length === 0) {
+      correctPoints.push(`Included relevant keywords: ${kwHits.slice(0, 4).join(", ")}.`);
+    }
+    if (accuracy === 0 && relevance === 0) {
+      correctPoints = [];
+    }
 
-    const missing = kws.filter(k => !lower.includes(k)).slice(0, 3);
-    if (missing.length) improvements.push(`Consider mentioning: ${missing.join(", ")}.`);
-    if (fillerHits > 1) improvements.push('Trim filler words ("basically", "kind of") — they dilute a confident answer.');
-    if (hedgeHits > 0) improvements.push('Avoid hedging phrases like "I\'m not sure" — state your reasoning, then flag uncertainty briefly if needed.');
-    if (wordCount < EXP.idealMin) improvements.push(`This answer is a little thin (${wordCount} words) — add one concrete example to back up your point.`);
-    if (avgSentenceLen > 30) improvements.push("A few sentences run long — breaking them up will make your reasoning easier to follow out loud.");
-    if (!improvements.length) improvements.push("Solid answer — tightening it to your single strongest example would make it even sharper.");
+    const incorrectPoints = detectedMisconceptions.map(m => `Misconception: ${m}`);
+    if (accuracy === 0 && relevance === 0) {
+      incorrectPoints.push("Response contained zero relevant concepts or domain keywords addressing the prompt.");
+    } else if (accuracy < 40 && incorrectPoints.length === 0) {
+      incorrectPoints.push("Answer lacked factual correctness for the core concepts asked.");
+    }
 
-    return { overall, tier, technical, clarity, confidence, wordCount, wins: wins.slice(0, 3), improvements: improvements.slice(0, 3) };
+    const missingPoints = expected.filter(c => !matchedConcepts.includes(c)).map(c => `Missing: ${c}`);
+
+    // Generate Honest Actionable Summary Callout
+    let actionableSummary = "";
+    if (accuracy === 0 && relevance === 0) {
+      actionableSummary = "Your response is completely off-topic or irrelevant. All parameters (Accuracy, Relevance, Completeness, Clarity, Communication, Confidence) received a 0% score. Make sure to directly address the question.";
+    } else if (accuracy < 40) {
+      actionableSummary = `Your communication is understandable, but your technical accuracy is low (${accuracy}/100). The answer contains inaccurate claims or lacks essential domain concepts. Focus on strengthening the core theory before practicing delivery.`;
+    } else if (relevance < 40) {
+      actionableSummary = `The response went off-topic (Relevance: ${relevance}/100). Ensure you directly answer the specific question asked rather than providing generic filler.`;
+    } else if (completeness < 60) {
+      actionableSummary = `Your answer is factually on the right track, but incomplete (${completeness}/100). Add concrete examples and cover missing structural points to achieve a top score.`;
+    } else {
+      actionableSummary = `Strong, well-grounded response! High accuracy (${accuracy}/100) and complete coverage of key interview concepts.`;
+    }
+
+    // Voice Analytics
+    let voiceMetrics = null;
+    if (isVoiceMode) {
+      const durSec = voiceDurationSec || Math.max(10, Math.round(wordCount / 2.2));
+      const wpm = Math.round((wordCount / durSec) * 60);
+      const pauses = Math.max(0, Math.round(durSec / 8 - sentences.length));
+      voiceMetrics = {
+        wpm: wpm,
+        duration: `${durSec}s`,
+        fillers: fillerHits,
+        paceStatus: (wpm >= 110 && wpm <= 160) ? "Ideal Pace" : (wpm > 160 ? "Too Fast" : "Too Slow")
+      };
+    }
+
+    return {
+      accuracy, relevance, completeness, clarity, communication, confidence,
+      overall, tier, wordCount,
+      correctPoints, incorrectPoints, missingPoints,
+      actionableSummary, voiceMetrics
+    };
   }
 
   /* ── Submit / feedback modal ─────────────────────────────────────── */
-  const THINK_DELAY = reduced ? 150 : 1100;
+  const THINK_DELAY = reduced ? 150 : 900;
 
   submitBtn.addEventListener("click", () => handleSubmit());
 
@@ -1133,10 +1578,18 @@
 
     const q = state.questions[state.currentIndex];
     const text = answerInput.value;
+    const durSec = state.speechDurationSec || 0;
+
     setTimeout(() => {
-      const evalResult = evaluateAnswer(q, text, state.experience);
+      const evalResult = evaluateAnswer(q, text, state.experience, state.mode === "voice", durSec);
       state.answers.push({ question: q, text, eval: evalResult });
       state.submitting = false;
+
+      // Spoken AI transition feedback if Voice Mode
+      if (state.mode === "voice" && state.ttsEnabled) {
+        speakText(`Answer received. Overall score: ${evalResult.overall} out of 10. ${evalResult.actionableSummary.split('.')[0]}.`);
+      }
+
       openFeedback(evalResult, q);
     }, THINK_DELAY);
   }
@@ -1147,6 +1600,7 @@
   function setBar(fillEl, valEl, pct) {
     fillEl.style.width = pct + "%";
     valEl.textContent = pct + "%";
+    fillEl.className = "bar-fill " + (pct >= 75 ? "green" : (pct >= 55 ? "gold" : "red"));
   }
 
   function openFeedback(ev, q) {
@@ -1155,25 +1609,64 @@
     const status = $("fbStatus");
     status.textContent = TIER_LABEL[ev.tier];
     status.className = "fb-status " + ev.tier;
-    $("fbTitle").textContent = `Question ${state.currentIndex + 1} feedback`;
+    $("fbTitle").textContent = `Question ${state.currentIndex + 1} Evaluation`;
 
-    setBar($("fbBarTech"), $("fbBarTechVal"), ev.technical);
+    setBar($("fbBarAccuracy"), $("fbBarAccuracyVal"), ev.accuracy);
+    setBar($("fbBarRelevance"), $("fbBarRelevanceVal"), ev.relevance);
+    setBar($("fbBarCompleteness"), $("fbBarCompletenessVal"), ev.completeness);
     setBar($("fbBarClarity"), $("fbBarClarityVal"), ev.clarity);
+    setBar($("fbBarComm"), $("fbBarCommVal"), ev.communication);
     setBar($("fbBarConf"), $("fbBarConfVal"), ev.confidence);
 
-    const winsList = $("fbWins");
-    winsList.innerHTML = "";
-    ev.wins.forEach(w => { const li = document.createElement("li"); li.textContent = w; winsList.appendChild(li); });
+    $("fbActionableText").textContent = ev.actionableSummary;
 
-    const improveList = $("fbImprove");
-    improveList.innerHTML = "";
-    ev.improvements.forEach(w => { const li = document.createElement("li"); li.textContent = w; improveList.appendChild(li); });
+    // Render Correct Points
+    const correctList = $("fbCorrect");
+    correctList.innerHTML = "";
+    ev.correctPoints.forEach(p => { const li = document.createElement("li"); li.textContent = p; correctList.appendChild(li); });
+
+    // Render Incorrect Points / Misconceptions
+    const incorrectSec = $("fbIncorrectSec");
+    const incorrectList = $("fbIncorrect");
+    incorrectList.innerHTML = "";
+    if (ev.incorrectPoints.length > 0) {
+      incorrectSec.style.display = "block";
+      ev.incorrectPoints.forEach(p => { const li = document.createElement("li"); li.textContent = p; incorrectList.appendChild(li); });
+    } else {
+      incorrectSec.style.display = "none";
+    }
+
+    // Render Missing Core Concepts
+    const missingSec = $("fbMissingSec");
+    const missingList = $("fbMissing");
+    missingList.innerHTML = "";
+    if (ev.missingPoints.length > 0) {
+      missingSec.style.display = "block";
+      ev.missingPoints.forEach(p => { const li = document.createElement("li"); li.textContent = p; missingList.appendChild(li); });
+    } else {
+      missingSec.style.display = "none";
+    }
+
+    // Render Voice Analytics if available
+    const voiceSec = $("fbVoiceSec");
+    const voiceGrid = $("fbVoiceGrid");
+    voiceGrid.innerHTML = "";
+    if (ev.voiceMetrics) {
+      voiceSec.style.display = "block";
+      voiceGrid.innerHTML = `
+        <div class="vm-card"><b>${ev.voiceMetrics.wpm} WPM</b><span>Pace (${ev.voiceMetrics.paceStatus})</span></div>
+        <div class="vm-card"><b>${ev.voiceMetrics.fillers}</b><span>Filler Words</span></div>
+        <div class="vm-card"><b>${ev.voiceMetrics.duration}</b><span>Speech Time</span></div>
+      `;
+    } else {
+      voiceSec.style.display = "none";
+    }
 
     $("fbModelAnswer").textContent = q.modelAnswer;
     document.querySelector(".fb-model").open = false;
 
     const isLast = state.currentIndex === state.questions.length - 1;
-    $("fbNextBtn").textContent = isLast ? "View Final Report" : "Next Question →";
+    $("fbNextBtn").textContent = isLast ? "View Comprehensive Analytics Report →" : "Next Question →";
 
     fbBackdrop.classList.add("show");
     $("fbNextBtn").focus();
@@ -1188,25 +1681,28 @@
     }, 200);
   });
 
-  /* ── Final report ────────────────────────────────────────────────── */
+  /* ── Final Report & Analytics Dashboard ─────────────────────────── */
   const FINAL_CIRC = 289.03;
   const STATUS_NOTE = {
-    strong: "Interview-ready — this is a strong, well-rounded performance.",
-    good: "Good foundation — a bit more precision and you're interview-ready.",
-    work: "Solid start — focus on the improvement notes below before your next attempt."
+    strong: "Interview-Ready — Highly accurate, structured, and confident performance across all questions.",
+    good: "Good Foundation — Factually solid attempt, minor improvements needed in concept completeness.",
+    work: "Needs Practice — Technical accuracy or relevance needs focused study before your real interview."
   };
 
   function showFinal() {
     const answers = state.answers;
-    const avg = key => answers.reduce((s, a) => s + a.eval[key], 0) / answers.length;
+    const avg = key => answers.reduce((s, a) => s + a.eval[key], 0) / Math.max(1, answers.length);
+
     const avgOverall = avg("overall");
-    const avgTech = Math.round(avg("technical"));
+    const avgAccuracy = Math.round(avg("accuracy"));
+    const avgRelevance = Math.round(avg("relevance"));
+    const avgCompleteness = Math.round(avg("completeness"));
     const avgClarity = Math.round(avg("clarity"));
+    const avgComm = Math.round(avg("communication"));
     const avgConf = Math.round(avg("confidence"));
     const tier = tierFor(avgOverall);
 
-    $("finalRecap").textContent =
-      `${state.roleLabel} · ${EXPERIENCE[state.experience].label} · ${answers.length} questions answered`;
+    $("finalRecap").textContent = `${state.roleLabel} · ${EXPERIENCE[state.experience].label} · ${answers.length} Questions Evaluated`;
 
     const pct = Math.round(avgOverall * 10);
     $("finalRingArc").style.strokeDashoffset = String(FINAL_CIRC * (1 - pct / 100));
@@ -1214,10 +1710,42 @@
     $("finalScoreBig").textContent = avgOverall.toFixed(1) + "/10";
     $("finalStatusNote").textContent = STATUS_NOTE[tier];
 
-    setBar($("finalBarTech"), $("finalBarTechVal"), avgTech);
+    setBar($("finalBarAccuracy"), $("finalBarAccuracyVal"), avgAccuracy);
+    setBar($("finalBarRelevance"), $("finalBarRelevanceVal"), avgRelevance);
+    setBar($("finalBarCompleteness"), $("finalBarCompletenessVal"), avgCompleteness);
     setBar($("finalBarClarity"), $("finalBarClarityVal"), avgClarity);
+    setBar($("finalBarComm"), $("finalBarCommVal"), avgComm);
     setBar($("finalBarConf"), $("finalBarConfVal"), avgConf);
 
+    // Calculate Correct vs Incorrect counts
+    const correctCount = answers.filter(a => a.eval.overall >= 6.5).length;
+    const incorrectCount = answers.length - correctCount;
+    $("finalCorrectCount").textContent = correctCount;
+    $("finalIncorrectCount").textContent = incorrectCount;
+
+    // Collect missed concepts for actionable plan
+    const allMissed = [];
+    answers.forEach(a => {
+      if (a.eval.missingPoints) {
+        a.eval.missingPoints.forEach(m => allMissed.push(m.replace("Missing: ", "")));
+      }
+    });
+
+    $("finalStrongArea").textContent = avgAccuracy >= 70 ? `${state.roleLabel} Core Theory` : "Communication & Tone";
+    $("finalWeakArea").textContent = allMissed.length > 0 ? allMissed[0] : "Deep Technical Tradeoffs";
+
+    // Personalized Improvement Plan text
+    let planText = "";
+    if (avgAccuracy < 55) {
+      planText = `Your communication tone is solid, but your technical accuracy averaged ${avgAccuracy}%. Focus on reviewing the foundational principles of ${state.roleLabel}. Specifically study: ${allMissed.slice(0, 3).join(", ") || "core technical concepts"}.`;
+    } else if (avgCompleteness < 65) {
+      planText = `Good technical accuracy! To reach senior readiness, focus on covering complete trade-offs and concrete examples. Focus on practicing: ${allMissed.slice(0, 2).join(", ") || "system structure and edge cases"}.`;
+    } else {
+      planText = `Outstanding performance! You demonstrated high technical precision (${avgAccuracy}%) and structured responses. Practice under tighter time constraints to maintain peak performance.`;
+    }
+    $("finalImprovementText").textContent = planText;
+
+    // Per-question detailed accordion list
     const list = $("finalList");
     list.innerHTML = "";
     answers.forEach((a, i) => {
@@ -1240,25 +1768,48 @@
       const yours = document.createElement("div");
       yours.className = "qr-your";
       const yoursLabel = document.createElement("strong");
-      yoursLabel.textContent = "Your answer: ";
+      yoursLabel.textContent = "Your Answer: ";
       yours.appendChild(yoursLabel);
       yours.appendChild(document.createTextNode(a.text.trim() || "No answer submitted."));
 
-      const wins = document.createElement("div");
-      const winsLabel = document.createElement("strong");
-      winsLabel.textContent = "What worked: ";
-      wins.appendChild(winsLabel);
-      wins.appendChild(document.createTextNode(a.eval.wins.join(" ")));
+      const metricsRow = document.createElement("div");
+      metricsRow.style.cssText = "display:flex; gap:12px; font-size:11.5px; margin:4px 0;";
+      metricsRow.innerHTML = `
+        <span>Accuracy: <b style="color:var(--saffron)">${a.eval.accuracy}%</b></span>
+        <span>Relevance: <b>${a.eval.relevance}%</b></span>
+        <span>Completeness: <b>${a.eval.completeness}%</b></span>
+      `;
 
-      const improve = document.createElement("div");
-      const improveLabel = document.createElement("strong");
-      improveLabel.textContent = "To improve: ";
-      improve.appendChild(improveLabel);
-      improve.appendChild(document.createTextNode(a.eval.improvements.join(" ")));
+      const correct = document.createElement("div");
+      const correctLabel = document.createElement("strong");
+      correctLabel.style.color = "#22c55e";
+      correctLabel.textContent = "✅ Correct Points: ";
+      correct.appendChild(correctLabel);
+      correct.appendChild(document.createTextNode(a.eval.correctPoints.join(" | ")));
+
+      const incorrect = document.createElement("div");
+      if (a.eval.incorrectPoints.length > 0) {
+        const incorrectLabel = document.createElement("strong");
+        incorrectLabel.style.color = "#ef4444";
+        incorrectLabel.textContent = "❌ Misconceptions: ";
+        incorrect.appendChild(incorrectLabel);
+        incorrect.appendChild(document.createTextNode(a.eval.incorrectPoints.join(" | ")));
+      }
+
+      const missing = document.createElement("div");
+      if (a.eval.missingPoints.length > 0) {
+        const missingLabel = document.createElement("strong");
+        missingLabel.style.color = "var(--saffron)";
+        missingLabel.textContent = "💡 Missing Concepts: ";
+        missing.appendChild(missingLabel);
+        missing.appendChild(document.createTextNode(a.eval.missingPoints.join(" | ")));
+      }
 
       body.appendChild(yours);
-      body.appendChild(wins);
-      body.appendChild(improve);
+      body.appendChild(metricsRow);
+      body.appendChild(correct);
+      if (a.eval.incorrectPoints.length > 0) body.appendChild(incorrect);
+      if (a.eval.missingPoints.length > 0) body.appendChild(missing);
 
       details.appendChild(summary);
       details.appendChild(body);

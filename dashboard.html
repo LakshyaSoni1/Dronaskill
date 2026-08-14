@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Dashboard — Dronaskill</title>
+<meta name="description" content="Your personal skill checklist, built from your onboarding profile — foundation to job-ready, with lectures for every skill.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+    --good:        #34c46b;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); overflow-x: hidden;
+    font-family: var(--font); -webkit-font-smoothing: antialiased;
+    color: var(--ink); line-height: 1.55;
+  }
+
+  /* ── Ambient background ──────────────────────────────────────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); top: 4%; left: 4%; }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); top: 40%; right: 2%; }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); bottom: 2%; left: 26%; }
+  .orb-center {
+    width: 640px; height: 640px; top: 10%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .btn { background: var(--cta); color: var(--cta-ink); box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35); }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn-sm { padding: 9px 16px; font-size: 13px; border-radius: 10px; }
+
+  :where(a, button, input, select, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand span { color: var(--saffron); }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+
+  /* ── Layout ──────────────────────────────────────────────────────── */
+  .dash { padding: 30px 0 90px; }
+  .dash-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 26px; }
+  .dash-head h1 { font-size: clamp(26px, 4vw, 36px); margin: 12px 0 8px; }
+  .head-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .dash-grid { display: grid; grid-template-columns: 1fr 330px; gap: 20px; align-items: start; }
+
+  /* ── Overview card ───────────────────────────────────────────────── */
+  .overview { padding: 24px 26px; border-radius: var(--r-xl); margin-bottom: 20px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+  .ring { position: relative; width: 108px; height: 108px; flex: none; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .track { stroke: rgba(255,255,255,0.09); }
+  .ring .fill { stroke: url(#ringGrad); stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1); }
+  .ring-label { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .ring-label b { display: block; font-size: 22px; font-weight: 650; letter-spacing: -0.03em; line-height: 1; }
+  .ring-label span { display: block; font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+  .overview-text { flex: 1 1 240px; min-width: 220px; }
+  .overview-text h2 { font-size: 19px; margin-bottom: 6px; }
+  .overview-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 14px; }
+  .ostat b { display: block; font-size: 19px; font-weight: 640; letter-spacing: -0.02em; color: var(--saffron); line-height: 1.1; }
+  .ostat span { font-size: 11.5px; color: var(--ink-3); }
+
+  /* ── Checklist ───────────────────────────────────────────────────── */
+  .list-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 30px 0 14px; }
+  .list-head h2 { font-size: 20px; }
+  .filter-group { display: flex; gap: 4px; margin-left: auto; padding: 4px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); }
+  .filter-btn {
+    padding: 6px 13px; border: 0; border-radius: 8px; background: none; color: var(--ink-2);
+    font-family: inherit; font-size: 12.5px; font-weight: 560; cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .filter-btn:hover { color: var(--ink); }
+  .filter-btn[aria-pressed="true"] { background: var(--cta); color: var(--cta-ink); }
+
+  .level-block { margin-bottom: 26px; }
+  .level-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .level-head h3 { font-size: 14px; letter-spacing: 0; }
+  .level-badge {
+    padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: rgba(242,171,60,0.12); border: 1px solid rgba(242,171,60,0.26); color: var(--saffron);
+  }
+  .level-head .muted { font-size: 12px; }
+
+  .skill-row {
+    display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px;
+    border-radius: var(--r-md); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line-soft); margin-bottom: 8px;
+    transition: background .2s ease, border-color .2s ease, opacity .25s ease;
+  }
+  .skill-row:hover { background: rgba(255,255,255,0.065); border-color: rgba(255,255,255,0.14); }
+  .skill-row.is-done { opacity: .52; }
+  .skill-row.is-done .skill-name { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.3); }
+
+  .skill-check { position: relative; flex: none; margin-top: 2px; }
+  .skill-check input { position: absolute; opacity: 0; width: 22px; height: 22px; margin: 0; cursor: pointer; }
+  .skill-box {
+    width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid rgba(255,255,255,0.28);
+    display: grid; place-items: center; transition: background .2s ease, border-color .2s ease;
+  }
+  .skill-box svg { opacity: 0; transition: opacity .15s ease; }
+  .skill-check:has(input:checked) .skill-box { background: var(--good); border-color: var(--good); }
+  .skill-check:has(input:checked) .skill-box svg { opacity: 1; }
+  .skill-check:has(input:focus-visible) .skill-box { outline: 2px solid var(--saffron); outline-offset: 3px; }
+
+  .skill-main { flex: 1 1 auto; min-width: 0; }
+  .skill-name { font-size: 14.5px; font-weight: 570; color: var(--ink); }
+  .skill-desc { font-size: 12.5px; color: var(--ink-3); margin-top: 3px; line-height: 1.5; }
+  .skill-meta { display: flex; align-items: center; gap: 10px; flex: none; }
+  .hours-tag { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+  .learn-link {
+    font-size: 12.5px; font-weight: 560; color: var(--saffron); text-decoration: none;
+    padding: 6px 12px; border-radius: 9px; border: 1px solid rgba(242,171,60,0.28);
+    background: rgba(242,171,60,0.08); white-space: nowrap;
+  }
+  .learn-link:hover { background: rgba(242,171,60,0.16); }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────── */
+  .side { display: grid; gap: 16px; position: sticky; top: 84px; }
+  .side-card { padding: 22px; border-radius: var(--r-xl); }
+  .side-card h3 { font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+  .next-name { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .next-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin-bottom: 16px; }
+  .next-card .btn { width: 100%; }
+
+  .profile-rows { display: grid; gap: 0; }
+  .profile-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 12.5px; }
+  .profile-row:last-child { border-bottom: 0; }
+  .profile-row span:first-child { color: var(--ink-3); }
+  .profile-row span:last-child { color: var(--ink); text-align: right; }
+
+  .chip-static { padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); font-size: 11.5px; color: var(--ink-2); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── Per-skill logged-hours bar ──────────────────────────────────── */
+  .logged { margin-top: 9px; display: flex; align-items: center; gap: 9px; }
+  .logged-track { flex: 1 1 auto; height: 4px; border-radius: 999px; background: rgba(242,171,60,0.16); overflow: hidden; }
+  .logged-fill { height: 100%; border-radius: 999px; background: var(--saffron); transition: width .5s ease; }
+  .logged-text { flex: none; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  /* ── Recent sessions (sidebar) ───────────────────────────────────── */
+  .sess { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 12.5px; }
+  .sess:last-child { border-bottom: 0; }
+  .sess-h { flex: none; font-weight: 600; color: var(--saffron); font-variant-numeric: tabular-nums; }
+  .sess-main { flex: 1 1 auto; min-width: 0; }
+  .sess-skill { color: var(--ink); overflow-wrap: anywhere; }
+  .sess-date { display: block; font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+
+  /* ── Log-time modal ──────────────────────────────────────────────── */
+  .modal-back {
+    position: fixed; inset: 0; z-index: 80; display: grid; place-items: center;
+    padding: 22px; background: rgba(5,5,9,0.72);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .modal-back[hidden] { display: none; }
+  .modal {
+    width: min(460px, 100%); max-height: calc(100vh - 44px); overflow-y: auto;
+    padding: 28px 28px 24px; border-radius: var(--r-xl);
+    background: #14141a; border: 1px solid var(--line);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    animation: modalIn .25s ease both;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: none; } }
+  .modal h2 { font-size: 20px; margin-bottom: 6px; }
+  .modal .modal-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 22px; line-height: 1.55; }
+  .m-field { margin-bottom: 18px; }
+  .m-field label, .m-field .m-label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px;
+  }
+  .m-input {
+    width: 100%; padding: 11px 13px; border-radius: 11px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    color: var(--ink); font-family: inherit; font-size: 14px;
+  }
+  .m-input:focus { border-color: rgba(242,171,60,0.5); outline: none; }
+  .m-input::placeholder { color: var(--ink-3); }
+  select.m-input {
+    appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2ab3c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 13px center;
+  }
+  select.m-input option, select.m-input optgroup { background: #16161d; color: var(--ink); }
+  input[type="date"].m-input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .55; cursor: pointer; }
+  .quick-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
+  .quick {
+    padding: 7px 13px; border-radius: 9px; cursor: pointer; font-family: inherit; font-size: 12.5px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); color: var(--ink-2);
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .quick:hover { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .quick[aria-pressed="true"] { background: rgba(242,171,60,0.16); border-color: rgba(242,171,60,0.4); color: var(--saffron); }
+  .m-error { font-size: 12px; color: var(--saffron); min-height: 16px; margin-top: 4px; }
+  .m-actions { display: flex; gap: 10px; margin-top: 22px; }
+  .m-actions .btn { flex: 1; }
+  .visually-hidden-label {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────── */
+  .empty { padding: 70px 0 110px; display: flex; justify-content: center; }
+  .empty-card { width: min(520px, 100%); padding: 40px 34px; border-radius: var(--r-xl); text-align: center; }
+  .empty-card h1 { font-size: 26px; margin: 14px 0 12px; }
+  .empty-card .lede { margin-bottom: 26px; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+  @media (max-width: 980px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .side { position: static; }
+  }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 620px) {
+    .skill-row { flex-wrap: wrap; }
+    .skill-meta { width: 100%; padding-left: 36px; }
+    .filter-group { margin-left: 0; width: 100%; }
+    .filter-btn { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="tick-dark" viewBox="0 0 24 24">
+      <path d="M5 12.6l4.6 4.6L19 7.4" fill="none" stroke="#07120a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div>
+  <div class="orb orb-3"></div><div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="dashboard.html" aria-current="page">Dashboard</a>
+      <a class="nav-link" href="analysis.html">Analysis</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ══ No profile yet ══ -->
+  <section class="empty wrap hidden" id="emptyState">
+    <div class="empty-card glass">
+      <span class="eyebrow">No profile yet</span>
+      <h1>Your dashboard is waiting.</h1>
+      <p class="lede">Answer six quick slides and we'll build your skill checklist — sequenced
+        from foundation to job-ready, with the ones you already know ticked off.</p>
+      <a class="btn" href="onboarding.html">Start onboarding
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ══ Dashboard ══ -->
+  <section class="dash wrap hidden" id="dashState">
+
+    <div class="dash-head">
+      <div>
+        <span class="eyebrow" id="trackEyebrow">Your path</span>
+        <h1 id="greeting">Welcome back.</h1>
+        <p class="lede" id="subline"></p>
+      </div>
+      <div class="head-actions">
+        <button type="button" class="btn btn-sm" id="logBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>
+          </svg>
+          Log study time
+        </button>
+        <a class="btn-ghost btn-sm" href="analysis.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19V10M10 19V5M16 19v-6M22 19H2"/>
+          </svg>
+          Deep analysis
+        </a>
+        <a class="btn-ghost btn-sm" href="onboarding.html">Edit profile</a>
+        <button type="button" class="btn-ghost btn-sm" id="resetBtn">Reset progress</button>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div>
+        <div class="overview glass">
+          <div class="ring">
+            <svg width="108" height="108" aria-hidden="true">
+              <circle class="track" cx="54" cy="54" r="46" fill="none" stroke-width="9"/>
+              <circle class="fill" id="ringFill" cx="54" cy="54" r="46" fill="none" stroke-width="9"
+                      stroke-dasharray="289" stroke-dashoffset="289"/>
+            </svg>
+            <div class="ring-label">
+              <div>
+                <b id="ringPct">0%</b>
+                <span>complete</span>
+              </div>
+            </div>
+          </div>
+          <div class="overview-text">
+            <h2 id="overviewTitle">Getting started</h2>
+            <p class="lede" style="font-size:13.5px;" id="overviewLine"></p>
+            <div class="overview-stats">
+              <div class="ostat"><b id="statDone">0</b><span>skills done</span></div>
+              <div class="ostat"><b id="statLeft">0</b><span>skills left</span></div>
+              <div class="ostat"><b id="statHours">0</b><span>hours remaining</span></div>
+              <div class="ostat"><b id="statWeeks">0</b><span>weeks at your pace</span></div>
+              <div class="ostat"><b id="statThisWeek">0</b><span>hrs logged this week</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-head">
+          <h2>Skill checklist</h2>
+          <div class="filter-group" role="group" aria-label="Filter skills">
+            <button type="button" class="filter-btn" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="filter-btn" data-filter="todo" aria-pressed="false">To do</button>
+            <button type="button" class="filter-btn" data-filter="done" aria-pressed="false">Done</button>
+          </div>
+        </div>
+
+        <div id="checklist"></div>
+      </div>
+
+      <aside class="side">
+        <div class="side-card next-card glass">
+          <h3>Next up</h3>
+          <p class="next-name" id="nextName">—</p>
+          <p class="next-desc" id="nextDesc"></p>
+          <a class="btn" id="nextLink" href="lectures.html">Open lectures
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+
+        <div class="side-card glass">
+          <h3>Recent sessions</h3>
+          <div id="sessionList"></div>
+          <button type="button" class="btn-ghost btn-sm" id="logBtn2" style="width:100%; margin-top:14px;">
+            Log study time
+          </button>
+        </div>
+
+        <div class="side-card glass">
+          <h3>Your profile</h3>
+          <div class="profile-rows" id="profileRows"></div>
+        </div>
+
+        <div class="side-card glass">
+          <h3>Learning formats</h3>
+          <div class="chip-row" id="formatChips"></div>
+        </div>
+      </aside>
+    </div>
+
+  </section>
+</main>
+
+<!-- ══ Log study time ══ -->
+<div class="modal-back" id="logBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <h2 id="logTitle">Log study time</h2>
+    <p class="modal-sub">Real hours you put in. This is what fills your activity heatmap —
+      separate from the estimates attached to each skill.</p>
+
+    <div class="m-field">
+      <span class="m-label">How long?</span>
+      <div class="quick-row" id="quickRow">
+        <button type="button" class="quick" data-h="0.5" aria-pressed="false">30m</button>
+        <button type="button" class="quick" data-h="1" aria-pressed="true">1h</button>
+        <button type="button" class="quick" data-h="1.5" aria-pressed="false">1h 30m</button>
+        <button type="button" class="quick" data-h="2" aria-pressed="false">2h</button>
+        <button type="button" class="quick" data-h="3" aria-pressed="false">3h</button>
+        <button type="button" class="quick" data-h="4" aria-pressed="false">4h</button>
+      </div>
+      <label for="logHours" class="visually-hidden-label">Hours</label>
+      <input type="number" id="logHours" class="m-input" min="0.25" max="16" step="0.25" value="1">
+      <p class="m-error" id="logError" role="alert"></p>
+    </div>
+
+    <div class="m-field">
+      <label for="logSkill">What were you working on?</label>
+      <select id="logSkill" class="m-input"></select>
+    </div>
+
+    <div class="m-field">
+      <label for="logDate">When?</label>
+      <input type="date" id="logDate" class="m-input">
+    </div>
+
+    <div class="m-field" style="margin-bottom:0;">
+      <label for="logNote">Note <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="logNote" class="m-input" maxlength="140" placeholder="e.g. finished the recursion set">
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn-ghost" id="logCancel">Cancel</button>
+      <button type="button" class="btn" id="logSave">Save session</button>
+    </div>
+  </div>
+</div>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script src="skills-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.DRONA;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ── Load profile ────────────────────────────────────────────────── */
+  var profile = null;
+  try { profile = JSON.parse(localStorage.getItem(D.STORAGE_KEY) || "null"); } catch (e) { profile = null; }
+
+  if (!profile || !profile.career_goal) {
+    $("emptyState").classList.remove("hidden");
+    return;
+  }
+  $("dashState").classList.remove("hidden");
+
+  /* ── Progress store — the checklist's source of truth ────────────── */
+  /* { skillId: "YYYY-MM-DD" }; analysis.html reads the same map for its charts. */
+  var progress = D.readProgress();
+
+  function saveProgress() { D.writeProgress(progress); }
+
+  /* ── Study log — measured hours, rebuilt on every save ───────────── */
+  var log = D.readLog();
+  var loggedBySkill = D.logHoursBySkill(log);
+
+  var filter = "all";
+
+  /* buildPlan gives us ordering + hours; progress overrides the done flags. */
+  function currentPlan() {
+    var plan = D.buildPlan({
+      career_goal: profile.career_goal,
+      known_skills: [],
+      hours_per_week: profile.hours_per_week
+    });
+    plan.items.forEach(function (it) { it.done = !!progress[it.id]; });
+    plan.groups.forEach(function (g) {
+      g.items.forEach(function (it) { it.done = !!progress[it.id]; });
+    });
+    plan.doneCount = plan.items.filter(function (it) { return it.done; }).length;
+    plan.remainingHours = plan.items.reduce(function (sum, it) {
+      return it.done ? sum : sum + it.hours;
+    }, 0);
+    plan.weeksToFinish = Math.ceil(plan.remainingHours / (profile.hours_per_week || 8));
+    return plan;
+  }
+
+  /* ── Header + overview ───────────────────────────────────────────── */
+  function renderHeader(plan) {
+    var pct = plan.totalCount ? Math.round(plan.doneCount / plan.totalCount * 100) : 0;
+
+    $("trackEyebrow").textContent = plan.trackLabel;
+    $("greeting").textContent = profile.name
+      ? "Welcome back, " + profile.name + "."
+      : "Welcome back.";
+    $("subline").textContent = plan.trackBlurb;
+
+    $("statDone").textContent = plan.doneCount;
+    $("statLeft").textContent = plan.totalCount - plan.doneCount;
+    $("statHours").textContent = plan.remainingHours;
+    $("statWeeks").textContent = plan.weeksToFinish;
+
+    $("ringPct").textContent = pct + "%";
+    var circumference = 2 * Math.PI * 46;
+    $("ringFill").setAttribute("stroke-dasharray", circumference.toFixed(0));
+    $("ringFill").setAttribute("stroke-dashoffset", (circumference * (1 - pct / 100)).toFixed(1));
+
+    var stage = pct === 0 ? "Getting started"
+              : pct < 35  ? "Building foundations"
+              : pct < 70  ? "Deep in the core"
+              : pct < 100 ? "Nearly job-ready"
+              :             "Path complete";
+    $("overviewTitle").textContent = stage;
+    $("overviewLine").textContent = plan.doneCount + " of " + plan.totalCount +
+      " skills done. At " + (profile.hours_per_week || 8) + " hrs a week that's about " +
+      plan.weeksToFinish + " weeks of study left.";
+  }
+
+  /* ── Checklist ───────────────────────────────────────────────────── */
+  function renderChecklist(plan) {
+    var container = $("checklist");
+    container.innerHTML = "";
+
+    var shown = 0;
+
+    plan.groups.forEach(function (group) {
+      var items = group.items.filter(function (it) {
+        return filter === "all" || (filter === "done" ? it.done : !it.done);
+      });
+      if (!items.length) return;
+      shown += items.length;
+
+      var block = document.createElement("div");
+      block.className = "level-block";
+
+      var head = document.createElement("div");
+      head.className = "level-head";
+      var h3 = document.createElement("h3");
+      h3.textContent = group.label;
+      var badge = document.createElement("span");
+      badge.className = "level-badge";
+      var doneInGroup = group.items.filter(function (i) { return i.done; }).length;
+      badge.textContent = doneInGroup + " / " + group.items.length;
+      var note = document.createElement("span");
+      note.className = "muted";
+      note.textContent = group.note;
+      head.appendChild(h3); head.appendChild(badge); head.appendChild(note);
+      block.appendChild(head);
+
+      items.forEach(function (item) { block.appendChild(skillRow(item)); });
+      container.appendChild(block);
+    });
+
+    if (!shown) {
+      var empty = document.createElement("p");
+      empty.className = "muted";
+      empty.style.padding = "20px 0";
+      empty.textContent = filter === "done"
+        ? "Nothing ticked off yet — check a skill once you can build something small with it."
+        : "Everything here is done. Time to change your goal or go deeper.";
+      container.appendChild(empty);
+    }
+  }
+
+  function skillRow(item) {
+    var row = document.createElement("div");
+    row.className = "skill-row" + (item.done ? " is-done" : "");
+
+    var check = document.createElement("label");
+    check.className = "skill-check";
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = item.done;
+    input.setAttribute("aria-label", "Mark " + item.name + " complete");
+    var box = document.createElement("span");
+    box.className = "skill-box";
+    box.innerHTML = '<svg width="13" height="13" aria-hidden="true"><use href="#tick-dark"/></svg>';
+    check.appendChild(input);
+    check.appendChild(box);
+
+    input.addEventListener("change", function () {
+      D.setSkillDone(progress, item.id, input.checked);
+      render();
+    });
+
+    var main = document.createElement("div");
+    main.className = "skill-main";
+    var name = document.createElement("div");
+    name.className = "skill-name";
+    name.textContent = item.name;
+    var desc = document.createElement("p");
+    desc.className = "skill-desc";
+    desc.textContent = item.desc;
+    main.appendChild(name);
+    main.appendChild(desc);
+
+    /* Hours actually logged against this skill, against its estimate. */
+    var logged = loggedBySkill[item.id] || 0;
+    if (logged > 0) {
+      var bar = document.createElement("div");
+      bar.className = "logged";
+      var track = document.createElement("div");
+      track.className = "logged-track";
+      var fill = document.createElement("div");
+      fill.className = "logged-fill";
+      fill.style.width = Math.min(100, logged / item.hours * 100) + "%";
+      track.appendChild(fill);
+      var text = document.createElement("span");
+      text.className = "logged-text";
+      text.textContent = D.formatHours(logged) + " logged";
+      bar.appendChild(track);
+      bar.appendChild(text);
+      main.appendChild(bar);
+    }
+
+    var meta = document.createElement("div");
+    meta.className = "skill-meta";
+    var hours = document.createElement("span");
+    hours.className = "hours-tag";
+    hours.textContent = "~" + item.hours + " hrs";
+    var link = document.createElement("a");
+    link.className = "learn-link";
+    link.href = "lectures.html?skill=" + encodeURIComponent(item.id);
+    link.textContent = item.done ? "Revise" : "Learn";
+    meta.appendChild(hours);
+    meta.appendChild(link);
+
+    row.appendChild(check);
+    row.appendChild(main);
+    row.appendChild(meta);
+    return row;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────── */
+  function renderSidebar(plan) {
+    var next = null;
+    for (var i = 0; i < plan.items.length; i++) {
+      if (!plan.items[i].done) { next = plan.items[i]; break; }
+    }
+
+    if (next) {
+      $("nextName").textContent = next.name;
+      $("nextDesc").textContent = next.desc + " (~" + next.hours + " hrs)";
+      $("nextLink").href = "lectures.html?skill=" + encodeURIComponent(next.id);
+      $("nextLink").firstChild.nodeValue = "Open lectures";
+    } else {
+      $("nextName").textContent = "Path complete";
+      $("nextDesc").textContent = "Every skill on this track is ticked. Change your goal in onboarding to start a new one.";
+      $("nextLink").href = "onboarding.html";
+      $("nextLink").firstChild.nodeValue = "Pick a new goal";
+    }
+
+    var rows = [
+      ["Goal", plan.trackLabel],
+      ["Education", profile.education_level || "—"],
+      ["Stream", profile.stream || "—"],
+      ["Pace", (profile.hours_per_week || 8) + " hrs / week"],
+      ["Timeline", (profile.timeline || "—").split(" — ")[0]],
+      ["Study time", profile.study_time || "—"],
+      ["Language", profile.language || "English"]
+    ];
+    var box = $("profileRows");
+    box.innerHTML = "";
+    rows.forEach(function (r) {
+      var div = document.createElement("div");
+      div.className = "profile-row";
+      var a = document.createElement("span"); a.textContent = r[0];
+      var b = document.createElement("span"); b.textContent = r[1];
+      div.appendChild(a); div.appendChild(b);
+      box.appendChild(div);
+    });
+
+    var chips = $("formatChips");
+    chips.innerHTML = "";
+    (profile.formats && profile.formats.length ? profile.formats : ["No preference set"])
+      .forEach(function (f) {
+        var chip = document.createElement("span");
+        chip.className = "chip-static";
+        chip.textContent = f;
+        chips.appendChild(chip);
+      });
+  }
+
+  /* ── Recent sessions ─────────────────────────────────────────────── */
+  function renderSessions() {
+    var box = $("sessionList");
+    box.innerHTML = "";
+    var sessions = D.sessionList(log).slice(0, 5);
+
+    if (!sessions.length) {
+      var empty = document.createElement("p");
+      empty.className = "muted";
+      empty.style.fontSize = "12.5px";
+      empty.textContent = "Nothing logged yet. Log a session and it shows up here and on your heatmap.";
+      box.appendChild(empty);
+      return;
+    }
+
+    sessions.forEach(function (s) {
+      var row = document.createElement("div");
+      row.className = "sess";
+
+      var h = document.createElement("span");
+      h.className = "sess-h";
+      h.textContent = D.formatHours(s.hours);
+
+      var main = document.createElement("div");
+      main.className = "sess-main";
+      var name = document.createElement("span");
+      name.className = "sess-skill";
+      name.textContent = s.skill ? D.SKILLS[s.skill].name : (s.note || "General study");
+      var date = document.createElement("span");
+      date.className = "sess-date";
+      date.textContent = prettyDate(s.date) + (s.skill && s.note ? " · " + s.note : "");
+      main.appendChild(name);
+      main.appendChild(date);
+
+      row.appendChild(h);
+      row.appendChild(main);
+      box.appendChild(row);
+    });
+  }
+
+  function prettyDate(iso) {
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var p = iso.split("-");
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var days = Math.round((today - d) / 86400000);
+    if (days === 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 7) return days + " days ago";
+    return d.getDate() + " " + months[d.getMonth()];
+  }
+
+  /* Hours logged since this week's Sunday. */
+  function hoursThisWeek() {
+    var start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - start.getDay());
+    var total = 0;
+    Object.keys(log).forEach(function (date) {
+      var p = date.split("-");
+      if (new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])) >= start) {
+        log[date].forEach(function (s) { total += s.hours; });
+      }
+    });
+    return total;
+  }
+
+  /* ── Log modal ───────────────────────────────────────────────────── */
+  var lastFocus = null;
+
+  function fillSkillSelect(plan) {
+    var select = $("logSkill");
+    select.innerHTML = "";
+    var general = document.createElement("option");
+    general.value = "";
+    general.textContent = "General study — not one skill";
+    select.appendChild(general);
+
+    /* Unfinished skills first: that's what you're most likely logging against. */
+    [["Still to do", false], ["Already done", true]].forEach(function (bucket) {
+      var items = plan.items.filter(function (it) { return it.done === bucket[1]; });
+      if (!items.length) return;
+      var group = document.createElement("optgroup");
+      group.label = bucket[0];
+      items.forEach(function (it) {
+        var opt = document.createElement("option");
+        opt.value = it.id;
+        opt.textContent = it.name;
+        group.appendChild(opt);
+      });
+      select.appendChild(group);
+    });
+  }
+
+  function openModal(preselectSkill) {
+    lastFocus = document.activeElement;
+    fillSkillSelect(currentPlan());
+    $("logSkill").value = preselectSkill || "";
+    $("logDate").value = D.todayISO();
+    $("logDate").max = D.todayISO();
+    $("logHours").value = "1";
+    $("logNote").value = "";
+    $("logError").textContent = "";
+    setQuick(1);
+    $("logBack").hidden = false;
+    $("logHours").focus();
+  }
+
+  function closeModal() {
+    $("logBack").hidden = true;
+    if (lastFocus) lastFocus.focus();
+  }
+
+  function setQuick(hours) {
+    document.querySelectorAll(".quick").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(Number(b.dataset.h) === Number(hours)));
+    });
+  }
+
+  document.querySelectorAll(".quick").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $("logHours").value = btn.dataset.h;
+      setQuick(btn.dataset.h);
+      $("logError").textContent = "";
+    });
+  });
+  $("logHours").addEventListener("input", function () { setQuick(this.value); });
+
+  $("logBtn").addEventListener("click", function () { openModal(""); });
+  $("logBtn2").addEventListener("click", function () { openModal(""); });
+  $("logCancel").addEventListener("click", closeModal);
+  $("logBack").addEventListener("click", function (e) {
+    if (e.target === $("logBack")) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !$("logBack").hidden) closeModal();
+  });
+
+  $("logSave").addEventListener("click", function () {
+    var hours = Number($("logHours").value);
+    if (!isFinite(hours) || hours <= 0) {
+      $("logError").textContent = "Enter how long you studied.";
+      return;
+    }
+    if (hours > D.MAX_SESSION_HOURS) {
+      $("logError").textContent = "That's over " + D.MAX_SESSION_HOURS + " hours — log it as separate sessions.";
+      return;
+    }
+
+    var saved = D.addSession(log, {
+      date: $("logDate").value,
+      hours: hours,
+      skill: $("logSkill").value,
+      note: $("logNote").value
+    });
+    if (!saved) {
+      $("logError").textContent = "That date is in the future — pick today or earlier.";
+      return;
+    }
+
+    loggedBySkill = D.logHoursBySkill(log);
+    closeModal();
+    render();
+  });
+
+  /* ── Render everything ───────────────────────────────────────────── */
+  function render() {
+    var plan = currentPlan();
+    renderHeader(plan);
+    renderChecklist(plan);
+    renderSidebar(plan);
+    renderSessions();
+    $("statThisWeek").textContent = D.formatHours(hoursThisWeek());
+  }
+
+  document.querySelectorAll(".filter-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".filter-btn").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      filter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  $("resetBtn").addEventListener("click", function () {
+    if (!confirm("Untick every skill on this path? Your profile stays as it is.")) return;
+    progress = {};
+    saveProgress();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

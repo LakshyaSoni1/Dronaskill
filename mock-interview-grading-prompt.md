@@ -55,15 +55,24 @@ You are a strict, unsentimental Technical & Behavioral Interviewer. Your task is
 Return ONLY a valid JSON object matching this schema (no markdown, no conversational text):
 
 {
-  "score": <float between 0.0 and 10.0 based strictly on the rubric>,
+  "accuracy": <float between 0 and 100 representing factual correctness>,
+  "relevance": <float between 0 and 100 representing how directly answer addresses prompt>,
+  "completeness": <float between 0 and 100 representing expected concept coverage>,
+  "clarity": <float between 0 and 100 representing structure and readability>,
+  "communication": <float between 0 and 100 representing vocabulary and low filler usage>,
+  "confidence": <float between 0 and 100 representing assertiveness>,
+  "score": <float between 0.0 and 10.0 overall score - MUST BE CAPPED if accuracy < 40>,
   "status": "<Needs Significant Improvement | Below Average | Average | Strong Response>",
-  "strengths": [
-    "<Only list genuine strengths. If none exist, output ['No notable strengths in this response.']>"
+  "correct_points": [
+    "<Verified correct concept 1>"
   ],
-  "improvements": [
-    "<Crucial, specific critique 1>",
-    "<Crucial, specific critique 2>"
+  "misconceptions": [
+    "<Detected factual error or misconception 1>"
   ],
+  "missing_concepts": [
+    "<Important concept left out 1>"
+  ],
+  "actionable_summary": "<Direct, honest evaluation summary highlighting key improvement path>",
   "ideal_answer_concept": "<1-2 sentence summary of what a passing answer should have included>"
 }
 ```
@@ -80,24 +89,16 @@ The rubric defines five score bands but the output schema only allows four `stat
 | 5.0–6.5 | Average | `Average` |
 | 7.0–10.0 | Good / Exceptional | `Strong Response` |
 
-## Mapping onto `mock-interview.html`'s existing UI
+## Mapping onto `mock-interview.html`'s UI
 
-The feedback modal and final report were built to accept this exact shape without redesign.
 When the backend call replaces `evaluateAnswer()`, map fields as:
 
 | Prompt output | Current app field (`eval.*`) | Used by |
 |---|---|---|
-| `score` | `overall` (already 0–10) | `fbRingNum`, `fbRingArc`, final aggregate ring |
-| `status` | `tier` — derive via the table above, reusing `tierFor()`'s strong/good/work buckets (`Strong Response`→strong, `Average`→good, `Below Average`/`Needs Significant Improvement`→work/none) | `fb-status` chip, `qr-score` chip |
-| `strengths[]` | `wins[]` | "What you did well" list |
-| `improvements[]` | `improvements[]` | "Areas for improvement" list |
-| `ideal_answer_concept` | *(new)* — show as a one-line teaser above the existing "Show model sample answer" toggle; keep the hand-authored `question.modelAnswer` as the full worked example rather than replacing it | `.fb-model` |
+| `score` | `overall` (0–10) | `fbRingNum`, `fbRingArc`, final aggregate ring |
+| `accuracy`, `relevance`, `completeness`, `clarity`, `communication`, `confidence` | `eval.accuracy`, etc. | 6 dimension progress bars in modal and final report |
+| `correct_points[]` | `eval.correctPoints[]` | ✅ Correct Points Covered section |
+| `misconceptions[]` | `eval.incorrectPoints[]` | ❌ Misconceptions & Incorrect Statements section |
+| `missing_concepts[]` | `eval.missingPoints[]` | 💡 Missing Core Concepts section |
+| `actionable_summary` | `eval.actionableSummary` | Direct Interviewer Callout box |
 
-Request payload per submit should send `role = state.roleLabel`, `question = <current question>.text`,
-`candidate_answer = answerInput.value.trim()` — these are already available at the point
-`handleSubmit()` fires in the script.
-
-`technical` / `clarity` / `confidence` (the three bar-chart rows) have no equivalent in this
-prompt's output — it returns one overall score, not three sub-scores. Either extend the prompt
-to request those three numbers explicitly, or drop the three-bar breakdown once a real model is
-wired in and show only the single `score`.
