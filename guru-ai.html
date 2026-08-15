@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guru AI — Context-Aware Voice Doubt Solver | Dronaskill</title>
+<meta name="description" content="Ask out loud and get context-aware answers. Guru AI reads your lectures, answers doubts in real-time with voice-in/voice-out, and turns doubts into tomorrow's revision plan.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --series-gold: #c98500;
+    --series-blue: #3987e5;
+    --series-aqua: #199e70;
+    --good:        #22c55e;
+    --track:       rgba(57,135,229,0.16);
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background ───────────────────────────────────────────── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #5b6ee0 0%, #1e2a7a 55%, transparent 100%); }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost, .btn-quiet {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14px; font-weight: 590;
+    padding: 10px 18px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38); }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+
+  /* ── Hero / Context Section ─────────────────────────────────────── */
+  .hero-sec { padding: 36px 0 20px; }
+  .hero-card { padding: 28px 30px; border-radius: var(--r-xl); margin-bottom: 22px; }
+  .hero-card h1 { font-size: clamp(24px, 3.5vw, 34px); margin: 12px 0 10px; }
+  
+  .context-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 16px 20px; border-radius: var(--r-lg); background: rgba(255,255,255,0.035); border: 1px solid var(--line-soft);
+    margin-top: 20px;
+  }
+  .context-info { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .context-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2);
+  }
+  .context-pill strong { color: var(--saffron); }
+
+  .select-lecture {
+    appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.07); border: 1px solid var(--line);
+    color: var(--ink); font-family: inherit; font-size: 13px; padding: 8px 32px 8px 14px; border-radius: 10px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+
+  /* ── Layout Grid ────────────────────────────────────────────────── */
+  .guru-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px; align-items: start; padding-bottom: 80px; }
+  @media (max-width: 960px) { .guru-grid { grid-template-columns: 1fr; } }
+
+  /* ── Chat Container ─────────────────────────────────────────────── */
+  .chat-box { padding: 26px; border-radius: var(--r-xl); display: flex; flex-direction: column; min-height: 580px; }
+  .chat-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
+  .chat-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 10px var(--good); }
+
+  .chat-thread {
+    flex: 1; overflow-y: auto; max-height: 400px; padding: 18px 0; display: flex; flex-direction: column; gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .msg { padding: 14px 16px; border-radius: 16px; font-size: 13.5px; line-height: 1.6; max-width: 88%; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .msg.you {
+    align-self: flex-end; background: rgba(242,171,60,0.12); border: 1px solid rgba(242,171,60,0.3); color: var(--ink);
+    border-bottom-right-radius: 4px;
+  }
+  .msg.guru {
+    align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); color: var(--ink);
+    border-bottom-left-radius: 4px;
+  }
+  .msg .who { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; color: var(--saffron); }
+  .msg.guru .who { color: var(--indigo); }
+  .msg code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #f7bb52; font-family: monospace; font-size: 12.5px; }
+
+  /* Preset doubt chips */
+  .presets-row { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0 14px; scrollbar-width: none; }
+  .presets-row::-webkit-scrollbar { display: none; }
+  .chip-btn {
+    flex: none; font-size: 12px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line-soft); color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: all .2s ease;
+  }
+  .chip-btn:hover { background: rgba(255,255,255,0.1); color: var(--ink); border-color: rgba(255,255,255,0.2); }
+
+  /* Input Controls */
+  .input-card { margin-top: 10px; padding: 14px; border-radius: var(--r-md); background: rgba(255,255,255,0.035); border: 1px solid var(--line); }
+  .mic-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .mic {
+    width: 42px; height: 42px; border-radius: 50%; border: 0; cursor: pointer; flex: none;
+    display: grid; place-items: center; background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 4px 16px rgba(224,125,28,0.35); transition: transform .2s ease;
+  }
+  .mic:hover { transform: scale(1.05); }
+  .wave { display: flex; align-items: center; gap: 3px; height: 22px; flex: 1; }
+  .wave i { flex: 1; max-width: 3px; border-radius: 999px; background: var(--saffron); opacity: .4; height: 20%; }
+  .listening .wave i { animation: pulse 1.1s ease-in-out infinite; opacity: 0.9; }
+  .wave i:nth-child(3n) { animation-delay: .12s; }
+  .wave i:nth-child(3n+1) { animation-delay: .26s; }
+  .wave i:nth-child(4n) { animation-delay: .4s; }
+  @keyframes pulse { 0%, 100% { height: 18%; } 50% { height: 92%; } }
+  .mic-hint { font-size: 12px; color: var(--ink-2); }
+
+  .text-form { display: flex; gap: 10px; }
+  .chat-input {
+    flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); border-radius: 10px;
+    padding: 10px 14px; color: var(--ink); font-family: inherit; font-size: 13.5px;
+  }
+  .chat-input:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+
+  /* ── Tomorrow's Revision Plan Drawer ────────────────────────────── */
+  .plan-box { padding: 26px; border-radius: var(--r-xl); display: flex; flex-direction: column; min-height: 580px; }
+  .plan-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); }
+  .plan-badge { background: rgba(124,127,242,0.18); border: 1px solid rgba(124,127,242,0.35); color: #a5a7f7; font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+
+  .cards-list { flex: 1; overflow-y: auto; max-height: 450px; display: grid; gap: 12px; padding-right: 4px; }
+  .rev-card {
+    padding: 16px; border-radius: var(--r-md); background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft);
+    transition: transform .2s ease, border-color .2s ease; position: relative;
+  }
+  .rev-card:hover { border-color: rgba(242,171,60,0.3); transform: translateY(-2px); }
+  .rev-card .tag { font-size: 10.5px; font-weight: 650; text-transform: uppercase; color: var(--saffron); margin-bottom: 4px; display: block; }
+  .rev-card h4 { font-size: 13.5px; margin-bottom: 6px; }
+  .rev-card p { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+  .rev-card .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
+  .rev-card .done-btn { background: none; border: 0; color: var(--good); font-size: 11.5px; cursor: pointer; font-weight: 600; }
+
+  .empty-plan { text-align: center; padding: 50px 20px; color: var(--ink-3); font-size: 13px; }
+
+  /* ── AI status + settings ───────────────────────────────────────── */
+  .ai-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--line);
+    background: rgba(255,255,255,0.05); color: var(--ink-2); font-family: inherit;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .ai-pill:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+  .ai-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); }
+  .ai-pill.live .dot { background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .ai-pill.live { color: var(--ink); border-color: rgba(34,197,94,0.35); }
+
+  .modal-back {
+    position: fixed; inset: 0; z-index: 90; background: rgba(4,4,10,0.72);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    display: none; place-items: center; padding: 22px;
+  }
+  .modal-back.open { display: grid; }
+  .modal {
+    width: min(520px, 100%); padding: 26px; border-radius: var(--r-xl);
+    animation: fadeIn .22s ease;
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 8px; }
+  .modal label { display: block; font-size: 12px; color: var(--ink-2); margin: 16px 0 6px; }
+  .modal input {
+    width: 100%; background: rgba(0,0,0,0.35); border: 1px solid var(--line); border-radius: 10px;
+    padding: 11px 13px; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px;
+  }
+  .modal input:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+  .modal .note {
+    margin-top: 14px; padding: 12px 14px; border-radius: var(--r-sm); font-size: 12px; line-height: 1.6;
+    background: rgba(242,171,60,0.08); border: 1px solid rgba(242,171,60,0.22); color: var(--ink-2);
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+  .modal-actions .btn-quiet {
+    background: none; color: var(--ink-3); padding: 10px 14px;
+  }
+  .modal-actions .btn-quiet:hover { color: var(--ink); }
+
+  /* Message footer + typing state */
+  .msg .msg-foot { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+  .msg .save-btn {
+    background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 600; color: var(--indigo);
+  }
+  .msg .save-btn[disabled] { color: var(--good); cursor: default; }
+  .msg .src-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
+
+  .typing { display: inline-flex; gap: 4px; align-items: center; height: 14px; }
+  .typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--indigo); opacity: .5; animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .18s; }
+  .typing i:nth-child(3) { animation-delay: .36s; }
+  @keyframes blink { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+
+  .msg.guru.unknown { border-color: rgba(242,171,60,0.28); background: rgba(242,171,60,0.06); }
+
+  footer.slim { border-top: 1px solid var(--line-soft); padding: 24px 0; font-size: 12px; color: var(--ink-3); }
+  .foot-slim { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<!-- Header -->
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f2ab3c" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="guru-ai.html" aria-current="page">Guru AI</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+      <a class="nav-link" href="index.html#dashboard">Dashboard</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+  <!-- Hero Section -->
+  <section class="hero-sec">
+    <div class="hero-card glass">
+      <span class="eyebrow">Guru AI Doubt Solver</span>
+      <h1>Ask out loud. Get an answer that knows where you are.</h1>
+      <p class="lede">A doubt-solving mentor that has read the same lecture you just watched. Speak the question, hear the answer, keep your hands on the problem.</p>
+
+      <!-- Active Context Bar -->
+      <div class="context-bar">
+        <div class="context-info">
+          <span class="context-pill">📌 Active Track: <strong id="trackPill">ML Engineer</strong></span>
+          <span class="context-pill">⏸ Paused At: <strong id="timePill">14:20</strong></span>
+          <span class="context-pill">📊 Last Quiz: <strong id="quizPill">85% (Gradients)</strong></span>
+        </div>
+        <div>
+          <label for="lectureSelect" style="font-size:12px; color:var(--ink-3); margin-right:8px">Current Lecture:</label>
+          <select id="lectureSelect" class="select-lecture">
+            <option value="cs231n">CS231n: Neural Networks & Backprop (14:20)</option>
+            <option value="dsa">DSA: Graph Traversal & Dijkstra (22:45)</option>
+            <option value="sys">System Design: Rate Limiting & Redis (09:15)</option>
+            <option value="db">SQL: B-Tree Indexing & Performance (18:05)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Grid -->
+  <section class="guru-grid">
+    
+    <!-- Left Column: Voice Doubt Solver Console -->
+    <div class="chat-box glass">
+      <div class="chat-head">
+        <div class="chat-title">
+          <span class="live-dot"></span> Guru AI Assistant
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="ai-pill" id="aiStatus" title="Configure the AI brain">
+            <span class="dot"></span><span id="aiStatusText">Offline mode</span>
+          </button>
+          <button type="button" class="btn-ghost" id="ttsToggle" style="font-size:12px; padding:6px 12px;">🔊 AI Voice ON</button>
+        </div>
+      </div>
+
+      <!-- Message History -->
+      <div class="chat-thread" id="chatThread">
+        <div class="msg guru">
+          <span class="who">Guru AI</span>
+          Welcome back! I'm synced to <code>CS231n Lecture 4 (Paused @ 14:20)</code>. What doubt can I explain while your hands stay on paper?
+        </div>
+      </div>
+
+      <!-- Quick Preset Doubt Chips (rebuilt per lecture) -->
+      <div class="presets-row" id="presetsRow"></div>
+
+      <!-- Input Controls -->
+      <div class="input-card">
+        <div class="mic-row" id="micRow">
+          <button class="mic" id="micBtn" type="button" aria-pressed="false" aria-label="Start voice input">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2.5" width="6" height="10" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+          </button>
+          <span class="wave" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span class="mic-hint" id="micHint">Tap mic to speak hands-free...</span>
+        </div>
+
+        <form class="text-form" id="chatForm">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type your doubt or question..." autocomplete="off">
+          <button type="submit" class="btn">Ask Guru</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Tomorrow's Revision Plan Drawer -->
+    <div class="plan-box glass">
+      <div class="plan-head">
+        <div>
+          <h3>Tomorrow's Revision Plan</h3>
+          <p class="muted" style="font-size:12px">Every doubt becomes a revision card.</p>
+        </div>
+        <span class="plan-badge" id="cardCountBadge">0 Cards Saved</span>
+      </div>
+
+      <div class="cards-list" id="cardsList">
+        <div class="empty-plan" id="emptyPlan">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.8" style="margin-bottom:8px;"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
+          <p>No revision cards generated yet. Ask Guru AI a doubt to convert it into a card for tomorrow's plan!</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<!-- AI Setup Modal -->
+<div class="modal-back" id="aiModal" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
+  <div class="modal glass">
+    <span class="eyebrow">Guru AI Brain</span>
+    <h3 id="aiModalTitle" style="margin-top:10px">Connect a real AI model</h3>
+    <p class="lede" style="font-size:13.5px; margin-top:8px">
+      Without a key, Guru AI answers from a built-in offline topic base and tells you plainly when a
+      question is outside it. Paste an Anthropic API key and it can answer anything &mdash; with your
+      current lecture as context.
+    </p>
+
+    <label for="apiKeyInput">Anthropic API key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+
+    <div class="note">
+      <strong>Where this key lives:</strong> only in this browser's <code>localStorage</code>. It is never
+      sent anywhere except directly to <code>api.anthropic.com</code>, and never written to the project files.
+      Anyone with access to this browser profile can read it &mdash; fine for a demo or your own laptop,
+      not for a site you deploy publicly.
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-quiet" id="clearKeyBtn">Remove key</button>
+      <button type="button" class="btn-ghost" id="cancelKeyBtn">Cancel</button>
+      <button type="button" class="btn" id="saveKeyBtn">Save &amp; go live</button>
+    </div>
+  </div>
+</div>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html" style="color:var(--ink-3); text-decoration:none;">Back to Home</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+
+  /* ═══════════════════════════════════════════════════════════════════
+     1. LECTURE CONTEXT — what Guru AI knows about "where you are"
+     ═══════════════════════════════════════════════════════════════════ */
+  const LECTURES = {
+    cs231n: {
+      title: "CS231n: Neural Networks & Backpropagation",
+      instructor: "Prof. Andrej Karpathy",
+      time: "14:20", quiz: "85% (Gradients)", track: "ML Engineer",
+      covered: "the chain rule, computational graphs, local vs upstream gradients, and activation functions",
+      presets: [
+        "Why does the gradient vanish in deep sigmoid networks?",
+        "How does backpropagation actually compute dL/dW?",
+        "Why is ReLU preferred over sigmoid?",
+        "What is the difference between overfitting and underfitting?"
+      ]
+    },
+    dsa: {
+      title: "DSA: Graph Traversal & Dijkstra",
+      instructor: "Prof. Tim Roughgarden",
+      time: "22:45", quiz: "90% (Graphs)", track: "Algorithms & Systems",
+      covered: "BFS, DFS, priority queues, and greedy shortest-path selection",
+      presets: [
+        "How does Dijkstra handle negative edge weights?",
+        "When should I use BFS instead of DFS?",
+        "What is the time complexity of Dijkstra with a heap?",
+        "How does a hash map get O(1) lookup?"
+      ]
+    },
+    sys: {
+      title: "System Design: Rate Limiting & Redis",
+      instructor: "Prof. Martin Kleppmann",
+      time: "09:15", quiz: "78% (Caching)", track: "Backend & Systems",
+      covered: "token buckets, sliding windows, and atomic Redis counters",
+      presets: [
+        "Token Bucket vs Sliding Window rate limiting?",
+        "What is the CAP theorem in simple terms?",
+        "Why do we need a load balancer?",
+        "What is cache invalidation and why is it hard?"
+      ]
+    },
+    db: {
+      title: "SQL: B-Tree Indexing & Performance",
+      instructor: "Prof. Joe Hellerstein",
+      time: "18:05", quiz: "92% (SQL)", track: "Full-Stack Data",
+      covered: "index internals, range scans, and query plan costs",
+      presets: [
+        "How does B-Tree indexing speed up range queries?",
+        "What is the difference between INNER and LEFT JOIN?",
+        "When does an index actually slow things down?",
+        "What is database normalization?"
+      ]
+    }
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     2. OFFLINE KNOWLEDGE BASE
+     Used when no API key is configured. Every entry answers a real
+     question — there is deliberately no "generic filler" entry.
+     ═══════════════════════════════════════════════════════════════════ */
+  const TOPICS = [
+    // ── Web fundamentals ──────────────────────────────────────────────
+    { id: "html", lecture: null, keys: ["html", "hyper text markup", "hypertext markup"],
+      title: "HTML",
+      answer: "HTML (HyperText Markup Language) is the *structure* layer of a web page. It is not a programming language — it has no logic, loops or variables. You write elements as tags like `<h1>`, `<p>`, `<img>`, `<button>`, and the browser turns them into a tree of nodes called the DOM. Each tag describes what a piece of content **is** (a heading, a list, a form field), which is also what screen readers and search engines rely on. Think of it as the skeleton: bones only, no skin, no movement." },
+
+    { id: "css", lecture: null, keys: ["css", "cascading style", "stylesheet"],
+      title: "CSS",
+      answer: "CSS (Cascading Style Sheets) is the *presentation* layer. You write rules — a selector plus declarations, like `h1 { color: red; }` — and the browser applies them to matching HTML elements. **Cascading** means that when several rules target the same element, the winner is decided by specificity, source order and importance. CSS controls layout (Flexbox, Grid), colour, typography, spacing and animation. If HTML is the skeleton, CSS is the skin, clothes and posture." },
+
+    { id: "htmlcss", lecture: null, keys: ["html and css", "html vs css", "html css"],
+      title: "HTML vs CSS",
+      answer: "They are two halves of one page. **HTML** defines *what* is on the page — headings, paragraphs, images, buttons — as a tree of tagged elements. **CSS** defines *how those elements look and sit* — colour, size, spacing, layout, animation. HTML alone renders as plain black text on white; CSS alone does nothing without markup to target. A third layer, **JavaScript**, adds behaviour. Structure, style, behaviour — that is the whole front-end stack in one line." },
+
+    { id: "js", lecture: null, keys: ["javascript", "js basics", "node js"],
+      title: "JavaScript",
+      answer: "JavaScript is the *behaviour* layer of the web — the only programming language browsers run natively. It reads and modifies the DOM (the live tree the browser built from your HTML), responds to events like clicks and keypresses, and talks to servers with `fetch()`. It is **single-threaded** with an event loop, so long-running work must be asynchronous (`Promise`, `async/await`) or the whole page freezes. It also runs outside the browser via Node.js." },
+
+    { id: "dom", lecture: null, keys: ["dom", "document object model"],
+      title: "The DOM",
+      answer: "The DOM (Document Object Model) is the browser's in-memory tree representation of your HTML. Every tag becomes a node object with properties and methods. JavaScript never edits your HTML file — it edits **this tree**, and the browser re-renders. That is why `document.querySelector('h1').textContent = 'Hi'` changes the page instantly but leaves the file on disk untouched. DOM updates are relatively expensive, which is why frameworks batch them." },
+
+    { id: "http", lecture: null, keys: ["http", "https", "status code", "get vs post", "request response"],
+      title: "HTTP",
+      answer: "HTTP is the request/response protocol the web runs on. A client sends a **method** (`GET` to read, `POST` to create, `PUT`/`PATCH` to update, `DELETE` to remove), a path, headers and an optional body. The server replies with a **status code** — 2xx success, 3xx redirect, 4xx you made a mistake, 5xx the server did — plus headers and a body. HTTPS is the same protocol wrapped in TLS. HTTP is stateless: each request carries everything needed, which is exactly why cookies and tokens exist." },
+
+    { id: "rest", lecture: null, keys: ["rest api", "restful", "what is an api", "api"],
+      title: "REST APIs",
+      answer: "An API is a contract letting one program call another. A **REST** API models everything as resources at URLs (`/users/42`) and uses HTTP methods as verbs on them: `GET /users/42` reads, `DELETE /users/42` removes. Responses are usually JSON. Key properties: stateless — no server-side session between calls — and predictable, so once you know the resource naming you can guess the endpoints. The alternatives you will hear about are GraphQL (one endpoint, client picks the fields) and gRPC (binary, fast, service-to-service)." },
+
+    { id: "git", lecture: null, keys: ["git", "version control", "merge conflict", "git branch", "commit"],
+      title: "Git",
+      answer: "Git is a distributed version control system: every clone holds the full history. The core loop is `add` (stage what you want to record) → `commit` (snapshot it with a message) → `push` (share it). A **branch** is just a movable pointer to a commit, which is why branching is instant. A **merge conflict** happens when two branches change the same lines — Git cannot decide, so it marks both versions and asks you. `git log`, `git diff` and `git status` answer most \"what is going on\" questions." },
+
+    // ── Programming concepts ─────────────────────────────────────────
+    { id: "oop", lecture: null, keys: ["oop", "object oriented", "inheritance", "polymorphism", "encapsulation"],
+      title: "Object-Oriented Programming",
+      answer: "OOP organises code around objects that bundle **data** with the **behaviour** acting on it. Four pillars: *Encapsulation* — hide internals, expose a small interface. *Inheritance* — a subclass reuses and extends a parent. *Polymorphism* — different classes answer the same call in their own way, so callers never branch on type. *Abstraction* — expose what something does, not how. Modern advice: prefer composition over deep inheritance chains, which get brittle fast." },
+
+    { id: "recursion", lecture: "dsa", keys: ["recursion", "recursive", "base case", "stack overflow"],
+      title: "Recursion",
+      answer: "A recursive function solves a problem by calling itself on a smaller version of the same problem. Two parts are mandatory: a **base case** that returns without recursing, and a recursive case that provably moves toward it. Miss either and you get a stack overflow, because every pending call holds a frame on the call stack — space cost is O(depth). Any recursion can be rewritten iteratively with an explicit stack, which is worth doing when depth is large." },
+
+    { id: "bigo", lecture: "dsa", keys: ["big o", "time complexity", "space complexity", "asymptotic"],
+      title: "Big-O complexity",
+      answer: "Big-O describes how runtime or memory grows as input size n grows, ignoring constants and lower-order terms. The ladder you will meet most: O(1) constant → O(log n) binary search → O(n) single scan → O(n log n) good sorts → O(n²) nested loops → O(2ⁿ) brute-force subsets. It is a statement about **growth**, not speed: an O(n²) algorithm can beat an O(n log n) one on small inputs. Always ask which n you are measuring against." },
+
+    { id: "hashmap", lecture: "dsa", keys: ["hash map", "hashmap", "hash table", "o(1) lookup"],
+      title: "Hash maps",
+      answer: "A hash map gets average O(1) lookup by turning the key into an array index: `hash(key) % capacity`. Two keys can land on the same slot — a **collision** — so each slot holds a small list or probe sequence, and the worst case degrades to O(n) if hashing is poor or an attacker crafts collisions. When the table gets roughly 70% full it resizes and rehashes everything, which is why one unlucky insert is slow while the amortised cost stays O(1)." },
+
+    // ── DSA ──────────────────────────────────────────────────────────
+    { id: "dijkstra_neg", lecture: "dsa", keys: ["dijkstra negative", "negative weight", "negative edge", "bellman ford"],
+      title: "Dijkstra & negative weights",
+      answer: "Dijkstra is greedy: once it pops a node from the priority queue it marks that distance **final** and never revisits it. That is only valid if adding an edge can never *decrease* a path's total — which negative weights break. A cheap negative edge discovered later could have improved an already-finalised node, and Dijkstra will never look again, so it silently returns a wrong answer. Use **Bellman-Ford** (O(V·E), and it detects negative cycles) when weights can be negative." },
+
+    { id: "dijkstra", lecture: "dsa", keys: ["dijkstra", "shortest path"],
+      title: "Dijkstra's algorithm",
+      answer: "Dijkstra finds shortest paths from one source in a graph with non-negative weights. Keep a tentative distance for every node — all ∞ except the source at 0. Repeatedly pop the unvisited node with the smallest tentative distance, mark it final, and **relax** its edges: if `dist[u] + w < dist[v]`, improve `dist[v]`. With a binary heap that is O((V+E) log V). The greedy step is safe precisely because no edge can ever make a path shorter." },
+
+    { id: "bfsdfs", lecture: "dsa", keys: ["bfs", "dfs", "breadth first", "depth first", "graph traversal"],
+      title: "BFS vs DFS",
+      answer: "Both visit every node once — the real difference is the data structure. **BFS** uses a queue, exploring level by level, so it finds the shortest path in an *unweighted* graph. **DFS** uses a stack (or recursion), diving deep before backtracking, which suits cycle detection, topological sort and \"does a path exist\" questions. Both are O(V+E) time. BFS memory scales with the widest level, DFS with the deepest path — pick whichever is smaller in your graph." },
+
+    // ── ML ───────────────────────────────────────────────────────────
+    { id: "vanishing", lecture: "cs231n", keys: ["vanishing gradient", "sigmoid gradient", "gradient vanish", "sigmoid saturate"],
+      title: "Vanishing gradients",
+      answer: "Sigmoid's derivative is `σ'(x) = σ(x)(1 − σ(x))`, which peaks at just **0.25** and collapses toward 0 once the input saturates. Backprop multiplies these derivatives layer by layer, so eight layers gives roughly 0.25⁸ ≈ 0.000015 — the early layers receive essentially no gradient and stop learning. Fixes: ReLU (derivative is exactly 1 for x > 0), careful initialisation (He/Xavier), batch normalisation, and residual connections that give gradients a shortcut path." },
+
+    { id: "backprop", lecture: "cs231n", keys: ["backpropagation", "backprop", "chain rule"],
+      title: "Backpropagation",
+      answer: "Backprop is the chain rule applied to a computational graph. Forward pass: compute and cache each intermediate value. Backward pass: start with `dL/dL = 1` at the loss and walk backwards, where each node multiplies its **local gradient** (its own derivative with respect to its inputs) by the **upstream gradient** flowing in — that product is what it passes further back. It is not a learning algorithm: it only computes `dL/dW` efficiently, and the optimiser (SGD, Adam) does the actual updating." },
+
+    { id: "relu", lecture: "cs231n", keys: ["relu", "activation function", "leaky relu", "tanh", "sigmoid"],
+      title: "Activation functions",
+      answer: "Without a non-linear activation, stacking layers is pointless — a composition of linear maps is still linear. **ReLU** (`max(0, x)`) dominates: its derivative is 1 for positive inputs so gradients survive depth, and it is trivially cheap. Its flaw is the dying ReLU — a unit stuck at negative input outputs 0 forever with 0 gradient — which Leaky ReLU and GELU fix. **Sigmoid** and **tanh** saturate and cause vanishing gradients; keep sigmoid for output layers doing binary probability, not for hidden layers." },
+
+    { id: "graddesc", lecture: "cs231n", keys: ["gradient descent", "learning rate", "sgd", "adam optimizer", "optimizer"],
+      title: "Gradient descent",
+      answer: "Gradient descent updates weights against the slope of the loss: `W ← W − lr · dL/dW`. The **learning rate** is the whole game — too high and you overshoot and diverge, too low and training crawls or stalls on a plateau. **SGD** uses a mini-batch instead of the full dataset, so each step is noisy but far cheaper, and that noise itself helps escape shallow minima. **Adam** adds per-parameter adaptive rates plus momentum, which is why it is the default first thing to try." },
+
+    { id: "overfit", lecture: "cs231n", keys: ["overfitting", "underfitting", "regularization", "dropout", "bias variance"],
+      title: "Overfitting",
+      answer: "Overfitting is memorising the training set instead of learning the pattern — training loss keeps dropping while validation loss turns upward, and **that gap is the diagnostic**. Counters: more or augmented data, dropout (randomly zero units so no single path is relied on), L2 weight decay, early stopping at the validation minimum, and simply a smaller model. Underfitting is the opposite — both losses stay high — and means the model is too weak or undertrained." },
+
+    { id: "attention", lecture: null, keys: ["transformer", "attention", "self attention", "llm architecture"],
+      title: "Transformers & attention",
+      answer: "Self-attention lets every token look at every other token directly, instead of passing information down a chain like an RNN. Each token emits a **Query**, **Key** and **Value**; the attention weight between two tokens is the softmax of `Q·K` scaled by `√d`, and the output is the weighted sum of Values. Because all positions compute in parallel, transformers train far faster than RNNs — the cost is O(n²) in sequence length, which is exactly why long context windows are expensive." },
+
+    // ── Systems ──────────────────────────────────────────────────────
+    { id: "ratelimit", lecture: "sys", keys: ["token bucket", "sliding window", "rate limit", "rate limiting", "leaky bucket"],
+      title: "Rate limiting",
+      answer: "**Token bucket**: tokens refill at a fixed rate up to a capacity, and each request spends one. It allows short bursts up to that capacity and needs only two numbers per user — count and last-refill timestamp — so it is cheap at scale. **Sliding window log** stores every request timestamp and counts those inside the window: exact, no burst leakage across boundaries, but memory grows with traffic. In a distributed setup, use atomic Redis operations (`INCR`, or a Lua script) so concurrent gateway instances do not race." },
+
+    { id: "cap", lecture: "sys", keys: ["cap theorem", "consistency availability", "partition tolerance", "eventual consistency"],
+      title: "CAP theorem",
+      answer: "During a **network partition**, a distributed system must choose: stay **Consistent** (refuse requests it cannot confirm, so no stale reads) or stay **Available** (answer from whatever node you reached, possibly with stale data). Partition tolerance is not optional — networks fail — so real systems are CP or AP. Banking picks CP; a social feed picks AP with eventual consistency. The common mistake is treating it as a permanent architecture label rather than a behaviour that only applies during a partition." },
+
+    { id: "cache", lecture: "sys", keys: ["caching", "cache invalidation", "redis", "cache miss", "ttl"],
+      title: "Caching",
+      answer: "A cache trades freshness for speed by keeping hot data closer to the reader. The hard part is **invalidation** — knowing when the cached copy became a lie. Common strategies: TTL (expire after N seconds; simple, tolerates staleness), write-through (update cache and DB together; consistent but slower writes), and cache-aside (read cache, on miss read the DB and populate). Watch for the thundering herd: when a hot key expires, thousands of requests hit the DB at once — stagger TTLs or take a lock." },
+
+    { id: "loadbalancer", lecture: "sys", keys: ["load balancer", "horizontal scaling", "vertical scaling", "round robin"],
+      title: "Load balancing",
+      answer: "A load balancer spreads incoming requests across identical servers so no single instance is a bottleneck or a single point of failure. Algorithms range from round-robin (simple) to least-connections (better when request costs vary) to consistent hashing (keeps a given user on the same node, which matters for local caches). It also health-checks backends and stops routing to dead ones. This is **horizontal** scaling — more machines — as opposed to vertical, a bigger machine, which eventually hits a hard ceiling." },
+
+    // ── Databases ────────────────────────────────────────────────────
+    { id: "btree", lecture: "db", keys: ["b-tree", "btree", "index", "indexing", "range query"],
+      title: "B-Tree indexing",
+      answer: "A B-Tree keeps keys sorted in a shallow, balanced tree where each node holds many keys — so a lookup across millions of rows is only a handful of disk reads, O(log n). Range queries are where it shines: `WHERE age BETWEEN 20 AND 30` descends once to find 20, then walks the linked leaf nodes sequentially to 30, never touching the rest of the table. The cost lands on writes — every INSERT/UPDATE must maintain the tree — so an index on a write-heavy column can hurt more than it helps." },
+
+    { id: "join", lecture: "db", keys: ["inner join", "left join", "outer join", "sql join"],
+      title: "SQL joins",
+      answer: "**INNER JOIN** returns only rows matching in both tables — unmatched rows on either side vanish. **LEFT JOIN** returns every row from the left table, filling NULLs where the right has no match, which is how you find \"users with no orders\" (`LEFT JOIN ... WHERE orders.id IS NULL`). RIGHT JOIN is the mirror and is rarely used, since you can flip the tables. FULL OUTER keeps unmatched rows from both. The classic bug: putting a right-table condition in `WHERE` instead of `ON`, which silently turns a LEFT JOIN back into an INNER JOIN." },
+
+    { id: "normalization", lecture: "db", keys: ["normalization", "normalisation", "denormalization", "normal form"],
+      title: "Normalization",
+      answer: "Normalization removes duplicated data by splitting it into related tables, so each fact lives in exactly one place. 1NF: atomic values, no repeating groups. 2NF: no partial dependency on part of a composite key. 3NF: no non-key column depending on another non-key column. The payoff is that updates cannot leave contradictory copies. The cost is more joins at read time — which is why analytics and read-heavy systems deliberately **denormalize** back for speed." },
+
+    { id: "sqlnosql", lecture: "db", keys: ["sql vs nosql", "nosql", "relational database", "mongodb"],
+      title: "SQL vs NoSQL",
+      answer: "**SQL** databases enforce a schema, guarantee ACID transactions, and are built for relationships and joins — the right default when correctness matters and the shape of the data is known. **NoSQL** covers several models: document (Mongo), key-value (Redis), wide-column (Cassandra), graph (Neo4j). They trade joins and strict schema for flexible documents and easier horizontal sharding. Choose by access pattern, not by hype: if you find yourself hand-rolling joins in application code, you wanted SQL." }
+  ];
+
+  const CHITCHAT = /^(hi|hey|hello|yo|thanks|thank you|thx|ok|okay|cool|nice|great|good morning|good evening|bye|test|testing)\b/i;
+  const STOPWORDS = new Set(["what","is","the","a","an","of","in","on","to","and","or","how","does","do","why","when","which","are","for","with","that","this","it","can","you","me","my","i","explain","tell","about","between","difference"]);
+
+  /* ═══════════════════════════════════════════════════════════════════
+     3. OFFLINE MATCHER — scores topics, and refuses to guess
+     ═══════════════════════════════════════════════════════════════════ */
+  function normalize(s) {
+    return " " + s.toLowerCase().replace(/[^a-z0-9+#\s-]/g, " ").replace(/\s+/g, " ").trim() + " ";
+  }
+
+  function scoreTopic(topic, normQuery, lectureKey) {
+    let best = 0;
+    for (const key of topic.keys) {
+      if (normQuery.includes(" " + key.toLowerCase() + " ")) {
+        // longer, more specific phrases outrank single generic words
+        best = Math.max(best, key.split(" ").length * 2);
+      }
+    }
+    if (best && topic.lecture === lectureKey) best += 1; // prefer the current lecture on ties
+    return best;
+  }
+
+  function findOffline(query, lectureKey) {
+    const nq = normalize(query);
+    const scored = TOPICS
+      .map(t => ({ topic: t, score: scoreTopic(t, nq, lectureKey) }))
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (!scored.length) return null;
+
+    const top = scored[0].score;
+    const winners = scored.filter(x => x.score === top).slice(0, 2);
+    return {
+      title: winners.map(w => w.topic.title).join(" + "),
+      answer: winners.map(w => w.topic.answer).join("\n\n")
+    };
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     4. CLAUDE CLIENT — real answers, streamed, lecture-aware
+     ═══════════════════════════════════════════════════════════════════ */
+  const KEY_STORE = "drona_anthropic_key";
+  const AI = {
+    endpoint: "https://api.anthropic.com/v1/messages",
+    model: "claude-opus-5",
+    getKey: () => localStorage.getItem(KEY_STORE) || "",
+    setKey: k => localStorage.setItem(KEY_STORE, k),
+    clearKey: () => localStorage.removeItem(KEY_STORE),
+    isLive: () => !!(localStorage.getItem(KEY_STORE) || "").trim()
+  };
+
+  function buildSystemPrompt(ctx) {
+    return [
+      "You are Guru AI, a doubt-solving mentor inside Dronaskill, a skill-verification platform for Indian engineering students.",
+      "",
+      "The learner is mid-lecture. Their current context:",
+      "- Lecture: " + ctx.title + " (" + ctx.instructor + ")",
+      "- Paused at: " + ctx.time,
+      "- This lecture has covered: " + ctx.covered,
+      "- Their track: " + ctx.track + " | Last quiz: " + ctx.quiz,
+      "",
+      "How to answer:",
+      "- Answer the question they actually asked. If it has nothing to do with the lecture, answer it on its own terms and do NOT force a connection to the lecture. Never claim the lecture covered something it did not.",
+      "- Only mention the paused timestamp or the instructor when the question genuinely relates to what this lecture covers.",
+      "- Assume a bright undergraduate. Lead with the direct answer in a sentence or two, then the mechanism or the why.",
+      "- Keep it under 150 words. Their hands are on paper; this is meant to be heard, not skimmed.",
+      "- Plain prose. Use `backticks` for code, identifiers and formulas, and **bold** for the one term that matters most. No headings, no bullet lists.",
+      "- If the question is ambiguous, answer the most likely reading and say in one clause what you assumed.",
+      "- If you genuinely do not know, say so plainly rather than inventing detail."
+    ].join("\n");
+  }
+
+  async function askClaude(history, ctx, onDelta) {
+    const res = await fetch(AI.endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": AI.getKey().trim(),
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: AI.model,
+        max_tokens: 8000,
+        stream: true,
+        output_config: { effort: "low" },
+        system: buildSystemPrompt(ctx),
+        messages: history
+      })
+    });
+
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = (await res.json()).error.message; } catch (e) { /* keep statusText */ }
+      if (res.status === 401) throw new Error("That API key was rejected (401). Check it in AI setup.");
+      if (res.status === 429) throw new Error("Rate limited by the API (429). Wait a moment and retry.");
+      throw new Error("API error " + res.status + ": " + detail);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "", full = "";
+
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload) continue;
+        let ev;
+        try { ev = JSON.parse(payload); } catch (e) { continue; }
+        if (ev.type === "error") throw new Error((ev.error && ev.error.message) || "Stream error");
+        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") {
+          full += ev.delta.text;
+          onDelta(full);
+        }
+      }
+    }
+    return full.trim();
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     5. RENDERING — user text is escaped, never treated as HTML
+     ═══════════════════════════════════════════════════════════════════ */
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function renderRich(text) {
+    return escapeHtml(text)
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+      .replace(/\n{2,}/g, "<br><br>")
+      .replace(/\n/g, "<br>");
+  }
+
+  function plainText(text) {
+    return String(text).replace(/[`*]/g, "");
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     6. STATE
+     ═══════════════════════════════════════════════════════════════════ */
+  let currentKey = "cs231n";
+  let ttsEnabled = true;
+  let busy = false;
+  let conversation = [];   // [{role, content}] — the thread sent to Claude
+  let cards = [];
+  try { cards = JSON.parse(localStorage.getItem("drona_revision_cards") || "[]"); } catch (e) { cards = []; }
+
+  const chatThread = $("chatThread");
+  const chatInput = $("chatInput");
+
+  /* ═══════════════════════════════════════════════════════════════════
+     7. CHAT RENDERING
+     ═══════════════════════════════════════════════════════════════════ */
+  function scrollChat() { chatThread.scrollTop = chatThread.scrollHeight; }
+
+  function addUserMessage(text) {
+    const div = document.createElement("div");
+    div.className = "msg you";
+    div.innerHTML = '<span class="who">You &middot; Voice/Text</span>' + escapeHtml(text);
+    chatThread.appendChild(div);
+    scrollChat();
+  }
+
+  // Returns a handle so a streaming answer can update in place.
+  function addGuruMessage(html, opts) {
+    opts = opts || {};
+    const div = document.createElement("div");
+    div.className = "msg guru" + (opts.unknown ? " unknown" : "");
+    div.innerHTML = '<span class="who">Guru AI</span><span class="body">' + html + "</span>";
+    chatThread.appendChild(div);
+    scrollChat();
+
+    return {
+      el: div,
+      setHtml(h) { div.querySelector(".body").innerHTML = h; scrollChat(); },
+      markUnknown() { div.classList.add("unknown"); },
+      addFooter(sourceLabel, saveState) {
+        const foot = document.createElement("div");
+        foot.className = "msg-foot";
+
+        const tag = document.createElement("span");
+        tag.className = "src-tag";
+        tag.textContent = sourceLabel;
+        foot.appendChild(tag);
+
+        if (saveState) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "save-btn";
+          if (saveState.saved) {
+            btn.textContent = "✓ In revision plan";
+            btn.disabled = true;
+          } else {
+            btn.textContent = "+ Add to revision plan";
+            btn.addEventListener("click", () => {
+              addCard(saveState.query, saveState.answer, saveState.lecture);
+              btn.textContent = "✓ In revision plan";
+              btn.disabled = true;
+            });
+          }
+          foot.appendChild(btn);
+        }
+
+        div.appendChild(foot);
+        scrollChat();
+      }
+    };
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     8. THE ANSWER PIPELINE
+     ═══════════════════════════════════════════════════════════════════ */
+  async function handleDoubt(rawQuery) {
+    const query = (rawQuery || "").trim();
+    if (!query || busy) return;
+
+    busy = true;
+    addUserMessage(query);
+    chatInput.value = "";
+
+    const ctx = LECTURES[currentKey];
+    if (AI.isLive()) await answerWithClaude(query, ctx);
+    else answerOffline(query, ctx);
+
+    busy = false;
+  }
+
+  async function answerWithClaude(query, ctx) {
+    const bubble = addGuruMessage('<span class="typing"><i></i><i></i><i></i></span>');
+    conversation.push({ role: "user", content: query });
+    if (conversation.length > 12) conversation = conversation.slice(-12);
+
+    try {
+      const answer = await askClaude(conversation, ctx, partial => bubble.setHtml(renderRich(partial)));
+      if (!answer) throw new Error("Empty response from the model.");
+
+      conversation.push({ role: "assistant", content: answer });
+      bubble.setHtml(renderRich(answer));
+      speak(plainText(answer));
+
+      const auto = shouldAutoSave(query);
+      if (auto) addCard(query, answer, ctx.title);
+      bubble.addFooter("Claude · " + AI.model, { saved: auto, query, answer, lecture: ctx.title });
+
+    } catch (err) {
+      conversation.pop(); // do not poison the thread with a failed turn
+      const offline = findOffline(query, currentKey);
+
+      if (offline) {
+        bubble.setHtml(
+          '<em style="color:var(--ink-3)">Live AI unreachable (' + escapeHtml(err.message) +
+          ') &mdash; answering from the offline base instead.</em><br><br>' + renderRich(offline.answer)
+        );
+        speak(plainText(offline.answer));
+        const auto = shouldAutoSave(query);
+        if (auto) addCard(query, offline.answer, ctx.title);
+        bubble.addFooter("Offline fallback", { saved: auto, query, answer: offline.answer, lecture: ctx.title });
+      } else {
+        bubble.markUnknown();
+        bubble.setHtml(
+          "I couldn't reach the AI service: <strong>" + escapeHtml(err.message) + "</strong><br><br>" +
+          "If that looks like a network or CORS block, your browser is refusing the direct call. " +
+          "Re-check the key in <em>AI setup</em>, or keep working offline &mdash; I can still answer core CS topics."
+        );
+        bubble.addFooter("Error", null);
+      }
+    }
+  }
+
+  function answerOffline(query, ctx) {
+    if (CHITCHAT.test(query.trim())) {
+      addGuruMessage("Hello. Ask me a doubt about <strong>" + escapeHtml(ctx.title) +
+        "</strong> — or anything else in your syllabus — and I'll take it apart.")
+        .addFooter("Offline base", null);
+      return;
+    }
+
+    const hit = findOffline(query, currentKey);
+
+    if (hit) {
+      const bubble = addGuruMessage(renderRich(hit.answer));
+      speak(plainText(hit.answer));
+      const auto = shouldAutoSave(query);
+      if (auto) addCard(query, hit.answer, ctx.title);
+      bubble.addFooter("Offline base · " + hit.title,
+        { saved: auto, query, answer: hit.answer, lecture: ctx.title });
+      return;
+    }
+
+    // The honest path — this is where the old build used to bluff.
+    const bubble = addGuruMessage(
+      "I don't have a reliable answer for that in my offline topic base, and I'd rather say so than " +
+      "invent one.<br><br>Two options: connect a real model in <strong>AI setup</strong> (top-right of " +
+      "this panel) and I can answer anything, or log this as an open doubt and I'll put it at the top of " +
+      "tomorrow's revision plan.",
+      { unknown: true }
+    );
+    bubble.addFooter("No match · not guessing", {
+      saved: false,
+      query,
+      answer: "OPEN DOUBT — not yet answered. Ask a mentor, or reconnect Guru AI to resolve this.",
+      lecture: ctx.title
+    });
+  }
+
+  function shouldAutoSave(query) {
+    if (CHITCHAT.test(query.trim())) return false;
+    const meaningful = query.trim().split(/\s+/).filter(w => !STOPWORDS.has(w.toLowerCase()));
+    return meaningful.length >= 2;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     9. REVISION PLAN
+     ═══════════════════════════════════════════════════════════════════ */
+  const cardsList = $("cardsList");
+  const emptyPlan = $("emptyPlan");
+  const cardCountBadge = $("cardCountBadge");
+
+  function saveCards() {
+    localStorage.setItem("drona_revision_cards", JSON.stringify(cards));
+  }
+
+  function addCard(query, answer, lecture) {
+    const norm = query.trim().toLowerCase();
+    if (cards.some(c => (c.query || "").trim().toLowerCase() === norm)) return; // no duplicates
+    cards.unshift({
+      query, answer, lecture,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    });
+    saveCards();
+    renderCards();
+  }
+
+  function renderCards() {
+    cardsList.innerHTML = "";
+    cardCountBadge.textContent = cards.length + " Card" + (cards.length === 1 ? "" : "s") + " Saved";
+
+    if (!cards.length) { cardsList.appendChild(emptyPlan); return; }
+
+    cards.forEach((card, index) => {
+      const el = document.createElement("div");
+      el.className = "rev-card";
+
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = card.lecture || "General";
+
+      const h4 = document.createElement("h4");
+      h4.textContent = 'Doubt: "' + card.query + '"';
+
+      const p = document.createElement("p");
+      p.textContent = plainText(card.answer);
+
+      const foot = document.createElement("div");
+      foot.className = "card-foot";
+
+      const when = document.createElement("span");
+      when.textContent = "Added " + (card.timestamp || "today") + " · Scheduled tomorrow";
+
+      const done = document.createElement("button");
+      done.type = "button";
+      done.className = "done-btn";
+      done.textContent = "✓ Mark Reviewed";
+      done.addEventListener("click", () => {
+        cards.splice(index, 1);
+        saveCards();
+        renderCards();
+      });
+
+      foot.appendChild(when);
+      foot.appendChild(done);
+      el.appendChild(tag);
+      el.appendChild(h4);
+      el.appendChild(p);
+      el.appendChild(foot);
+      cardsList.appendChild(el);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     10. LECTURE CONTEXT SYNC
+     ═══════════════════════════════════════════════════════════════════ */
+  const lectureSelect = $("lectureSelect");
+  const presetsRow = $("presetsRow");
+
+  function renderPresets(ctx) {
+    presetsRow.innerHTML = "";
+    ctx.presets.forEach(q => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip-btn";
+      b.textContent = "⚡ " + q;
+      b.addEventListener("click", () => handleDoubt(q));
+      presetsRow.appendChild(b);
+    });
+  }
+
+  function syncContext(key, announce) {
+    currentKey = key;
+    const ctx = LECTURES[key];
+    $("trackPill").textContent = ctx.track;
+    $("timePill").textContent = ctx.time;
+    $("quizPill").textContent = ctx.quiz;
+    renderPresets(ctx);
+    conversation = []; // new lecture, new thread
+    if (announce) {
+      addGuruMessage("Context switched. I'm now synced to <code>" + escapeHtml(ctx.title) +
+        "</code>, paused at " + escapeHtml(ctx.time) + ". Ask away.").addFooter("Context", null);
+    }
+  }
+
+  lectureSelect.addEventListener("change", e => syncContext(e.target.value, true));
+
+  /* ═══════════════════════════════════════════════════════════════════
+     11. VOICE — TTS out, STT in
+     ═══════════════════════════════════════════════════════════════════ */
+  const ttsToggle = $("ttsToggle");
+  ttsToggle.addEventListener("click", () => {
+    ttsEnabled = !ttsEnabled;
+    ttsToggle.textContent = ttsEnabled ? "🔊 AI Voice ON" : "🔇 AI Voice OFF";
+    if (!ttsEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+  });
+
+  function speak(text) {
+    if (!ttsEnabled || !("speechSynthesis" in window) || !text) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0;
+    const voice = (window.speechSynthesis.getVoices() || []).find(v => v.lang && v.lang.startsWith("en"));
+    if (voice) u.voice = voice;
+    window.speechSynthesis.speak(u);
+  }
+
+  const micBtn = $("micBtn"), micRow = $("micRow"), micHint = $("micHint");
+  let listening = false, rec = null;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SR) {
+    try {
+      rec = new SR();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+      rec.onresult = e => { const t = e.results[0][0].transcript; chatInput.value = t; handleDoubt(t); };
+      rec.onend = stopMic;
+      rec.onerror = stopMic;
+    } catch (e) { rec = null; }
+  }
+
+  function startMic() {
+    if (!rec) { micHint.textContent = "Voice input unavailable in this browser — type below"; return; }
+    try {
+      rec.start();
+      listening = true;
+      micRow.classList.add("listening");
+      micBtn.setAttribute("aria-pressed", "true");
+      micHint.textContent = "Listening... speak your doubt hands-free";
+    } catch (e) { stopMic(); }
+  }
+
+  function stopMic() {
+    listening = false;
+    if (rec) { try { rec.stop(); } catch (e) {} }
+    micRow.classList.remove("listening");
+    micBtn.setAttribute("aria-pressed", "false");
+    micHint.textContent = "Tap mic to speak hands-free...";
+  }
+
+  micBtn.addEventListener("click", () => listening ? stopMic() : startMic());
+
+  /* ═══════════════════════════════════════════════════════════════════
+     12. AI SETUP MODAL
+     ═══════════════════════════════════════════════════════════════════ */
+  const aiModal = $("aiModal"), apiKeyInput = $("apiKeyInput"), aiStatus = $("aiStatus");
+
+  function refreshAiStatus() {
+    const live = AI.isLive();
+    aiStatus.classList.toggle("live", live);
+    $("aiStatusText").textContent = live ? "Live AI connected" : "Offline mode · connect AI";
+  }
+
+  function openModal() {
+    apiKeyInput.value = AI.getKey();
+    aiModal.classList.add("open");
+    apiKeyInput.focus();
+  }
+  function closeModal() { aiModal.classList.remove("open"); }
+
+  aiStatus.addEventListener("click", openModal);
+  $("cancelKeyBtn").addEventListener("click", closeModal);
+  aiModal.addEventListener("click", e => { if (e.target === aiModal) closeModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+  $("saveKeyBtn").addEventListener("click", () => {
+    const k = apiKeyInput.value.trim();
+    if (!k) { apiKeyInput.focus(); return; }
+    AI.setKey(k);
+    refreshAiStatus();
+    closeModal();
+    conversation = [];
+    addGuruMessage("Live AI connected. I can now answer anything — inside or outside this lecture — " +
+      "and I'll still tell you when I'm unsure.").addFooter("AI setup", null);
+  });
+
+  $("clearKeyBtn").addEventListener("click", () => {
+    AI.clearKey();
+    apiKeyInput.value = "";
+    refreshAiStatus();
+    closeModal();
+    addGuruMessage("Key removed. Back to the offline topic base — I'll say plainly when a question " +
+      "falls outside it rather than guessing.").addFooter("AI setup", null);
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     13. BOOT
+     ═══════════════════════════════════════════════════════════════════ */
+  $("chatForm").addEventListener("submit", e => {
+    e.preventDefault();
+    handleDoubt(chatInput.value);
+  });
+
+  syncContext("cs231n", false);
+  refreshAiStatus();
+  renderCards();
+})();
+</script>
+</body>
+</html>
