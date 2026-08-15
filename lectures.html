@@ -611,6 +611,32 @@
   </div>
 </div>
 
+<!-- ══ Use a playlist ══ -->
+<div class="modal-back" id="plBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plTitle">
+    <h2 id="plTitle">Use a YouTube playlist</h2>
+    <p class="modal-sub" id="plSub">Paste a playlist link. This replaces the lectures currently listed for
+      <b id="plSkillName"></b> — every video in it plays here, and each one logs its own watch time as you
+      go through it.</p>
+
+    <div class="m-field">
+      <label for="plUrl">YouTube playlist link</label>
+      <input type="text" id="plUrl" class="m-input" placeholder="https://www.youtube.com/playlist?list=…">
+    </div>
+
+    <div class="m-field" style="margin-bottom:0;">
+      <label for="plName">Label <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="plName" class="m-input" maxlength="120" placeholder="e.g. Official course playlist">
+      <p class="m-error" id="plError" role="alert"></p>
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn-ghost" id="plCancel">Cancel</button>
+      <button type="button" class="btn" id="plSave">Use this playlist</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ Log study time ══ -->
 <div class="modal-back" id="logBack" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
@@ -701,27 +727,71 @@
   var library = L.readLibrary();
   var watched = L.readWatched();
   var prefs   = L.readPrefs();
-  var lectures = L.lecturesFor(current.id, library);
+
+  /* A skill either plays from its curated/custom list, or from a whole pasted
+     YouTube playlist — never both. Playlist mode can't be resolved
+     synchronously the way the curated list can: nobody but YouTube knows a
+     playlist's members or durations, so those get discovered at runtime
+     through the IFrame Player API (ids) and oEmbed (titles), and cached into
+     `library[skillId].playlist` as they're learned. See the "Playlist" block
+     below for the player wiring. */
+  var playlistMode = !!L.playlistFor(current.id, library);
+  var ytPlayer = null;
+  var ytReady = false;
+  var playlistIds = [];        /* ordered video ids, from the live player */
+  var playlistItems = [];      /* rendered rows built from playlistIds + cache */
+  var playlistNowId = null;    /* id of whatever the player last started PLAYING */
+  var playlistPlayerBuilt = false;
+
+  var lectures = playlistMode ? playlistItems : L.lecturesFor(current.id, library);
 
   /* The video being played lives in the URL so links are shareable; default is
-     the first one you haven't watched, else the first. */
+     the first one you haven't watched, else the first. In playlist mode this
+     resolves once the player reports back what's actually in the playlist
+     (see onPlaylistReady) rather than here, since `lectures` starts empty. */
   var currentVideoId = null;
   var wantedVideo = params.get("v");
-  if (wantedVideo && lectures.filter(function (x) { return x.videoId === wantedVideo; })[0]) {
-    currentVideoId = wantedVideo;
-  }
-  if (!currentVideoId && lectures.length) {
-    var firstUnwatched = lectures.filter(function (x) {
-      return !L.isWatched(watched, current.id, x.videoId);
-    })[0];
-    currentVideoId = (firstUnwatched || lectures[0]).videoId;
+  if (!playlistMode) {
+    if (wantedVideo && lectures.filter(function (x) { return x.videoId === wantedVideo; })[0]) {
+      currentVideoId = wantedVideo;
+    }
+    if (!currentVideoId && lectures.length) {
+      var firstUnwatched = lectures.filter(function (x) {
+        return !L.isWatched(watched, current.id, x.videoId);
+      })[0];
+      currentVideoId = (firstUnwatched || lectures[0]).videoId;
+    }
   }
 
   function lectureById(videoId) {
     return lectures.filter(function (x) { return x.videoId === videoId; })[0] || null;
   }
 
+  /* Builds `playlistItems` from whatever the player has told us so far, laying
+     in cached titles/channels/measured minutes. Safe to call before the
+     player exists — playlistIds is just empty then. */
+  function syncPlaylistItems() {
+    var plib = L.playlistFor(current.id, library);
+    playlistItems = playlistIds.map(function (id, i) {
+      var meta = (plib && plib.meta[id]) || {};
+      return {
+        videoId: id,
+        title: meta.title || ("Video " + (i + 1) + " in this playlist"),
+        channel: meta.channel || "",
+        minutes: (plib && plib.minutes[id]) || 0,
+        start: 0,
+        source: "playlist",
+        n: i + 1
+      };
+    });
+  }
+
   function refreshLectures() {
+    if (playlistMode) {
+      syncPlaylistItems();
+      lectures = playlistItems;
+      return;
+    }
     lectures = L.lecturesFor(current.id, library);
     if (currentVideoId && !lectureById(currentVideoId)) currentVideoId = null;
     if (!currentVideoId && lectures.length) currentVideoId = lectures[0].videoId;
@@ -784,8 +854,50 @@
     return link;
   }
 
+  function playlistFallback() {
+    var plib = L.playlistFor(current.id, library);
+    var link = document.createElement("a");
+    link.className = "player-fallback";
+    link.href = plib ? L.playlistWatchUrl(plib.id) : "https://www.youtube.com";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    var inner = document.createElement("div");
+    inner.className = "fb-inner";
+
+    var badge = document.createElement("div");
+    badge.className = "fb-badge";
+    badge.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="var(--saffron)" aria-hidden="true"><path d="M8 5.6v12.8L19 12z"/></svg>';
+
+    var h = document.createElement("h2");
+    h.textContent = (plib && plib.title) || "Your playlist";
+
+    var p = document.createElement("p");
+    p.textContent = "YouTube won't play embedded video (or report back what's in your playlist) when this page is opened straight from your computer. Double-click start-dronaskill.cmd to open the site properly — or click through to YouTube.";
+
+    var cta = document.createElement("span");
+    cta.className = "fb-cta";
+    cta.textContent = "Open playlist on YouTube ↗";
+
+    inner.appendChild(badge); inner.appendChild(h); inner.appendChild(p); inner.appendChild(cta);
+    link.appendChild(inner);
+    return link;
+  }
+
   function renderPlayer() {
     var slot = $("playerSlot");
+
+    if (playlistMode) {
+      /* Built once per skill load; after that the player object itself
+         handles switching videos (see playVideo/onPlaylistStateChange), so
+         re-rendering the list or ticking a checkbox must never touch this DOM
+         again or it would restart playback. */
+      if (playlistPlayerBuilt) return;
+      playlistPlayerBuilt = true;
+      buildPlaylistPlayer();
+      return;
+    }
+
     var item = currentVideoId ? lectureById(currentVideoId) : null;
 
     if (!item) {
@@ -838,8 +950,169 @@
       history.replaceState(null, "",
         "lectures.html?skill=" + encodeURIComponent(current.id) + "&v=" + encodeURIComponent(videoId));
     } catch (e) { /* ignore */ }
-    render();
+
+    if (playlistMode) {
+      if (ytPlayer && ytReady) {
+        var idx = playlistIds.indexOf(videoId);
+        if (idx !== -1) { try { ytPlayer.playVideoAt(idx); } catch (e) { /* ignore */ } }
+      }
+      render();
+    } else {
+      render();
+    }
     $("playerSlot").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  /* ── Playlist mode: the YouTube IFrame Player API ─────────────────────
+     Discovering a playlist's members/durations without a (keyed, backend-only)
+     Data API call isn't possible from a static page — but the IFrame Player
+     API is just a postMessage-based script YouTube serves for free, no key
+     needed, and once a player is bound to a playlist it can tell us the ids
+     in it (getPlaylist()) and, as each one plays, its real duration
+     (getDuration()). That's what feeds both the lecture list and auto-logging
+     in this mode: titles come from oEmbed, minutes come from having actually
+     watched it. */
+
+  var YT_API_SRC = "https://www.youtube.com/iframe_api";
+  var ytApiRequested = false;
+  var ytApiCallbacks = [];
+
+  function loadYouTubeApi(cb) {
+    if (window.YT && window.YT.Player) { cb(); return; }
+    ytApiCallbacks.push(cb);
+    if (ytApiRequested) return;
+    ytApiRequested = true;
+    var prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () {
+      if (typeof prevReady === "function") prevReady();
+      var queued = ytApiCallbacks;
+      ytApiCallbacks = [];
+      queued.forEach(function (fn) { fn(); });
+    };
+    var s = document.createElement("script");
+    s.src = YT_API_SRC;
+    document.head.appendChild(s);
+  }
+
+  function safeGetPlaylist() {
+    try { return (ytPlayer.getPlaylist() || []).filter(L.isValidVideoId); }
+    catch (e) { return []; }
+  }
+
+  function safeCurrentVideoId() {
+    try {
+      var data = ytPlayer.getVideoData();
+      return (data && L.isValidVideoId(data.video_id)) ? data.video_id : null;
+    } catch (e) { return null; }
+  }
+
+  function buildPlaylistPlayer() {
+    var slot = $("playerSlot");
+    var plib = L.playlistFor(current.id, library);
+    if (!plib) return;
+
+    if (embedBlocked) {
+      slot.className = "player is-blocked";
+      slot.innerHTML = "";
+      slot.appendChild(playlistFallback());
+      return;
+    }
+
+    slot.className = "player is-live";
+    slot.innerHTML = '<div id="ytHost"></div>';
+
+    loadYouTubeApi(function () {
+      /* The skill (and so the target div) can't have changed underneath us —
+         switching skills is a full page navigation, never an in-place swap —
+         but the modal that started playlist mode could have been cancelled
+         and re-opened for a different skill's page in a rare double-init; the
+         div existing is our authoritative guard. */
+      if (!$("ytHost")) return;
+      ytPlayer = new YT.Player("ytHost", {
+        width: "640",
+        height: "360",
+        playerVars: {
+          listType: "playlist",
+          list: plib.id,
+          rel: 0,
+          modestbranding: 1,
+          iv_load_policy: 3,
+          playsinline: 1
+        },
+        events: {
+          onReady: onPlaylistReady,
+          onStateChange: onPlaylistStateChange,
+          onError: onPlaylistError
+        }
+      });
+    });
+  }
+
+  function onPlaylistReady() {
+    ytReady = true;
+    playlistIds = safeGetPlaylist();
+    refreshLectures();      /* rebuilds playlistItems AND repoints `lectures` at it */
+    fetchMissingMeta();
+
+    var startId = (wantedVideo && playlistIds.indexOf(wantedVideo) !== -1) ? wantedVideo : null;
+    if (!startId) {
+      var firstUnwatched = playlistItems.filter(function (x) {
+        return !L.isWatched(watched, current.id, x.videoId);
+      })[0];
+      startId = (firstUnwatched || playlistItems[0] || {}).videoId || null;
+    }
+    if (startId) {
+      var idx = playlistIds.indexOf(startId);
+      if (idx > 0) { try { ytPlayer.playVideoAt(idx); } catch (e) { /* ignore */ } }
+      currentVideoId = startId;
+      playlistNowId = startId;   /* corrected by the next PLAYING event regardless */
+    }
+    render();
+  }
+
+  function onPlaylistStateChange(e) {
+    if (!window.YT) return;
+    if (e.data === YT.PlayerState.PLAYING) {
+      var vid = safeCurrentVideoId();
+      if (vid && vid !== playlistNowId) {
+        playlistNowId = vid;
+        currentVideoId = vid;
+        try {
+          history.replaceState(null, "",
+            "lectures.html?skill=" + encodeURIComponent(current.id) + "&v=" + encodeURIComponent(vid));
+        } catch (err) { /* ignore */ }
+        render();
+      }
+    } else if (e.data === YT.PlayerState.ENDED && playlistNowId) {
+      var minutes = 1;
+      try { minutes = Math.max(1, Math.round(ytPlayer.getDuration() / 60)); } catch (err) { /* ignore */ }
+      onPlaylistVideoEnded(playlistNowId, minutes);
+    }
+  }
+
+  var playlistErrorShown = false;
+  function onPlaylistError() {
+    if (playlistErrorShown) return;
+    playlistErrorShown = true;
+    toast("One of the videos in this playlist won't play here (private, deleted, or embedding's off) — the rest should still work.");
+  }
+
+  function teardownPlaylistPlayer() {
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) { /* ignore */ } }
+    ytPlayer = null;
+    ytReady = false;
+    playlistIds = [];
+    playlistItems = [];
+    playlistNowId = null;
+    playlistPlayerBuilt = false;
+    playlistErrorShown = false;
+  }
+
+  function enterPlaylistMode() {
+    playlistMode = true;
+    currentVideoId = null;
+    refreshLectures();
+    render();
   }
 
   /* ── Auto-logging watched time ─────────────────────────────────────── */
@@ -880,6 +1153,44 @@
     render();
   }
 
+  /* Pulls in title/channel for any playlist video we haven't seen yet, via
+     YouTube's public oEmbed endpoint (no key, CORS-open). Durations aren't
+     part of that response — those only become known once a video is actually
+     watched through, in onPlaylistVideoEnded below. */
+  function fetchMissingMeta() {
+    var plib = L.playlistFor(current.id, library);
+    if (!plib) return;
+    playlistIds.filter(function (id) { return !plib.meta[id]; }).forEach(function (id) {
+      fetch("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent("https://youtu.be/" + id))
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+          if (!data) return;
+          var saved = L.setPlaylistMeta(library, current.id, id, { title: data.title, channel: data.author_name });
+          if (!saved) return;
+          L.writeLibrary(saved);
+          if (playlistMode) { refreshLectures(); render(); }
+        })
+        .catch(function () { /* leave the "Video N" placeholder */ });
+    });
+  }
+
+  /* Fires when a playlist video plays through to the end — this is the only
+     honest source of a playlist video's length, so it both records the
+     measured minutes for next time and feeds the same auto-log pipeline the
+     curated lectures use. */
+  function onPlaylistVideoEnded(videoId, measuredMinutes) {
+    var saved = L.setPlaylistMinutes(library, current.id, videoId, measuredMinutes);
+    if (saved) L.writeLibrary(saved);
+    refreshLectures();
+
+    var item = lectureById(videoId);
+    if (!item) return;
+    var already = L.isWatched(watched, current.id, videoId);
+    L.setWatched(watched, current.id, videoId, true);
+    if (!already) autoLogWatch(item);
+    render();
+  }
+
   /* ── Lecture list ──────────────────────────────────────────────────── */
   function lectureRow(item) {
     var isDone = L.isWatched(watched, current.id, item.videoId);
@@ -914,10 +1225,10 @@
     var title = document.createElement("div");
     title.className = "module-title";
     title.textContent = item.title;
-    if (item.source === "custom") {
+    if (item.source === "custom" || item.source === "playlist") {
       var badge = document.createElement("span");
       badge.className = "lec-badge";
-      badge.textContent = "Yours";
+      badge.textContent = item.source === "custom" ? "Yours" : "Playlist";
       title.appendChild(badge);
     }
 
@@ -934,25 +1245,30 @@
     playBtn.textContent = item.videoId === currentVideoId ? "Playing" : "Play";
     playBtn.disabled = item.videoId === currentVideoId;
     playBtn.addEventListener("click", function () { playVideo(item.videoId); });
+    actions.appendChild(playBtn);
 
-    var editBtn = document.createElement("button");
-    editBtn.type = "button";
-    editBtn.className = "link-btn";
-    editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", function () { openLibModal(item); });
+    /* Playlist rows aren't yours to edit or remove — the playlist itself is
+       the source of truth; use "Stop using this playlist" instead. */
+    if (item.source !== "playlist") {
+      var editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "link-btn";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", function () { openLibModal(item); });
 
-    var removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "link-btn";
-    removeBtn.textContent = "Remove";
-    removeBtn.addEventListener("click", function () {
-      L.writeLibrary(L.removeLecture(library, current.id, item.videoId));
-      refreshLectures();
-      render();
-      toast("Removed. Use “Reset to picked lectures” to bring it back.");
-    });
+      var removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "link-btn";
+      removeBtn.textContent = "Remove";
+      removeBtn.addEventListener("click", function () {
+        L.writeLibrary(L.removeLecture(library, current.id, item.videoId));
+        refreshLectures();
+        render();
+        toast("Removed. Use “Reset to picked lectures” to bring it back.");
+      });
 
-    actions.appendChild(playBtn); actions.appendChild(editBtn); actions.appendChild(removeBtn);
+      actions.appendChild(editBtn); actions.appendChild(removeBtn);
+    }
     main.appendChild(title); main.appendChild(sub); main.appendChild(actions);
 
     var len = document.createElement("span");
@@ -982,6 +1298,12 @@
     add.textContent = "Add a lecture";
     add.addEventListener("click", function () { openLibModal(null); });
 
+    var addPl = document.createElement("button");
+    addPl.type = "button";
+    addPl.className = "btn-ghost btn-sm";
+    addPl.textContent = "Use a playlist instead";
+    addPl.addEventListener("click", function () { openPlaylistModal(); });
+
     var search = document.createElement("a");
     search.className = "search-yt";
     search.href = L.searchUrl(current.name + " full course tutorial");
@@ -989,14 +1311,97 @@
     search.rel = "noopener noreferrer";
     search.textContent = "Search YouTube for " + current.name + " ↗";
 
-    row.appendChild(add); row.appendChild(search);
+    row.appendChild(add); row.appendChild(addPl); row.appendChild(search);
     box.appendChild(h); box.appendChild(p); box.appendChild(row);
+    return box;
+  }
+
+  function playlistLoadingNotice() {
+    var box = document.createElement("div");
+    box.className = "no-lectures";
+    var h = document.createElement("h4");
+    h.textContent = "Loading your playlist…";
+    var p = document.createElement("p");
+    p.textContent = "Pulling in the video list from YouTube — this can take a few seconds for a long playlist.";
+    box.appendChild(h); box.appendChild(p);
+    return box;
+  }
+
+  function playlistBlockedNotice() {
+    var plib = L.playlistFor(current.id, library);
+    var box = document.createElement("div");
+    box.className = "no-lectures";
+    var h = document.createElement("h4");
+    h.textContent = "Can't list this playlist from a local file.";
+    var p = document.createElement("p");
+    p.textContent = "Open the site through start-dronaskill.cmd (or your own local server) to see and track every video in it.";
+    var row = document.createElement("div");
+    row.className = "row";
+    var open = document.createElement("a");
+    open.className = "search-yt";
+    open.target = "_blank";
+    open.rel = "noopener noreferrer";
+    open.href = plib ? L.playlistWatchUrl(plib.id) : "#";
+    open.textContent = "Open playlist on YouTube ↗";
+    row.appendChild(open);
+    box.appendChild(h); box.appendChild(p); box.appendChild(row);
+    return box;
+  }
+
+  function playlistEmptyNotice() {
+    var box = document.createElement("div");
+    box.className = "no-lectures";
+    var h = document.createElement("h4");
+    h.textContent = "This playlist looks empty, private, or unavailable.";
+    var p = document.createElement("p");
+    p.textContent = "Double check the link, or switch back to individual lectures below.";
+    box.appendChild(h); box.appendChild(p);
     return box;
   }
 
   function renderTools() {
     var tools = $("lectureTools");
     tools.innerHTML = "";
+
+    if (playlistMode) {
+      var plib = L.playlistFor(current.id, library);
+
+      var swap = document.createElement("button");
+      swap.type = "button";
+      swap.className = "link-btn";
+      swap.textContent = "Use a different playlist";
+      swap.addEventListener("click", function () { openPlaylistModal(); });
+      tools.appendChild(swap);
+
+      var stop = document.createElement("button");
+      stop.type = "button";
+      stop.className = "link-btn";
+      stop.textContent = "Stop using this playlist";
+      stop.addEventListener("click", function () {
+        teardownPlaylistPlayer();
+        L.writeLibrary(L.clearPlaylist(library, current.id));
+        playlistMode = false;
+        currentVideoId = null;
+        renderedVideoId = null;
+        refreshLectures();
+        render();
+        toast(lectures.length ? "Back to the hand-picked list for " + current.name + "."
+                               : "Playlist removed. " + current.name + " has no lectures picked right now.");
+      });
+      tools.appendChild(stop);
+
+      if (plib) {
+        var openFull = document.createElement("a");
+        openFull.className = "link-btn";
+        openFull.target = "_blank";
+        openFull.rel = "noopener noreferrer";
+        openFull.href = L.playlistWatchUrl(plib.id);
+        openFull.textContent = "Open full playlist on YouTube ↗";
+        tools.appendChild(openFull);
+      }
+      return;
+    }
+
     if (!lectures.length) return;
 
     var add = document.createElement("button");
@@ -1005,6 +1410,13 @@
     add.textContent = "+ Add a lecture";
     add.addEventListener("click", function () { openLibModal(null); });
     tools.appendChild(add);
+
+    var addPl = document.createElement("button");
+    addPl.type = "button";
+    addPl.className = "link-btn";
+    addPl.textContent = "+ Use a playlist instead";
+    addPl.addEventListener("click", function () { openPlaylistModal(); });
+    tools.appendChild(addPl);
 
     if (library[current.id]) {
       var reset = document.createElement("button");
@@ -1128,8 +1540,9 @@
 
     renderPlayer();
 
+    var playlistLoading = playlistMode && !embedBlocked && !ytReady;
     var playing = currentVideoId ? lectureById(currentVideoId) : null;
-    $("serveHint").hidden = !(embedBlocked && playing);
+    $("serveHint").hidden = !(embedBlocked && (playing || playlistMode));
     var nowPlaying = $("nowPlaying");
     nowPlaying.innerHTML = "";
     if (playing) {
@@ -1138,17 +1551,24 @@
       var meta = document.createElement("span");
       meta.textContent = (playing.channel ? playing.channel + " · " : "") + L.formatMinutes(playing.minutes);
       nowPlaying.appendChild(b); nowPlaying.appendChild(meta);
-      $("openOnYt").href = L.watchUrl(playing.videoId);
+      var plibNow = playlistMode ? L.playlistFor(current.id, library) : null;
+      $("openOnYt").href = L.watchUrl(playing.videoId) + (plibNow ? "&list=" + encodeURIComponent(plibNow.id) : "");
       $("openOnYt").hidden = false;
     } else {
       $("openOnYt").hidden = true;
     }
 
-    /* Lecture list, or the empty state for a skill nobody has picked yet. */
+    /* Lecture list, or a notice explaining why it's empty right now. */
     var list = $("modules");
     list.innerHTML = "";
-    if (lectures.length) {
+    if (playlistMode && embedBlocked) {
+      list.appendChild(playlistBlockedNotice());
+    } else if (playlistLoading) {
+      list.appendChild(playlistLoadingNotice());
+    } else if (lectures.length) {
       lectures.forEach(function (item) { list.appendChild(lectureRow(item)); });
+    } else if (playlistMode) {
+      list.appendChild(playlistEmptyNotice());
     } else {
       list.appendChild(emptyLectures());
     }
@@ -1157,7 +1577,7 @@
     var seen = L.watchedCount(watched, current.id, lectures);
     $("watchCount").textContent = lectures.length
       ? seen + " of " + lectures.length + " watched"
-      : "Nothing picked yet";
+      : (playlistLoading ? "Loading…" : "Nothing picked yet");
     $("watchFill").style.width = (lectures.length ? seen / lectures.length * 100 : 0) + "%";
 
     renderNextUp();
@@ -1251,7 +1671,7 @@
       var videoId = L.parseVideoId(raw);
       if (!videoId) {
         $("libError").textContent = L.isPlaylistOnly(raw)
-          ? "That's a playlist link — open the playlist, click the first video, and paste that URL."
+          ? "That's a playlist link — use “+ Use a playlist instead” below to add the whole thing, or paste a single video's link here."
           : "That doesn't look like a YouTube video link.";
         return;
       }
@@ -1272,6 +1692,52 @@
     refreshLectures();
     closeLibModal();
     render();
+  });
+
+  /* ── Use a playlist ───────────────────────────────────────────────── */
+  function openPlaylistModal() {
+    lastFocus = document.activeElement;
+    $("plSkillName").textContent = current.name;
+    $("plUrl").value = "";
+    $("plName").value = "";
+    $("plError").textContent = "";
+    $("plBack").hidden = false;
+    $("plUrl").focus();
+  }
+
+  function closePlaylistModal() {
+    $("plBack").hidden = true;
+    if (lastFocus) lastFocus.focus();
+  }
+
+  $("plCancel").addEventListener("click", closePlaylistModal);
+  $("plBack").addEventListener("click", function (e) {
+    if (e.target === $("plBack")) closePlaylistModal();
+  });
+
+  $("plSave").addEventListener("click", function () {
+    var raw = $("plUrl").value;
+    var plid = L.parsePlaylistId(raw);
+    if (!plid) {
+      $("plError").textContent = "That doesn't look like a YouTube playlist link.";
+      return;
+    }
+
+    var result = L.setPlaylist(library, current.id, { id: plid, title: $("plName").value });
+    if (!result) {
+      $("plError").textContent = "Couldn't save that playlist.";
+      return;
+    }
+    L.writeLibrary(result);
+
+    /* Covers the "swap to a different playlist while already in one" case —
+       a stale player left running would keep reporting the old playlist. */
+    teardownPlaylistPlayer();
+    renderedVideoId = null;
+
+    closePlaylistModal();
+    enterPlaylistMode();
+    toast("Now playing from your playlist for " + current.name + ".");
   });
 
   /* ── Focus mode ────────────────────────────────────────────────────── */
@@ -1441,6 +1907,7 @@
     if (e.key !== "Escape") return;
     if (!$("logBack").hidden) { closeModal(); return; }
     if (!$("libBack").hidden) { closeLibModal(); return; }
+    if (!$("plBack").hidden) { closePlaylistModal(); return; }
     if (focusOn) exitFocus();
   });
 

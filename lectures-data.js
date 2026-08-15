@@ -663,6 +663,26 @@
     return /[?&]list=/.test(input) && parseVideoId(input) === null;
   }
 
+  /* Playlist ids vary more than video ids (10-64 chars covers PL/UU/OL/FL/RD
+     and the handful of other prefixes YouTube uses) — this is a shape check,
+     not a guarantee the playlist exists or is embeddable. A bad id just fails
+     to load in the player, same as a bad curated video id already can. */
+  var PLAYLIST_ID_RE = /^[A-Za-z0-9_-]{10,64}$/;
+
+  function isValidPlaylistId(id) {
+    return typeof id === "string" && PLAYLIST_ID_RE.test(id);
+  }
+
+  function parsePlaylistId(input) {
+    if (typeof input !== "string") return null;
+    var text = input.replace(/^\s+|\s+$/g, "");
+    if (!text) return null;
+    var m = text.match(/[?&]list=([A-Za-z0-9_-]{10,64})/);
+    if (m && isValidPlaylistId(m[1])) return m[1];
+    if (isValidPlaylistId(text)) return text;   /* bare id pasted */
+    return null;
+  }
+
   /* t=90 | t=90s | t=1m30s | t=1h2m3s | #t=90 -> seconds */
   function parseStart(input) {
     if (typeof input !== "string") return 0;
@@ -703,6 +723,11 @@
 
   function searchUrl(query) {
     return "https://www.youtube.com/results?search_query=" + encodeURIComponent(String(query || ""));
+  }
+
+  function playlistWatchUrl(id) {
+    if (!isValidPlaylistId(id)) return "";
+    return "https://www.youtube.com/playlist?list=" + encodeURIComponent(id);
   }
 
   /* ── Small helpers ────────────────────────────────────────────────────── */
@@ -786,6 +811,34 @@
         src.order.forEach(function (id) {
           if (isValidVideoId(id) && entry.order.indexOf(id) === -1) entry.order.push(id);
         });
+      }
+
+      if (src.playlist && typeof src.playlist === "object" && isValidPlaylistId(src.playlist.id)) {
+        var pl = {
+          id: src.playlist.id,
+          title: clean(src.playlist.title) || "Playlist",
+          addedAt: clean(src.playlist.addedAt),
+          meta: {},
+          minutes: {}
+        };
+        if (src.playlist.meta && typeof src.playlist.meta === "object") {
+          Object.keys(src.playlist.meta).forEach(function (vid) {
+            if (!isValidVideoId(vid)) return;
+            var m = src.playlist.meta[vid];
+            if (!m || typeof m !== "object") return;
+            var keptM = {};
+            if (typeof m.title === "string" && clean(m.title)) keptM.title = clean(m.title);
+            if (typeof m.channel === "string") keptM.channel = clean(m.channel);
+            if (Object.keys(keptM).length) pl.meta[vid] = keptM;
+          });
+        }
+        if (src.playlist.minutes && typeof src.playlist.minutes === "object") {
+          Object.keys(src.playlist.minutes).forEach(function (vid) {
+            if (!isValidVideoId(vid)) return;
+            pl.minutes[vid] = cleanMinutes(src.playlist.minutes[vid]);
+          });
+        }
+        entry.playlist = pl;
       }
 
       out[skillId] = entry;
@@ -957,6 +1010,64 @@
     return lib;
   }
 
+  /* ── Playlist mode ────────────────────────────────────────────────────────
+     A skill can be pointed at a whole YouTube playlist instead of an
+     individual-lecture list. We can't know a pasted playlist's members or
+     durations up front without the (keyed, backend-only) Data API, so this
+     store only ever holds what we've actually observed through the client-side
+     IFrame Player API / oEmbed at runtime: per-video titles/channels in `meta`,
+     and per-video watched length in `minutes`, filled in lazily as the learner
+     plays through it. See lectures.html for the player wiring. */
+
+  function setPlaylist(lib, skillId, opts) {
+    if (!skillExists(skillId) || !opts) return null;
+    var id = isValidPlaylistId(opts.id) ? opts.id : parsePlaylistId(opts.id || opts.url || "");
+    if (!id) return null;
+    var e = ensureEntry(lib, skillId);
+    e.playlist = {
+      id: id,
+      title: clean(opts.title) || "Playlist",
+      addedAt: (global.DRONA && global.DRONA.todayISO) ? global.DRONA.todayISO() : "",
+      meta: {},
+      minutes: {}
+    };
+    return lib;
+  }
+
+  function clearPlaylist(lib, skillId) {
+    if (lib[skillId]) delete lib[skillId].playlist;
+    return lib;
+  }
+
+  function playlistFor(skillId, lib) {
+    lib = lib || readLibrary();
+    var e = lib[skillId];
+    return (e && e.playlist) ? e.playlist : null;
+  }
+
+  /* Title/channel learned from oEmbed once a video is seen in the playlist. */
+  function setPlaylistMeta(lib, skillId, videoId, patch) {
+    if (!skillExists(skillId) || !isValidVideoId(videoId)) return null;
+    var e = ensureEntry(lib, skillId);
+    if (!e.playlist) return null;
+    var kept = e.playlist.meta[videoId] || {};
+    if (patch && typeof patch.title === "string" && clean(patch.title)) kept.title = clean(patch.title);
+    if (patch && typeof patch.channel === "string") kept.channel = clean(patch.channel);
+    e.playlist.meta[videoId] = kept;
+    return lib;
+  }
+
+  /* Real duration measured by the player once a video has actually played
+     through — this is what auto-logging uses for playlist videos, since no
+     curated estimate exists for them. */
+  function setPlaylistMinutes(lib, skillId, videoId, minutes) {
+    if (!skillExists(skillId) || !isValidVideoId(videoId)) return null;
+    var e = ensureEntry(lib, skillId);
+    if (!e.playlist) return null;
+    e.playlist.minutes[videoId] = cleanMinutes(minutes);
+    return lib;
+  }
+
   /* ── Watched state ────────────────────────────────────────────────────── */
 
   /* { skillId: { videoId: "YYYY-MM-DD" } } — a date rather than true, mirroring
@@ -1046,11 +1157,14 @@
     parseVideoId: parseVideoId,
     parseStart: parseStart,
     isPlaylistOnly: isPlaylistOnly,
+    isValidPlaylistId: isValidPlaylistId,
+    parsePlaylistId: parsePlaylistId,
 
     embedUrl: embedUrl,
     watchUrl: watchUrl,
     thumbUrl: thumbUrl,
     searchUrl: searchUrl,
+    playlistWatchUrl: playlistWatchUrl,
 
     readLibrary: readLibrary,
     writeLibrary: writeLibrary,
@@ -1060,6 +1174,12 @@
     editLecture: editLecture,
     removeLecture: removeLecture,
     resetSkill: resetSkill,
+
+    setPlaylist: setPlaylist,
+    clearPlaylist: clearPlaylist,
+    playlistFor: playlistFor,
+    setPlaylistMeta: setPlaylistMeta,
+    setPlaylistMinutes: setPlaylistMinutes,
 
     readWatched: readWatched,
     writeWatched: writeWatched,
