@@ -300,16 +300,201 @@
 
   var LEVEL_ORDER = ["foundation", "core", "advanced", "career"];
 
+  /* ── Custom skills — the learner's own additions ───────────────────────────
+     Stored as an array under CUSTOM_KEY and merged into SKILLS at load time,
+     before anything else reads the catalogue. That ordering matters: readLog()
+     validates session.skill against SKILLS, so a merge that ran late would
+     silently orphan every hour logged against a custom skill.
+
+     Custom skills are global, not per-track. They belong to the learner, so
+     switching career goal must never make one disappear — trackSkillIds()
+     appends them to whatever track is active.
+     ─────────────────────────────────────────────────────────────────────── */
+  var CUSTOM_KEY = "dronaskill_custom_skills";
+  var MAX_CUSTOM_SKILLS = 40;
+  var CUSTOM_DOMAIN = "My Own Skills";
+
+  function slugify(name) {
+    return String(name).toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 32);
+  }
+
+  /* Never collides with a catalogue id: every custom id carries the prefix. */
+  function makeCustomId(name, taken) {
+    var base = "custom-" + (slugify(name) || "skill");
+    var id = base, n = 2;
+    while (SKILLS[id] || taken[id]) { id = base + "-" + n; n++; }
+    return id;
+  }
+
+  function clampInt(value, min, max, fallback) {
+    var n = Math.round(Number(value));
+    if (!isFinite(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  /* Coerce one stored record into a valid skill, or null if it is beyond saving. */
+  function normalizeCustom(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    var name = String(raw.name || "").trim().slice(0, 60);
+    if (name.length < 2) return null;
+    var id = String(raw.id || "").trim();
+    if (!/^custom-[a-z0-9-]+$/.test(id)) return null;
+
+    return {
+      id: id,
+      name: name,
+      domain: String(raw.domain || CUSTOM_DOMAIN).trim().slice(0, 40) || CUSTOM_DOMAIN,
+      level: LEVEL_ORDER.indexOf(raw.level) === -1 ? "core" : raw.level,
+      hours: clampInt(raw.hours, 1, 500, 20),
+      desc: String(raw.desc || "").trim().slice(0, 220) ||
+            "A skill you added yourself. Tick it off once you can build something small with it.",
+      custom: true,
+      added: /^\d{4}-\d{2}-\d{2}$/.test(raw.added) ? raw.added : todayISO()
+    };
+  }
+
+  function readCustomSkills() {
+    var raw = [];
+    try { raw = JSON.parse(global.localStorage.getItem(CUSTOM_KEY) || "[]"); }
+    catch (e) { raw = []; }
+    if (!Array.isArray(raw)) return [];
+
+    /* No clash check against SKILLS here: once merged, every custom skill IS in
+       SKILLS, so testing that would make this return nothing and the next write
+       would wipe the list. Built-ins are already unreachable — normalizeCustom
+       only accepts ids matching /^custom-.../, and no catalogue id uses that. */
+    var seen = {}, out = [];
+    raw.forEach(function (entry) {
+      var skill = normalizeCustom(entry);
+      if (!skill || seen[skill.id]) return;
+      seen[skill.id] = true;
+      out.push(skill);
+    });
+    return out.slice(0, MAX_CUSTOM_SKILLS);
+  }
+
+  function writeCustomSkills(list) {
+    try { global.localStorage.setItem(CUSTOM_KEY, JSON.stringify(list)); }
+    catch (e) { /* storage full or blocked — the merged in-memory copy still works */ }
+  }
+
+  function isCustomSkill(id) {
+    return !!(SKILLS[id] && SKILLS[id].custom);
+  }
+
+  function customSkillIds() {
+    return Object.keys(SKILLS).filter(function (id) { return SKILLS[id].custom; });
+  }
+
+  /* Put every stored custom skill into SKILLS so all four pages resolve it
+     by id exactly like a built-in one. */
+  function mergeCustomSkills() {
+    customSkillIds().forEach(function (id) { delete SKILLS[id]; });
+    readCustomSkills().forEach(function (skill) { SKILLS[skill.id] = skill; });
+  }
+
+  /*
+    addCustomSkill(input) -> { ok: true, skill } | { ok: false, error }
+    Returns a reason instead of throwing, so the caller has one message to show.
+  */
+  function addCustomSkill(input) {
+    input = input || {};
+    var name = String(input.name || "").trim().slice(0, 60);
+    if (name.length < 2) return { ok: false, error: "Give the skill a name of at least 2 characters." };
+
+    var existing = readCustomSkills();
+    if (existing.length >= MAX_CUSTOM_SKILLS) {
+      return { ok: false, error: "You've reached the limit of " + MAX_CUSTOM_SKILLS + " custom skills. Remove one first." };
+    }
+
+    var lower = name.toLowerCase();
+    var clash = Object.keys(SKILLS).some(function (id) {
+      return SKILLS[id].name.toLowerCase() === lower;
+    });
+    if (clash) return { ok: false, error: "“" + name + "” is already on your list." };
+
+    var taken = {};
+    existing.forEach(function (s) { taken[s.id] = true; });
+
+    var skill = normalizeCustom({
+      id: makeCustomId(name, taken),
+      name: name,
+      domain: input.domain,
+      level: input.level,
+      hours: input.hours,
+      desc: input.desc,
+      added: todayISO()
+    });
+    if (!skill) return { ok: false, error: "That skill couldn't be saved. Check the name and hours." };
+
+    existing.push(skill);
+    writeCustomSkills(existing);
+    SKILLS[skill.id] = skill;
+    return { ok: true, skill: skill };
+  }
+
+  function updateCustomSkill(id, patch) {
+    if (!isCustomSkill(id)) return { ok: false, error: "Only skills you added can be edited." };
+    var list = readCustomSkills();
+    var current = null;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) current = list[i];
+    if (!current) return { ok: false, error: "That skill no longer exists." };
+
+    patch = patch || {};
+    var name = patch.name === undefined ? current.name : String(patch.name).trim().slice(0, 60);
+    if (name.length < 2) return { ok: false, error: "Give the skill a name of at least 2 characters." };
+
+    var lower = name.toLowerCase();
+    var clash = Object.keys(SKILLS).some(function (other) {
+      return other !== id && SKILLS[other].name.toLowerCase() === lower;
+    });
+    if (clash) return { ok: false, error: "“" + name + "” is already on your list." };
+
+    var updated = normalizeCustom({
+      id: id,
+      name: name,
+      domain: patch.domain === undefined ? current.domain : patch.domain,
+      level: patch.level === undefined ? current.level : patch.level,
+      hours: patch.hours === undefined ? current.hours : patch.hours,
+      desc: patch.desc === undefined ? current.desc : patch.desc,
+      added: current.added
+    });
+    if (!updated) return { ok: false, error: "That change couldn't be saved." };
+
+    writeCustomSkills(list.map(function (s) { return s.id === id ? updated : s; }));
+    SKILLS[id] = updated;
+    return { ok: true, skill: updated };
+  }
+
+  /*
+    Removes the skill and its completion tick. Logged study sessions are left
+    alone on purpose — readLog() blanks an unknown skill id, so those hours
+    survive as unassigned time rather than vanishing from the learner's totals.
+  */
+  function removeCustomSkill(id) {
+    if (!isCustomSkill(id)) return { ok: false, error: "Only skills you added can be removed." };
+    writeCustomSkills(readCustomSkills().filter(function (s) { return s.id !== id; }));
+    delete SKILLS[id];
+
+    var progress = readProgress();
+    if (progress[id]) { delete progress[id]; writeProgress(progress); }
+    return { ok: true };
+  }
+
   /* ── Plan builder ─────────────────────────────────────────────────────── */
   function getTrack(id) {
     for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i];
     return null;
   }
 
-  /* Every skill id a track touches, universal ones included, de-duplicated. */
+  /* Every skill id a track touches — universal and learner-added ones
+     included — de-duplicated. Custom skills ride along with every track. */
   function trackSkillIds(trackId) {
     var track = getTrack(trackId);
-    var ids = (track ? track.skills : []).concat(UNIVERSAL);
+    var ids = (track ? track.skills : []).concat(UNIVERSAL).concat(customSkillIds());
     var seen = {}, out = [];
     ids.forEach(function (id) {
       if (SKILLS[id] && !seen[id]) { seen[id] = true; out.push(id); }
@@ -335,7 +520,8 @@
       var s = SKILLS[id];
       return {
         id: id, name: s.name, desc: s.desc, level: s.level,
-        domain: s.domain, hours: s.hours, done: !!known[id]
+        domain: s.domain, hours: s.hours, done: !!known[id],
+        custom: !!s.custom
       };
     });
 
@@ -548,6 +734,10 @@
   var PROGRESS_KEY = "dronaskill_skill_progress";
   var LOG_KEY = "dronaskill_study_log";
 
+  /* Merge before anything is exported: every reader below — buildPlan,
+     readLog, readProgress — must already see custom skills in SKILLS. */
+  mergeCustomSkills();
+
   global.DRONA = {
     SKILLS: SKILLS,
     TRACKS: TRACKS,
@@ -565,7 +755,16 @@
     STORAGE_KEY: STORAGE_KEY,
     PROGRESS_KEY: PROGRESS_KEY,
     LOG_KEY: LOG_KEY,
+    CUSTOM_KEY: CUSTOM_KEY,
+    CUSTOM_DOMAIN: CUSTOM_DOMAIN,
     MAX_SESSION_HOURS: MAX_SESSION_HOURS,
+    MAX_CUSTOM_SKILLS: MAX_CUSTOM_SKILLS,
+    readCustomSkills: readCustomSkills,
+    customSkillIds: customSkillIds,
+    isCustomSkill: isCustomSkill,
+    addCustomSkill: addCustomSkill,
+    updateCustomSkill: updateCustomSkill,
+    removeCustomSkill: removeCustomSkill,
     getTrack: getTrack,
     trackSkillIds: trackSkillIds,
     buildPlan: buildPlan,

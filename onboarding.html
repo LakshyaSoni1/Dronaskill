@@ -212,6 +212,22 @@
   .skill-group-head h3 { font-size: 13.5px; letter-spacing: 0; }
   .skill-group-head .muted { font-size: 11.5px; }
   .skills-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+
+  /* Inline "add a skill we missed" row on the known-skills step. */
+  .add-row {
+    display: grid; grid-template-columns: 1fr 150px 110px auto; gap: 10px; align-items: start;
+    padding: 16px; margin-bottom: 18px; border-radius: 14px;
+    background: rgba(124,127,242,0.07); border: 1px solid rgba(124,127,242,0.26);
+  }
+  .add-row[hidden] { display: none; }
+  .add-row .add-err { grid-column: 1 / -1; font-size: 12px; color: var(--saffron); min-height: 0; }
+  .add-row .add-err:empty { display: none; }
+  .add-btn {
+    padding: 12px 18px; border-radius: 12px; border: 0; cursor: pointer;
+    font-family: inherit; font-size: 13.5px; font-weight: 620;
+    background: var(--cta); color: var(--cta-ink);
+  }
+  @media (max-width: 640px) { .add-row { grid-template-columns: 1fr; } }
   .link-btn {
     background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
     font-size: 12.5px; color: var(--saffron); text-decoration: underline; text-underline-offset: 3px;
@@ -397,8 +413,19 @@
 
           <div class="skills-toolbar">
             <button type="button" class="link-btn" id="skillsNone">Clear all</button>
+            <button type="button" class="link-btn" id="addSkillToggle">+ Add a skill we missed</button>
             <span class="muted" style="font-size:12px;">Starting from zero? Just hit Next.</span>
             <span class="count-pill" id="skillsCount">0 selected</span>
+          </div>
+
+          <div class="add-row" id="addSkillRow" hidden>
+            <input type="text" id="newSkillName" class="text-input" maxlength="60"
+                   placeholder="Skill name — e.g. Rust, Figma, Microprocessors" aria-label="New skill name">
+            <select id="newSkillLevel" class="select-input" aria-label="Stage"></select>
+            <input type="number" id="newSkillHours" class="text-input" min="1" max="500" step="1"
+                   value="20" aria-label="Estimated hours">
+            <button type="button" class="add-btn" id="newSkillAdd">Add</button>
+            <p class="add-err" id="newSkillError" role="alert"></p>
           </div>
 
           <div id="skillsGroups"></div>
@@ -609,9 +636,11 @@
   onGoalChange();
 
   /* ── Slide 3 — known skills, rebuilt whenever the goal changes ───────── */
-  function renderSkills() {
+  /* force=true rebuilds even when the goal hasn't changed — used after the
+     learner adds a skill of their own, which changes the list mid-step. */
+  function renderSkills(force) {
     var goal = $("goalSelect").value;
-    if (!goal || goal === lastRenderedTrack) { updateSkillCount(); return; }
+    if (!goal || (!force && goal === lastRenderedTrack)) { updateSkillCount(); return; }
 
     /* Keep ticks that still exist in the new track. */
     var previously = {};
@@ -664,6 +693,65 @@
   $("skillsNone").addEventListener("click", function () {
     $("skillsGroups").querySelectorAll("input:checked").forEach(function (i) { i.checked = false; });
     updateSkillCount();
+  });
+
+  /* ── Add a skill the catalogue doesn't have ───────────────────────────────
+     Saved straight to the shared custom-skill store, so it is already on the
+     roadmap by the time onboarding finishes — and on every later visit.
+     ─────────────────────────────────────────────────────────────────────── */
+  D.LEVEL_ORDER.forEach(function (level) {
+    var opt = document.createElement("option");
+    opt.value = level;
+    opt.textContent = D.LEVEL_META[level].label;
+    $("newSkillLevel").appendChild(opt);
+  });
+  $("newSkillLevel").value = "core";
+
+  $("addSkillToggle").addEventListener("click", function () {
+    var row = $("addSkillRow");
+    row.hidden = !row.hidden;
+    $("addSkillToggle").textContent = row.hidden ? "+ Add a skill we missed" : "Cancel";
+    if (!row.hidden) $("newSkillName").focus();
+    else $("newSkillError").textContent = "";
+  });
+
+  $("newSkillAdd").addEventListener("click", function () {
+    var result = D.addCustomSkill({
+      name: $("newSkillName").value,
+      level: $("newSkillLevel").value,
+      hours: $("newSkillHours").value
+    });
+
+    if (!result.ok) {
+      $("newSkillError").textContent = result.error;
+      return;
+    }
+
+    $("newSkillName").value = "";
+    $("newSkillHours").value = "20";
+    $("newSkillError").textContent = "";
+    renderSkills(true);
+
+    /* Show the learner where it landed — the list is long. */
+    var added = $("skillsGroups").querySelector('input[value="' + result.skill.id + '"]');
+    if (added && added.closest) {
+      var card = added.closest(".check-card");
+      if (card && card.scrollIntoView) card.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    $("newSkillName").focus();
+  });
+
+  $("newSkillName").addEventListener("input", function () { $("newSkillError").textContent = ""; });
+
+  /* stopPropagation matters: a document-level Enter handler advances the slide,
+     so without it, adding a skill would also skip the learner past this step. */
+  ["newSkillName", "newSkillHours"].forEach(function (id) {
+    $(id).addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      e.stopPropagation();
+      $("newSkillAdd").click();
+    });
   });
 
   /* ── Slide 4 — pace ──────────────────────────────────────────────────── */
@@ -755,7 +843,9 @@
       ["Goal", plan.trackLabel],
       ["Why", profile.motivations.length ? profile.motivations : ["Not specified"]],
       ["Already knows", profile.known_skills.length
-        ? profile.known_skills.map(function (id) { return D.SKILLS[id].name; })
+        ? profile.known_skills
+            .filter(function (id) { return D.SKILLS[id]; })
+            .map(function (id) { return D.SKILLS[id].name; })
         : ["Starting from scratch"]],
       ["Pace", profile.hours_per_week + " hrs/week · " + profile.timeline],
       ["Study time", profile.study_time],

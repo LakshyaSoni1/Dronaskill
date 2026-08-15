@@ -1261,7 +1261,7 @@
       [
         prettyDate(s.date),
         D.formatHours(s.hours),
-        s.skill ? D.SKILLS[s.skill].name : "General study",
+        s.skill && D.SKILLS[s.skill] ? D.SKILLS[s.skill].name : "General study",
         s.note || "—"
       ].forEach(function (v, i) {
         var td = document.createElement("td");

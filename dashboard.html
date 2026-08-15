@@ -171,6 +171,34 @@
   .skill-row.is-done { opacity: .52; }
   .skill-row.is-done .skill-name { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.3); }
 
+  /* Learner-added skills — marked so they read as "yours", not catalogue. */
+  .skill-row.is-custom { border-left: 2px solid rgba(124,127,242,0.55); }
+  .custom-tag {
+    display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase;
+    vertical-align: middle; background: rgba(124,127,242,0.16);
+    border: 1px solid rgba(124,127,242,0.38); color: #a5a7f7;
+  }
+  .row-acts { display: flex; gap: 10px; margin-top: 2px; }
+  .row-act {
+    background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 600; color: var(--ink-3);
+    transition: color .18s ease;
+  }
+  .row-act:hover { color: var(--ink); }
+  .row-act.danger:hover { color: #f87171; }
+
+  .add-skill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 10px;
+    cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    background: rgba(124,127,242,0.14); border: 1px solid rgba(124,127,242,0.34); color: #a5a7f7;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .add-skill:hover { background: rgba(124,127,242,0.24); border-color: rgba(124,127,242,0.5); color: #c3c4fb; }
+  .m-hint { font-size: 11.5px; color: var(--ink-3); margin-top: 7px; line-height: 1.5; }
+  .m-row { display: flex; gap: 12px; }
+  .m-row .m-field { flex: 1; }
+
   .skill-check { position: relative; flex: none; margin-top: 2px; }
   .skill-check input { position: absolute; opacity: 0; width: 22px; height: 22px; margin: 0; cursor: pointer; }
   .skill-box {
@@ -436,6 +464,10 @@
             <button type="button" class="filter-btn" data-filter="todo" aria-pressed="false">To do</button>
             <button type="button" class="filter-btn" data-filter="done" aria-pressed="false">Done</button>
           </div>
+          <button type="button" class="add-skill" id="addSkillBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add your own skill
+          </button>
         </div>
 
         <div id="checklist"></div>
@@ -514,6 +546,50 @@
     <div class="m-actions">
       <button type="button" class="btn-ghost" id="logCancel">Cancel</button>
       <button type="button" class="btn" id="logSave">Save session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / edit a learner's own skill -->
+<div class="modal-back" id="skillBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="skillModalTitle">
+    <h2 id="skillModalTitle">Add your own skill</h2>
+    <p class="modal-sub" id="skillModalSub">Something your track doesn't cover — a language, a tool, a
+      subject from your college syllabus. It joins your checklist, your hours and your charts exactly
+      like the built-in skills.</p>
+
+    <div class="m-field">
+      <label for="skillName">Skill name</label>
+      <input type="text" id="skillName" class="m-input" maxlength="60" placeholder="e.g. Rust, Figma, Microprocessors">
+    </div>
+
+    <div class="m-row">
+      <div class="m-field">
+        <label for="skillLevel">Stage</label>
+        <select id="skillLevel" class="m-input"></select>
+      </div>
+      <div class="m-field">
+        <label for="skillHours">Est. hours</label>
+        <input type="number" id="skillHours" class="m-input" min="1" max="500" step="1" value="20">
+      </div>
+    </div>
+
+    <div class="m-field">
+      <label for="skillDomain">Category <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="skillDomain" class="m-input" maxlength="40" placeholder="My Own Skills">
+    </div>
+
+    <div class="m-field" style="margin-bottom:0;">
+      <label for="skillDesc">What does it cover? <span class="muted" style="font-weight:400;">(optional)</span></label>
+      <input type="text" id="skillDesc" class="m-input" maxlength="220" placeholder="e.g. Ownership, borrowing, lifetimes, cargo">
+      <p class="m-hint" id="skillHint">Your skill counts toward your roadmap totals and weeks-remaining
+        estimate, so keep the hours honest.</p>
+      <p class="m-error" id="skillError" role="alert"></p>
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn-ghost" id="skillCancel">Cancel</button>
+      <button type="button" class="btn" id="skillSave">Add skill</button>
     </div>
   </div>
 </div>
@@ -652,7 +728,7 @@
 
   function skillRow(item) {
     var row = document.createElement("div");
-    row.className = "skill-row" + (item.done ? " is-done" : "");
+    row.className = "skill-row" + (item.done ? " is-done" : "") + (item.custom ? " is-custom" : "");
 
     var check = document.createElement("label");
     check.className = "skill-check";
@@ -676,6 +752,12 @@
     var name = document.createElement("div");
     name.className = "skill-name";
     name.textContent = item.name;
+    if (item.custom) {
+      var tag = document.createElement("span");
+      tag.className = "custom-tag";
+      tag.textContent = "Yours";
+      name.appendChild(tag);
+    }
     var desc = document.createElement("p");
     desc.className = "skill-desc";
     desc.textContent = item.desc;
@@ -712,6 +794,41 @@
     link.textContent = item.done ? "Revise" : "Learn";
     meta.appendChild(hours);
     meta.appendChild(link);
+
+    /* Only skills the learner added can be edited or removed. */
+    if (item.custom) {
+      var acts = document.createElement("div");
+      acts.className = "row-acts";
+
+      var edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "row-act";
+      edit.textContent = "Edit";
+      edit.setAttribute("aria-label", "Edit " + item.name);
+      edit.addEventListener("click", function () { openSkillModal(item.id); });
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "row-act danger";
+      del.textContent = "Remove";
+      del.setAttribute("aria-label", "Remove " + item.name);
+      del.addEventListener("click", function () {
+        var logged = loggedBySkill[item.id] || 0;
+        var warning = "Remove “" + item.name + "” from your roadmap?";
+        if (logged > 0) {
+          warning += "\n\nThe " + D.formatHours(logged) +
+            " you logged against it stays in your total study time, but will no longer be attributed to this skill.";
+        }
+        if (!window.confirm(warning)) return;
+        D.removeCustomSkill(item.id);
+        progress = D.readProgress();
+        render();
+      });
+
+      acts.appendChild(edit);
+      acts.appendChild(del);
+      meta.appendChild(acts);
+    }
 
     row.appendChild(check);
     row.appendChild(main);
@@ -904,7 +1021,9 @@
     if (e.target === $("logBack")) closeModal();
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !$("logBack").hidden) closeModal();
+    if (e.key !== "Escape") return;
+    if (!$("logBack").hidden) closeModal();
+    else if (!$("skillBack").hidden) closeSkillModal();
   });
 
   $("logSave").addEventListener("click", function () {
@@ -943,6 +1062,87 @@
     renderSessions();
     $("statThisWeek").textContent = D.formatHours(hoursThisWeek());
   }
+
+  /* ── Custom skills — add / edit ──────────────────────────────────── */
+  /* editingSkillId is null when adding, or the id being edited. */
+  var editingSkillId = null;
+  var skillLastFocus = null;
+
+  (function fillLevelSelect() {
+    var select = $("skillLevel");
+    D.LEVEL_ORDER.forEach(function (level) {
+      var opt = document.createElement("option");
+      opt.value = level;
+      opt.textContent = D.LEVEL_META[level].label;
+      select.appendChild(opt);
+    });
+    select.value = "core";
+  })();
+
+  function openSkillModal(editId) {
+    skillLastFocus = document.activeElement;
+    editingSkillId = editId || null;
+
+    var existing = editingSkillId ? D.SKILLS[editingSkillId] : null;
+    $("skillModalTitle").textContent = existing ? "Edit your skill" : "Add your own skill";
+    $("skillModalSub").textContent = existing
+      ? "Changes apply everywhere this skill appears — your checklist, your hours and your charts."
+      : "Something your track doesn't cover — a language, a tool, a subject from your college syllabus. " +
+        "It joins your checklist, your hours and your charts exactly like the built-in skills.";
+    $("skillSave").textContent = existing ? "Save changes" : "Add skill";
+
+    $("skillName").value = existing ? existing.name : "";
+    $("skillLevel").value = existing ? existing.level : "core";
+    $("skillHours").value = existing ? existing.hours : 20;
+    $("skillDomain").value = existing && existing.domain !== D.CUSTOM_DOMAIN ? existing.domain : "";
+    $("skillDesc").value = existing && !/^A skill you added yourself/.test(existing.desc) ? existing.desc : "";
+    $("skillError").textContent = "";
+
+    $("skillBack").hidden = false;
+    $("skillName").focus();
+  }
+
+  function closeSkillModal() {
+    $("skillBack").hidden = true;
+    editingSkillId = null;
+    if (skillLastFocus) skillLastFocus.focus();
+  }
+
+  $("addSkillBtn").addEventListener("click", function () { openSkillModal(null); });
+  $("skillCancel").addEventListener("click", closeSkillModal);
+  $("skillBack").addEventListener("click", function (e) {
+    if (e.target === $("skillBack")) closeSkillModal();
+  });
+
+  $("skillSave").addEventListener("click", function () {
+    var input = {
+      name: $("skillName").value,
+      level: $("skillLevel").value,
+      hours: $("skillHours").value,
+      domain: $("skillDomain").value.trim() || D.CUSTOM_DOMAIN,
+      desc: $("skillDesc").value
+    };
+
+    var result = editingSkillId
+      ? D.updateCustomSkill(editingSkillId, input)
+      : D.addCustomSkill(input);
+
+    if (!result.ok) {
+      $("skillError").textContent = result.error;
+      return;
+    }
+
+    closeSkillModal();
+    render();
+  });
+
+  /* Enter submits from any text field in the skill modal. */
+  ["skillName", "skillHours", "skillDomain", "skillDesc"].forEach(function (id) {
+    $(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); $("skillSave").click(); }
+    });
+    $(id).addEventListener("input", function () { $("skillError").textContent = ""; });
+  });
 
   document.querySelectorAll(".filter-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
