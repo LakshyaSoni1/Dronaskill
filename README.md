@@ -1,5 +1,4 @@
-# Dronaskill - [https://lakshyasoni1.github.io/Dronaskill/](https://lakshyasoni1.github.io/Dronaskill/
-)
+# Dronaskill -  https://lakshyasoni1.github.io/Dronaskill/
 
 Dronaskill is an ad-free skill mentor for students: verify your degree, get a
 personalised learning path, practise with mock interviews, and apply for
