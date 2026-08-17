@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certification — Dronaskill</title>
+<meta name="description" content="Pick a topic, answer 10 questions, score 7 or more and earn a printable Dronaskill certificate. Free for Dronaskill students.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --series-gold: #c98500;
+    --series-blue: #3987e5;
+    --series-aqua: #199e70;
+    --good:        #0ca30c;
+    --track:       rgba(57,135,229,0.16);
+    --track-gold:  rgba(201,133,0,0.18);
+    --gridline:    rgba(255,255,255,0.07);
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background (identical system to the rest of the site) ─── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #5b6ee0 0%, #1e2a7a 55%, transparent 100%); }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease, opacity .2s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: linear-gradient(135deg,#7c7ff2,#4d4fc4); color: #fff; }
+
+  /* ── Stage machine ───────────────────────────────────────────────── */
+  .stage-hidden { display: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .stage-enter { animation: fadeUp .5s ease both; }
+
+  /* ── Setup stage ─────────────────────────────────────────────────── */
+  .setup-wrap { padding: 46px 0 90px; }
+  .setup-head { max-width: 62ch; margin-bottom: 30px; }
+  .setup-head h1 { font-size: clamp(26px, 4vw, 34px); margin: 14px 0 12px; }
+  .setup-head .lede { max-width: 56ch; }
+
+  .history-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 34px; }
+  .hist-chip { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: var(--r-md); font-size: 12.5px; }
+  .hist-chip b { font-weight: 600; }
+  .hist-chip .hist-score { color: var(--saffron); font-weight: 650; }
+  .hist-chip button { background: none; border: 0; color: var(--ink-2); font-size: 12px; cursor: pointer; font-family: inherit; text-decoration: underline; padding: 0; }
+  .hist-chip button:hover { color: var(--ink); }
+
+  .domain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .domain-card {
+    text-align: left; padding: 20px 20px 18px; border-radius: var(--r-lg); cursor: pointer;
+    color: inherit; font-family: inherit; border: 0; display: flex; flex-direction: column; gap: 8px;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .domain-card:hover { background: rgba(255,255,255,0.09); transform: translateY(-2px); }
+  .domain-card h3 { font-size: 15px; }
+  .domain-card .domain-count { font-size: 11.5px; color: var(--ink-3); }
+  .domain-card .domain-go { margin-top: 6px; font-size: 12.5px; color: var(--saffron); font-weight: 600; }
+
+  /* ── Test stage ──────────────────────────────────────────────────── */
+  .test-wrap { padding: 46px 0 90px; }
+  .test-inner { width: min(720px, 100%); margin-inline: auto; }
+  .progress-head { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .progress-info { flex: 1 1 auto; min-width: 0; }
+  .progress-info .q-num { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px; display: block; }
+  .progress-track { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 999px; background: var(--cta); transition: width .5s cubic-bezier(.22,.9,.3,1); }
+  .domain-chip { flex: none; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+
+  .q-card { padding: 28px 26px 24px; border-radius: var(--r-xl); }
+  .q-card h3 { font-size: 18px; line-height: 1.45; font-weight: 600; letter-spacing: -0.01em; }
+
+  .options { display: grid; gap: 10px; margin-top: 22px; }
+  .opt-btn {
+    display: flex; align-items: flex-start; gap: 13px; text-align: left; width: 100%;
+    padding: 14px 16px; border-radius: var(--r-md); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line-soft); color: var(--ink); font-family: inherit; font-size: 14px;
+    line-height: 1.5; cursor: pointer; transition: background .2s ease, border-color .2s ease;
+  }
+  .opt-btn:hover { background: rgba(255,255,255,0.075); }
+  .opt-btn[aria-pressed="true"] { border-color: rgba(242,171,60,0.55); background: rgba(242,171,60,0.10); }
+  .opt-letter {
+    flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(255,255,255,0.07); font-size: 11.5px; font-weight: 650; color: var(--ink-2);
+  }
+  .opt-btn[aria-pressed="true"] .opt-letter { background: var(--cta); color: var(--cta-ink); }
+
+  .test-actions { margin-top: 26px; display: flex; justify-content: flex-end; }
+
+  /* ── Result stage ────────────────────────────────────────────────── */
+  .result-wrap { padding: 20px 0 90px; }
+  .result-inner { width: min(760px, 100%); margin-inline: auto; }
+
+  .score-hero { padding: 30px 30px 26px; border-radius: var(--r-xl); margin-bottom: 24px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-ring { position: relative; width: 100px; height: 100px; flex: none; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-val { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .score-ring-val b { font-size: 26px; font-weight: 650; letter-spacing: -0.03em; }
+  .score-ring-val span { font-size: 10px; color: var(--ink-3); }
+  .score-meta strong { display: block; font-size: 22px; font-weight: 640; margin-bottom: 6px; }
+  .score-meta p { font-size: 13.5px; color: var(--ink-2); max-width: 46ch; }
+
+  .name-gate { padding: 26px; border-radius: var(--r-xl); margin-bottom: 24px; }
+  .name-gate .field { margin-bottom: 16px; }
+  .name-gate label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
+  .text-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line); color: var(--ink); font-family: inherit; font-size: 14px;
+  }
+  .text-input:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+  .text-input::placeholder { color: var(--ink-3); }
+
+  /* ── Certificate ─────────────────────────────────────────────────── */
+  .cert-card {
+    padding: 46px 42px 38px; border-radius: var(--r-xl); text-align: center; position: relative;
+    margin-bottom: 24px; overflow: hidden;
+  }
+  .cert-card::before {
+    content: ""; position: absolute; inset: 10px; border: 1px solid rgba(242,171,60,0.30); border-radius: 16px; pointer-events: none;
+  }
+  .cert-mark { width: 34px; height: 34px; margin: 0 auto 14px; }
+  .cert-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--saffron); font-weight: 650; }
+  .cert-title { font-size: 15px; color: var(--ink-2); margin-top: 10px; }
+  .cert-name { font-size: clamp(26px, 4vw, 36px); font-weight: 650; letter-spacing: -0.02em; margin: 16px 0 12px; }
+  .cert-body { font-size: 14px; color: var(--ink-2); max-width: 52ch; margin: 0 auto; line-height: 1.65; }
+  .cert-body b { color: var(--ink); }
+  .cert-meta { display: flex; justify-content: center; gap: 32px; margin-top: 26px; flex-wrap: wrap; }
+  .cert-meta div { text-align: center; }
+  .cert-meta b { display: block; font-size: 17px; font-weight: 650; }
+  .cert-meta span { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+  .cert-fineprint { margin-top: 28px; font-size: 11px; color: var(--ink-3); max-width: 48ch; margin-inline: auto; line-height: 1.6; }
+
+  .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+
+  /* ── Fail review list ────────────────────────────────────────────── */
+  .final-list { display: grid; gap: 12px; margin-bottom: 26px; }
+  .qr-card { padding: 16px 20px; border-radius: var(--r-lg); }
+  .qr-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+  .qr-head::-webkit-details-marker { display: none; }
+  .qr-head h4 { font-size: 13.5px; font-weight: 560; color: var(--ink); max-width: 76ch; }
+  .qr-score { flex: none; font-size: 12px; font-weight: 650; padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+  .qr-score.ok { background: rgba(12,163,12,0.14); color: #4ade80; }
+  .qr-score.no { background: rgba(239,68,68,0.14); color: #f87171; }
+  .qr-card[open] .qr-head { margin-bottom: 12px; }
+  .qr-body { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; display: grid; gap: 8px; }
+  .qr-body .qr-your { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--line-soft); }
+  .qr-body strong { color: var(--ink); font-weight: 560; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 560px) {
+    .cert-card { padding: 34px 22px 30px; }
+    .cert-meta { gap: 20px; }
+    .score-hero { padding: 24px 22px 22px; }
+  }
+
+  /* ── Print: certificate only ─────────────────────────────────────── */
+  @media print {
+    body * { visibility: hidden; }
+    #certificateCard, #certificateCard * { visibility: visible; }
+    #certificateCard {
+      position: absolute; top: 0; left: 0; width: 100%;
+      background: #fff !important; color: #1a1a1a !important; box-shadow: none; border: 2px solid #d9a336;
+    }
+    #certificateCard::before { border-color: rgba(200,140,20,0.5) !important; }
+    #certificateCard .cert-title, #certificateCard .cert-body, #certificateCard .cert-fineprint { color: #444 !important; }
+    #certificateCard .cert-body b { color: #1a1a1a !important; }
+    #certificateCard .cert-meta span { color: #777 !important; }
+    #certificateCard .cert-eyebrow { color: #b5791e !important; }
+    .site-head, footer.slim, .bg, .grid-layer, .noise, .result-actions, #stage-setup, #stage-test { display: none !important; }
+    @page { size: landscape; margin: 14mm; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="index.html#features">Learn</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+      <a class="nav-link" href="certification.html" aria-current="page">Certification</a>
+      <a class="nav-link" href="login.html">Login</a>
+      <a class="nav-link" href="recruiters.html">For Companies</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+      <span class="avatar" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>
+        </svg>
+      </span>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ══════════════════ STAGE 1 — SETUP ══════════════════ -->
+  <section class="stage setup-wrap wrap stage-enter" id="stage-setup">
+    <div class="setup-head">
+      <span class="eyebrow">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3l7.5 3v5.5c0 4.4-3 8.2-7.5 9.5-4.5-1.3-7.5-5.1-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+        Certification
+      </span>
+      <h1>Prove what you know.</h1>
+      <p class="lede">Pick a topic, answer 10 questions, score 7 or more and you'll get a certificate with your
+        name on it — a personal record you can print and keep, right from your dashboard.</p>
+    </div>
+
+    <div class="history-strip" id="historyStrip" hidden></div>
+
+    <div class="domain-grid" id="domainGrid"></div>
+  </section>
+
+  <!-- ══════════════════ STAGE 2 — TEST ══════════════════ -->
+  <section class="stage test-wrap wrap stage-hidden" id="stage-test">
+    <div class="test-inner">
+      <div class="progress-head">
+        <div class="progress-info">
+          <span class="q-num" id="qLabel">Question 1 of 10</span>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        <span class="domain-chip" id="domainChip">Topic</span>
+      </div>
+
+      <div class="q-card glass">
+        <h3 id="qText">Question text</h3>
+        <div class="options" id="optionsList"></div>
+      </div>
+
+      <div class="test-actions">
+        <button type="button" class="btn" id="nextBtn" disabled>Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STAGE 3 — RESULT ══════════════════ -->
+  <section class="stage result-wrap wrap stage-hidden" id="stage-result">
+    <div class="result-inner">
+
+      <!-- Pass branch -->
+      <div id="resultPass" hidden>
+        <div class="score-hero glass">
+          <div class="score-ring">
+            <svg width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--track-gold)" stroke-width="8"/>
+              <circle id="passRingArc" cx="50" cy="50" r="42" fill="none" stroke="var(--series-gold)"
+                      stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="263.9" stroke-dashoffset="263.9"
+                      style="transition: stroke-dashoffset 1s cubic-bezier(.22,.9,.3,1)"/>
+            </svg>
+            <span class="score-ring-val"><b id="passRingNum">0</b><span>of 10</span></span>
+          </div>
+          <div class="score-meta">
+            <strong id="passHeadline">You passed.</strong>
+            <p id="passSub">Enter your name to generate your certificate.</p>
+          </div>
+        </div>
+
+        <div class="name-gate glass" id="nameGate">
+          <div class="field">
+            <label for="certNameInput">Your name, as it should appear on the certificate</label>
+            <input type="text" id="certNameInput" class="text-input" placeholder="e.g. Ananya Sharma" autocomplete="name">
+          </div>
+          <button type="button" class="btn" id="genCertBtn">Generate certificate</button>
+        </div>
+
+        <div class="cert-card glass" id="certificateCard" hidden>
+          <svg class="cert-mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+          <div class="cert-eyebrow">Certificate of Completion</div>
+          <p class="cert-title">This certifies that</p>
+          <div class="cert-name" id="certName">Learner Name</div>
+          <p class="cert-body">has successfully completed the <b id="certDomain">Topic</b> certification
+            assessment on Dronaskill, demonstrating working knowledge of its core concepts.</p>
+          <div class="cert-meta">
+            <div><b id="certScore">8 / 10</b><span>Score</span></div>
+            <div><b id="certDate">—</b><span>Date issued</span></div>
+            <div><b id="certId">—</b><span>Certificate code</span></div>
+          </div>
+          <p class="cert-fineprint">A personal record of achievement issued by Dronaskill — not independently
+            verifiable by a third party, as there is no backend registry behind it.</p>
+        </div>
+
+        <div class="result-actions" id="passActions" hidden>
+          <button type="button" class="btn" id="printBtn">Print / Save as PDF</button>
+          <button type="button" class="btn-ghost" id="anotherCertBtn">Take another certification</button>
+        </div>
+      </div>
+
+      <!-- Fail branch -->
+      <div id="resultFail" hidden>
+        <div class="score-hero glass">
+          <div class="score-ring">
+            <svg width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--track-gold)" stroke-width="8"/>
+              <circle id="failRingArc" cx="50" cy="50" r="42" fill="none" stroke="var(--series-gold)"
+                      stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="263.9" stroke-dashoffset="263.9"
+                      style="transition: stroke-dashoffset 1s cubic-bezier(.22,.9,.3,1)"/>
+            </svg>
+            <span class="score-ring-val"><b id="failRingNum">0</b><span>of 10</span></span>
+          </div>
+          <div class="score-meta">
+            <strong id="failHeadline">Not quite — you needed 7/10.</strong>
+            <p>Review what you missed below, then try again with a fresh set of questions.</p>
+          </div>
+        </div>
+
+        <div class="final-list" id="reviewList"></div>
+
+        <div class="result-actions">
+          <button type="button" class="btn" id="retryBtn">Try Again</button>
+          <button type="button" class="btn-ghost" id="chooseDifferentBtn">Choose a different topic</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script src="skills-data.js"></script>
+<script src="certification-data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var C = window.DRONA_CERT;
+
+  var state = {
+    domain: null, questions: [], index: 0, answers: [], selected: null,
+    score: 0, passed: false, saved: false, certRecord: null, viewingOnly: false
+  };
+
+  function showStage(id) {
+    document.querySelectorAll(".stage").forEach(function (s) {
+      s.classList.add("stage-hidden"); s.classList.remove("stage-enter");
+    });
+    var el = $(id);
+    el.classList.remove("stage-hidden");
+    void el.offsetWidth;
+    el.classList.add("stage-enter");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function getProfileName() {
+    try {
+      var D = window.DRONA;
+      if (!D) return "";
+      var profile = JSON.parse(localStorage.getItem(D.STORAGE_KEY) || "null");
+      return (profile && profile.name) ? String(profile.name).trim() : "";
+    } catch (e) { return ""; }
+  }
+
+  /* ── Setup stage ──────────────────────────────────────────────────── */
+  function renderHistory() {
+    var certs = C.readCertifications();
+    var strip = $("historyStrip");
+    strip.innerHTML = "";
+    if (!certs.length) { strip.hidden = true; return; }
+    strip.hidden = false;
+    certs.slice(0, 8).forEach(function (rec) {
+      var chip = document.createElement("div");
+      chip.className = "hist-chip glass";
+      chip.innerHTML =
+        "<span>" + rec.domain + "</span>" +
+        "<span class=\"hist-score\">" + rec.score + "/" + rec.total + "</span>" +
+        "<span class=\"muted\">" + rec.dateISO + "</span>" +
+        "<button type=\"button\">View</button>";
+      chip.querySelector("button").addEventListener("click", function () { viewCertificate(rec); });
+      strip.appendChild(chip);
+    });
+  }
+
+  function renderDomains() {
+    var grid = $("domainGrid");
+    grid.innerHTML = "";
+    C.DOMAINS.forEach(function (domain) {
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "domain-card glass";
+      card.innerHTML =
+        "<h3>" + domain + "</h3>" +
+        "<span class=\"domain-count\">10 questions &middot; pass at 7</span>" +
+        "<span class=\"domain-go\">Start test →</span>";
+      card.addEventListener("click", function () { startTest(domain); });
+      grid.appendChild(card);
+    });
+  }
+
+  function renderSetup() {
+    state.viewingOnly = false;
+    renderHistory();
+    renderDomains();
+    showStage("stage-setup");
+  }
+
+  /* ── Test stage ───────────────────────────────────────────────────── */
+  function startTest(domain) {
+    state.domain = domain;
+    state.questions = C.sampleQuestions(domain, 10);
+    state.index = 0;
+    state.answers = [];
+    state.selected = null;
+    state.saved = false;
+    state.certRecord = null;
+    $("domainChip").textContent = domain;
+    renderQuestion();
+    showStage("stage-test");
+  }
+
+  function renderQuestion() {
+    var total = state.questions.length;
+    var q = state.questions[state.index];
+    state.selected = null;
+
+    $("qLabel").textContent = "Question " + (state.index + 1) + " of " + total;
+    $("progressFill").style.width = Math.round(((state.index) / total) * 100) + "%";
+    $("qText").textContent = q.q;
+
+    var list = $("optionsList");
+    list.innerHTML = "";
+    var letters = ["A", "B", "C", "D"];
+    q.options.forEach(function (opt, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt-btn";
+      b.setAttribute("aria-pressed", "false");
+      b.innerHTML = "<span class=\"opt-letter\">" + letters[i] + "</span><span>" + opt + "</span>";
+      b.addEventListener("click", function () {
+        state.selected = i;
+        list.querySelectorAll(".opt-btn").forEach(function (btn, idx) {
+          btn.setAttribute("aria-pressed", idx === i ? "true" : "false");
+        });
+        $("nextBtn").disabled = false;
+      });
+      list.appendChild(b);
+    });
+
+    $("nextBtn").disabled = true;
+    $("nextBtn").textContent = (state.index === total - 1) ? "Finish Test" : "Next";
+  }
+
+  function nextQuestion() {
+    if (state.selected === null) return;
+    state.answers.push(state.selected);
+    if (state.index === state.questions.length - 1) {
+      finishTest();
+    } else {
+      state.index++;
+      renderQuestion();
+    }
+  }
+
+  function finishTest() {
+    var score = 0;
+    state.questions.forEach(function (q, i) {
+      if (state.answers[i] === q.correctIndex) score++;
+    });
+    state.score = score;
+    state.passed = score >= 7;
+    renderResult();
+    showStage("stage-result");
+  }
+
+  /* ── Result stage ─────────────────────────────────────────────────── */
+  function setRing(ringId, numId, score, total) {
+    var circumference = 263.9;
+    var offset = circumference * (1 - score / total);
+    requestAnimationFrame(function () {
+      $(ringId).style.strokeDashoffset = String(offset);
+    });
+    $(numId).textContent = score;
+  }
+
+  function renderResult() {
+    var pass = $("resultPass"), fail = $("resultFail");
+    if (state.passed) {
+      pass.hidden = false; fail.hidden = true;
+      $("nameGate").hidden = false;
+      $("certificateCard").hidden = true;
+      $("passActions").hidden = true;
+      $("passHeadline").textContent = "You passed — " + state.score + "/" + state.questions.length + ".";
+      setRing("passRingArc", "passRingNum", state.score, state.questions.length);
+
+      var existingName = getProfileName();
+      if (existingName) {
+        $("certNameInput").value = existingName;
+      }
+    } else {
+      pass.hidden = true; fail.hidden = false;
+      $("failHeadline").textContent = "Not quite — " + state.score + "/" + state.questions.length + ". You needed 7/10.";
+      setRing("failRingArc", "failRingNum", state.score, state.questions.length);
+      renderReviewList();
+    }
+  }
+
+  function renderReviewList() {
+    var list = $("reviewList");
+    list.innerHTML = "";
+    var letters = ["A", "B", "C", "D"];
+    state.questions.forEach(function (q, i) {
+      var yourIndex = state.answers[i];
+      var correct = yourIndex === q.correctIndex;
+      var details = document.createElement("details");
+      details.className = "qr-card glass";
+      details.innerHTML =
+        "<summary class=\"qr-head\">" +
+          "<h4>" + (i + 1) + ". " + q.q + "</h4>" +
+          "<span class=\"qr-score " + (correct ? "ok" : "no") + "\">" + (correct ? "Correct" : "Missed") + "</span>" +
+        "</summary>" +
+        "<div class=\"qr-body\">" +
+          "<div class=\"qr-your\"><strong>Your answer:</strong> " +
+            (yourIndex === undefined ? "No answer" : letters[yourIndex] + ". " + q.options[yourIndex]) +
+          "</div>" +
+          "<div><strong>Correct answer:</strong> " + letters[q.correctIndex] + ". " + q.options[q.correctIndex] + "</div>" +
+          "<div>" + q.explain + "</div>" +
+        "</div>";
+      list.appendChild(details);
+    });
+  }
+
+  function generateCertificate() {
+    var name = $("certNameInput").value.trim();
+    if (name.length < 1) { $("certNameInput").focus(); return; }
+
+    if (!state.saved) {
+      var record = C.addCertification({
+        domain: state.domain, name: name, score: state.score, total: state.questions.length
+      });
+      state.saved = true;
+      state.certRecord = record;
+    }
+    if (state.certRecord) renderCertificateCard(state.certRecord);
+  }
+
+  function renderCertificateCard(record) {
+    $("certName").textContent = record.name;
+    $("certDomain").textContent = record.domain;
+    $("certScore").textContent = record.score + " / " + record.total;
+    $("certDate").textContent = record.dateISO;
+    $("certId").textContent = record.id;
+
+    $("nameGate").hidden = true;
+    $("certificateCard").hidden = false;
+    $("passActions").hidden = false;
+  }
+
+  /* Jump straight to a read-only certificate view for a past record. */
+  function viewCertificate(record) {
+    state.viewingOnly = true;
+    state.passed = true;
+    $("resultPass").hidden = false;
+    $("resultFail").hidden = true;
+    $("passHeadline").textContent = record.domain + " — " + record.score + "/" + record.total;
+    $("passSub").textContent = "Issued " + record.dateISO + ".";
+    setRing("passRingArc", "passRingNum", record.score, record.total);
+    renderCertificateCard(record);
+    showStage("stage-result");
+  }
+
+  /* ── Wire up buttons ──────────────────────────────────────────────── */
+  $("nextBtn").addEventListener("click", nextQuestion);
+  $("genCertBtn").addEventListener("click", generateCertificate);
+  $("printBtn").addEventListener("click", function () { window.print(); });
+  $("anotherCertBtn").addEventListener("click", renderSetup);
+  $("retryBtn").addEventListener("click", function () { startTest(state.domain); });
+  $("chooseDifferentBtn").addEventListener("click", renderSetup);
+
+  renderSetup();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+====================================================================
+DRONASKILL — PRESENTATION CONTENT
+Slide-by-slide points + speaker talking points + future roadmap
+====================================================================
+
+HOW TO USE THIS FILE
+---------------------
+Each section below = one slide. "SLIDE CONTENT" is what goes on the
+slide (keep it short there — this doc gives you the full version to
+trim from). "SAY THIS" is what to speak out loud, not put on the
+slide. Cheat-sheet numbers and anticipated Q&A are at the bottom.
+
+
+====================================================================
+KEY NUMBERS — MEMORIZE THESE (judges/audience always ask)
+====================================================================
+- 124 skills in the catalogue
+- 18 career tracks
+- 12 skill domains
+- 213 curated lecture videos, ~800 hours of content
+- 6-step onboarding wizard
+- 0 ads, 0 tracking scripts, 0 backend cost today (fully static)
+- 1 shared design system across every page (saffron/gold on
+  near-black, indigo, glassmorphism)
+
+
+====================================================================
+SLIDE 1 — TITLE
+====================================================================
+SLIDE CONTENT:
+- DronaSkill
+- An ad-free skill mentor for students
+- Verify. Learn. Practice. Get placed.
+- Team Drona
+
+SAY THIS:
+Open with the name meaning: "Drona" = the guru/teacher archetype from
+Indian tradition who trains based on the student's ability, not a
+one-size-fits-all curriculum. That's the whole product thesis in one
+word — position the app as a personal mentor, not a course catalogue.
+
+
+====================================================================
+SLIDE 2 — THE PROBLEM
+====================================================================
+SLIDE CONTENT:
+- Students drown in generic course catalogues — everyone gets the
+  same playlist regardless of what they already know
+- Free learning content exists, but it's scattered across YouTube,
+  ridden with ads, comments, and "recommended for you" distractions
+- No feedback loop: students don't know if they're interview-ready
+  until the actual interview
+- Verification and internship access are gatekept behind paid
+  platforms or college placement cells
+
+SAY THIS:
+Ground this in something relatable: "Raise your hand if you've ever
+opened YouTube to learn one concept and closed the tab 40 minutes
+later on a completely unrelated video." That's the exact failure mode
+DronaSkill's lecture player is built to prevent.
+
+
+====================================================================
+SLIDE 3 — OUR SOLUTION
+====================================================================
+SLIDE CONTENT:
+- One platform, one profile, one learning path
+- Onboarding builds a personalised skill roadmap in under 2 minutes
+- A distraction-free player delivers only the lectures that matter
+- A dashboard and analytics view turn "studying" into measurable
+  progress
+- An AI mock interview room closes the loop before the real
+  interview does
+
+SAY THIS:
+Frame it as a pipeline, not a feature list: "Tell us who you are once
+→ we build the path → we deliver the content without distraction →
+we show you the data → we test you before the real thing tests you."
+That sentence is your one-liner if you're cut off for time.
+
+
+====================================================================
+SLIDE 4 — WHO IT'S FOR
+====================================================================
+SLIDE CONTENT:
+- Students and early-career learners choosing or switching a track
+- Self-taught learners who want structure without paying for a
+  bootcamp
+- Anyone who's tired of ad-driven "free" learning platforms
+- Job-seekers who want realistic interview practice with feedback,
+  not just a stack of questions
+
+SAY THIS:
+If asked "who's your competition" — the honest answer is YouTube
+itself (as an unstructured default) and paid bootcamps, not other ed-
+tech apps. Say that directly; it's a stronger position than pretending
+you're competing with Coursera.
+
+
+====================================================================
+SLIDE 5 — WHAT MAKES US DIFFERENT
+====================================================================
+SLIDE CONTENT:
+- Ad-free by design — no impressions to sell means no incentive to
+  keep you scrolling instead of learning
+- Personalised from question one, not after a paywall
+- Learning + verification + interview practice + internships in one
+  place instead of four different apps
+- A genuinely distraction-free player — no suggested videos, no
+  comments, no autoplay rabbit hole
+- One consistent visual identity across the entire product, not a
+  patchwork of screens
+
+SAY THIS:
+This is your "why us" slide — spend real time here. The ad-free point
+lands well with a student audience specifically because they've all
+felt the YouTube rabbit hole; make it personal, not generic marketing
+copy.
+
+
+====================================================================
+SLIDE 6 — PRODUCT TOUR: THE FLOW
+====================================================================
+SLIDE CONTENT:
+  Landing → Onboarding → Dashboard → Lecture Player
+                              ↓
+                     Deep Analysis  ·  AI Mock Interview
+
+SLIDE CONTENT (page map):
+- Homepage — pitch, how-it-works, feature grid
+- Onboarding — 6-step profile wizard
+- Dashboard — skill checklist, progress ring, "next up"
+- Analysis — heatmap, level meters, domain coverage, burn-up chart
+- Lectures — the distraction-free player
+- Mock Interview — setup → interview room → feedback → report
+
+SAY THIS:
+Use this as your map slide — tell the room "I'll walk through each of
+these in order, then show you where this is going." It sets
+expectations for pacing and gives you a natural place to check the
+clock.
+
+
+====================================================================
+SLIDE 7 — ONBOARDING: PERSONALIZED FROM MINUTE ONE
+====================================================================
+SLIDE CONTENT:
+- A 6-slide wizard: about you → career goal → skills you already
+  know → weekly time budget → preferred learning formats → review
+- Answers immediately seed a real, ranked skill plan — not a generic
+  track
+- Skips what the learner already knows instead of re-teaching it
+- Redirects straight into a populated dashboard — zero empty states
+
+SAY THIS:
+Emphasize the "skips what you already know" part — this is the single
+biggest UX complaint students have about generic courses (re-doing
+intro content for a skill they already have). Naming that explicitly
+shows you understood the actual pain point, not just built a form.
+
+
+====================================================================
+SLIDE 8 — DASHBOARD: THE COMMAND CENTER
+====================================================================
+SLIDE CONTENT:
+- Progress ring showing overall completion at a glance
+- Skill checklist grouped by tier: foundation → core → advanced →
+  job-ready
+- Filters to focus on one domain or level at a time
+- A "next up" card that always tells the learner their single next
+  action
+- Every skill row deep-links straight into its lecture(s)
+
+SAY THIS:
+Highlight the "next up" card specifically — it's the antidote to
+decision paralysis. A learner never has to ask "what should I study
+today," the product answers that question for them.
+
+
+====================================================================
+SLIDE 9 — DEEP ANALYSIS: DATA-DRIVEN PROGRESS
+====================================================================
+SLIDE CONTENT:
+- Activity heatmap — see consistency, not just totals
+- Level meters and domain-coverage bars — see gaps, not just hours
+- Burn-up chart — track cumulative progress against the full plan
+- KPI row with a streak counter for motivation
+- Toggles between "estimated" hours (skills checked off) and
+  "logged" hours (real study sessions you entered) — never blends
+  the two, since one is a plan and the other is reality
+- Every chart ships with a table twin for accessibility
+
+SAY THIS:
+The estimated-vs-logged distinction is a genuine design decision, not
+an accident — mention it if asked about data integrity. It shows the
+team thought about what happens when a learner's actual study time
+diverges from the plan, instead of silently averaging two different
+kinds of numbers together.
+
+
+====================================================================
+SLIDE 10 — LECTURE LIBRARY: LEARNING WITHOUT THE RABBIT HOLE
+====================================================================
+SLIDE CONTENT:
+- 213 hand-picked videos across all 124 skills — ~800 hours, every
+  domain covered, every track walkable start to finish
+- Plays inside a stripped-down player: no suggested videos, no
+  comments, no autoplay drift
+- Watching a lecture can auto-log study hours — the analytics page
+  updates itself, the learner doesn't have to
+- Learners can hide, reorder, edit, or add their own videos — their
+  changes layer on top of the curated list instead of replacing it,
+  so future curation updates still reach them
+
+SAY THIS:
+"Hand-picked" is doing real work here — every video was vetted for
+quality and for whether embedding is even allowed, not scraped from a
+search API. That curation is a big part of the actual engineering
+effort, even though it shows up as "just a video list" on screen.
+
+
+====================================================================
+SLIDE 11 — LECTURE LIBRARY: PLAYLIST MODE (TECHNICAL HIGHLIGHT)
+====================================================================
+SLIDE CONTENT:
+- Learners can paste any YouTube playlist link and swap it in for a
+  skill's curated list
+- No YouTube Data API key required — and none exists for this static
+  site — so playlist contents come live from the client-side YouTube
+  IFrame Player API instead
+- Video titles/channels resolved through YouTube's public oEmbed
+  endpoint, also key-free
+- Duration for playlist videos isn't available up front from any
+  key-free source — the player measures it itself the first time a
+  video is watched to completion, then caches it for accurate
+  auto-logging from then on
+
+SAY THIS:
+This is your strongest "we actually engineered something" slide — use
+it if the audience is technical. The key insight to say out loud: "We
+don't have a backend, so we can't hold an API key. Every integration
+had to work from the browser alone, key-free" — that constraint, not
+its absence, is the interesting part.
+
+
+====================================================================
+SLIDE 12 — AI MOCK INTERVIEW: PRACTICE THAT FEELS REAL
+====================================================================
+SLIDE CONTENT:
+- Setup: choose role, experience level, and interview mode
+- Interview room: timed questions, answer by typing or speaking
+- Per-question feedback modal right after each answer
+- Final report summarizing the full session
+- Built from a UI reference for layout only — the visual identity
+  stayed 100% DronaSkill's own dark saffron/indigo system
+
+SAY THIS:
+If asked why voice input is there — frame it as closing the gap
+between "practicing" and "an actual interview," where you're speaking
+under time pressure, not typing calmly.
+
+
+====================================================================
+SLIDE 13 — MOCK INTERVIEW GRADING: TODAY VS. TOMORROW
+====================================================================
+SLIDE CONTENT:
+  TODAY (live, working now):
+  - A local, client-side heuristic scorer
+  - Checks keyword coverage, sentence length, filler/hedge-word usage
+  - No server round-trip — instant feedback, works completely offline
+
+  TOMORROW (designed, not yet wired in):
+  - A full rubric-based grading prompt is already written for
+    Claude (Anthropic's Messages API): 0–10 scoring, strengths,
+    improvements, and an "ideal answer" concept, mapped directly onto
+    the existing feedback UI
+  - Deliberately not connected yet — wiring in a real LLM call means
+    standing up a backend/serverless proxy so the API key is never
+    exposed in client-side code, and that's a real infrastructure
+    decision, not a copy-paste
+
+SAY THIS:
+Be upfront and confident about this being unfinished — it reads as
+engineering maturity, not a gap. Say: "We deliberately did not hard-
+code an API key into a static site just to get a demo working. The
+prompt is production-ready; the day we add a backend, this becomes a
+one-file swap, not a redesign."
+
+
+====================================================================
+SLIDE 14 — DESIGN SYSTEM & UX PHILOSOPHY
+====================================================================
+SLIDE CONTENT:
+- One shared visual language across every page: near-black
+  background, saffron/gold accent, indigo, glassmorphism cards
+- Ambient background layer — drifting blurred orbs, a faint grid,
+  film-grain noise — used consistently, never page-specific
+- Chart colors specifically validated for contrast against the dark
+  chart surface, not just picked to "look nice"
+- Every data visualization ships with an accessible table twin
+
+SAY THIS:
+Mention that the design tokens are defined once and deliberately
+duplicated per page rather than pulled from a shared stylesheet —
+segue naturally into the architecture slide next.
+
+
+====================================================================
+SLIDE 15 — TECHNICAL ARCHITECTURE
+====================================================================
+SLIDE CONTENT:
+- 100% static: plain HTML files with inline CSS/JS — no framework,
+  no bundler, no package.json
+- Every page is self-contained and can be opened on its own
+- Two shared data modules: skills-data.js (124-skill catalogue, 18
+  tracks, plan-building logic) and lectures-data.js (curated video
+  library) — the only shared code in the whole project
+- All learner state lives in localStorage: profile, skill progress,
+  study log, lecture overrides and watch history, interview sessions
+- A small local launcher script serves the folder over
+  http://localhost so YouTube embeds and the IFrame API work
+  correctly (they refuse to run over a bare file:// origin)
+
+SAY THIS:
+Reframe "no backend" as a deliberate choice for a hackathon/early-
+stage build, not a limitation the team failed to overcome: fast to
+ship, zero hosting cost, zero attack surface for user data since
+nothing leaves the browser. Then pivot straight into the roadmap
+slide — "here's exactly where a backend earns its place."
+
+
+====================================================================
+SLIDE 16 — ENGINEERING HIGHLIGHTS
+====================================================================
+SLIDE CONTENT:
+- Migrated an older progress data shape live, in place, with no data
+  loss for existing users (self-healing localStorage reads)
+- Built two separate hour-tracking systems (planned vs. actually
+  logged) and kept them from ever silently mixing in a chart
+- Shipped a key-free integration with YouTube's IFrame Player API and
+  oEmbed to support arbitrary playlists without a backend or API key
+- Defensive by default: every stored value is re-validated against
+  the real catalogue and a strict video-ID format before it ever
+  reaches an iframe or a chart
+
+SAY THIS:
+This slide exists for technical judges — if your audience is non-
+technical, compress it to one line: "the app is careful with data it
+didn't generate itself, including data a user could tamper with
+directly in their browser."
+
+
+====================================================================
+SLIDE 17 — WHAT'S LIVE TODAY VS. WHAT'S PITCHED
+====================================================================
+SLIDE CONTENT:
+  FULLY BUILT AND WORKING:
+  - Onboarding, Dashboard, Deep Analysis, Lecture Library (incl.
+    playlist mode), AI Mock Interview UI + heuristic grading
+
+  ON THE HOMEPAGE AS A PITCH, NOT YET A WORKING FLOW:
+  - "Verify Degree" — degree/enrolment upload and validation
+  - "Apply for Internships" — internship application flow
+
+SAY THIS:
+Say this proactively rather than waiting to be caught — it builds
+trust: "The homepage markets four pillars: verify, learn, practice,
+apply. Two of those are fully live products today; the other two are
+the next milestones, and I'll show you exactly what's needed to build
+them." Then move into the roadmap.
+
+
+====================================================================
+SLIDE 18 — ROADMAP: NEAR TERM
+====================================================================
+SLIDE CONTENT:
+- Wire in real AI grading — deploy the backend/serverless proxy,
+  connect the already-written Claude grading prompt, replace the
+  heuristic scorer with real LLM feedback
+- Stand up a minimal backend + real accounts so a learner's profile,
+  progress, and study log survive across devices instead of living
+  only in one browser's localStorage
+- Build the "Verify Degree" flow: document upload + institution-side
+  validation
+- Build a real "Apply for Internships" flow: listings, matching
+  against the learner's verified skill level, and applications
+
+SAY THIS:
+Order this list by "smallest lift, biggest credibility payoff" — the
+AI grading swap is genuinely closer than it looks because the hard
+part (the prompt + UI mapping) is already done.
+
+
+====================================================================
+SLIDE 19 — ROADMAP: LONGER TERM VISION
+====================================================================
+SLIDE CONTENT:
+- Adaptive learning paths that re-rank based on mock-interview
+  performance, not just self-reported skill level
+- Peer/community layer — study groups or accountability partners
+  matched by track and pace
+- Mobile app or installable PWA so the distraction-free player and
+  study log work as well on a phone as a desktop
+- Employer-facing side: verified profiles + real interview
+  performance become a credential companies can actually trust
+- Gamification done carefully — streaks and milestones that
+  reinforce the existing progress ring, not point systems that
+  distract from learning the way ads do
+- Sustainable, still-ad-free monetization: institutional/college
+  partnerships or an optional premium tier (e.g. deeper AI feedback,
+  verified credentials) rather than advertising
+
+SAY THIS:
+Close the loop back to Slide 5's "why us": every roadmap item here is
+in service of the ad-free, mentor-not-catalogue thesis — say that
+explicitly so the roadmap doesn't sound like generic feature bloat.
+If asked about monetization, having an actual answer (institutional
+partnerships / optional premium) beats "we'll figure it out."
+
+
+====================================================================
+SLIDE 20 — TEAM
+====================================================================
+SLIDE CONTENT:
+- Built by Team Drona
+- [add member names / roles here]
+
+SAY THIS:
+Keep this short. If time is tight, this is the slide to compress, not
+cut entirely — always credit the team by name.
+
+
+====================================================================
+SLIDE 21 — CLOSING
+====================================================================
+SLIDE CONTENT:
+- DronaSkill: the guru that adapts to the student, not the other way
+  around
+- Ad-free. Personalised. Measurable. Interview-ready.
+- Thank you — questions?
+
+SAY THIS:
+End on the "guru" framing from your opening line — it bookends the
+talk and is the one sentence you want the audience to remember if
+they remember nothing else.
+
+
+====================================================================
+ANTICIPATED QUESTIONS — HAVE ANSWERS READY
+====================================================================
+
+Q: "Why no backend / database at all?"
+A: Deliberate early-stage choice — zero hosting cost, zero attack
+   surface for user data (nothing leaves the browser), fastest
+   possible path to a working product. The roadmap adds a backend
+   specifically where it earns its place: real AI grading and
+   cross-device accounts.
+
+Q: "Isn't localStorage risky — what if a user clears their browser
+   data?"
+A: Yes, and that's precisely why cross-device accounts are the first
+   roadmap item once a backend exists. Today's tradeoff was shipping
+   speed over persistence guarantees.
+
+Q: "How do you know the mock interview grading is any good if it's
+   just a heuristic?"
+A: We're explicit that it's a stand-in — keyword coverage, sentence
+   length, filler-word detection. The real grading rubric (LLM-based,
+   via Claude) is already fully written and mapped to the UI; it's
+   waiting on backend infrastructure, not on design work.
+
+Q: "What happens if a curated video gets taken down or disabled?"
+A: Every video is pre-checked for embeddability before being added.
+   Playlist-mode videos are resolved live from YouTube itself, so
+   availability tracks YouTube directly.
+
+Q: "How is this different from just... using YouTube?"
+A: Curation (only vetted, embeddable videos), zero distractions (no
+   suggested videos/comments/autoplay), and everything tied back into
+   a measurable plan and progress dashboard — YouTube alone gives you
+   none of the last two.
+
+Q: "What's the actual tech stack?"
+A: Plain HTML/CSS/JS, no framework, no build step. Two shared data
+   modules for skills and lectures. All state in localStorage today.
+   YouTube IFrame Player API + oEmbed for playlist mode, no API key
+   needed anywhere.
+
+
+====================================================================
+END OF FILE
+====================================================================

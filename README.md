@@ -18,6 +18,9 @@ page is fully self-contained.
 | `analysis.html` | Charts over the study log: activity heatmap, per-level meters, domain bars, and an estimated-hours burn-up. |
 | `lectures.html` | Distraction-free lecture player — see [Lecture library](#lecture-library) below. |
 | `mock-interview.html` | AI Mock Interview flow: role/experience/mode setup → timed interview room (text or voice answers) → per-question feedback modal → final report. Answer scoring is currently a local heuristic (keyword coverage, sentence length, filler-word detection) — see [`mock-interview-grading-prompt.md`](./mock-interview-grading-prompt.md) for the real-LLM grading prompt planned to replace it. |
+| `certification.html` | Pick one of 12 topics, answer a randomised 10-question MCQ round, and score 7+ to earn a printable certificate. Question bank lives in `certification-data.js`. |
+| `login.html` | Email/password sign in and account creation via Supabase Auth. Standalone today — it doesn't gate any other page yet. |
+| `recruiters.html` | Open criteria form (career track, education, certification + minimum score) that returns matching students who opted in on `dashboard.html`. No company sign-in — see "Recruiter matching" below. |
 | `background-aesthetic.html` | A standalone earlier background-layer experiment (drifting orbs / grid / grain, "ocean" theme). Not linked from site navigation and not part of the live product. |
 
 ## Lecture library
@@ -77,6 +80,114 @@ directly from disk, but moving the project folder — or opening it via a
 different path, such as a mapped drive instead of a drive letter — can present
 as a different origin and look like data loss. Serving the folder over
 `http://localhost` avoids that.
+
+## Certification
+
+`certification.html` covers all 12 domains from the skill catalogue in
+`skills-data.js` (Employability, CS Fundamentals, Frontend, Backend & Infra,
+Mobile, Data & Analytics, AI & ML, Security, Design, Product & Business,
+Marketing, Electronics & Embedded). Each domain has its own hand-written pool
+of 15-17 MCQs in `certification-data.js` (`window.DRONA_CERT`); a test
+randomly samples 10 of them and shuffles each question's option order, so
+retakes don't see an identical round.
+
+Score 7 or more out of 10 and the page generates a certificate — name (read
+from the onboarding profile, or entered on the spot if missing), topic,
+score, date, and a display-only certificate code — styled to print or
+"Save as PDF" straight from the browser (`window.print()` plus a
+`@media print` stylesheet). **This is a personal record of achievement, not
+a third-party-verifiable credential** — there is no backend to check it
+against. Only passing attempts are saved; a learner can hold multiple
+certificates per domain by retaking a test to improve their score.
+
+**Storage key** (alongside the ones in `skills-data.js`):
+
+| Key | Contents |
+|---|---|
+| `dronaskill_certifications` | Array of earned certificates: `{ id, domain, name, score, total, dateISO, issuedAt }` |
+
+## Accounts (Supabase)
+
+`login.html` is a standalone email/password sign in and sign up page using
+[Supabase Auth](https://supabase.com/docs/guides/auth). It's the one page on
+the site with a real external dependency: it loads the `@supabase/supabase-js`
+client from a CDN (`https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2`)
+since there's no build step or package manager to install it through. Every
+other page on the site still has zero external dependencies.
+
+Project connection details live in `supabase-config.js` (`window.DRONA_SUPABASE`
+— `url` and `anonKey`), loaded the same plain-script way as `skills-data.js`.
+The anon/public key is meant to be shipped client-side by design — it
+identifies the project, it doesn't grant privileged access on its own. Real
+access control belongs in Supabase's Row Level Security policies, not in
+keeping this key secret.
+
+This page is not wired into the rest of the app yet: it doesn't gate
+dashboard/onboarding/lectures/etc., and the existing `localStorage`-based
+profile/progress data is entirely separate from a Supabase account. It's a
+working sign-in surface, not yet a source of identity for the rest of the
+product.
+
+**Local testing note:** Supabase requires email confirmation before a new
+account can sign in, by default. To test signup → signin locally without
+checking a real inbox, turn off "Confirm email" under
+**Authentication → Providers → Email** in the Supabase dashboard for this
+project while you're testing.
+
+## Recruiter matching
+
+A judge-suggested feature: a company sets hiring criteria and sees matching
+students. Because the rest of the site is entirely client-side (every
+student's data lives only in their own browser's `localStorage`), this is
+the one feature that needs a real shared backend — it reuses the Supabase
+project wired in for [Accounts](#accounts-supabase).
+
+**Setup (required, one-time, manual):** run `recruiter-schema.sql` in your
+Supabase project's **SQL Editor** before this feature will work. It creates
+two tables (`student_profiles`, `student_certifications`) with Row Level
+Security policies that are the actual enforcement mechanism for everything
+below — not just UI hiding.
+
+**How it works:**
+- On `dashboard.html`, a signed-in student sees a "Visible to recruiters"
+  card. Turning it on syncs their onboarding profile (name, career track,
+  education, resolved skill names) and every certification they've earned
+  (from `dronaskill_certifications`) up to Supabase, and sets
+  `visible_to_recruiters = true` on their row. Sync is manual ("Sync now"),
+  so a certification earned after opting in needs a re-sync to show up.
+  "Stop sharing" flips the flag off — RLS then stops returning that row to
+  anyone but the student themselves; their data isn't deleted.
+- `recruiters.html` is an **open, unauthenticated** criteria form — career
+  track, education level, a certification domain + minimum score. Submitting
+  it queries Supabase directly with the anon key and displays matching
+  students (name, email, track, education, matched certifications, skills).
+- **Demo mode**: a row of quick-select chips (Wipro, TCS Digital, Google,
+  Microsoft, Amazon, Flipkart, Zomato) fills in realistic criteria and shows
+  a hand-written set of matching students — no network call, so it can't
+  fail or come up empty during a live presentation. Wipro is what the page
+  loads by default. It's clearly hand-written sample data (`DEMO_COMPANIES`
+  in `recruiters.html`), not a claim that these companies are integrated
+  with Dronaskill. "Find Matches" still runs a real Supabase query against
+  whatever's actually been synced from `dashboard.html`.
+
+**Companies you match** (`dashboard.html`, entirely local, no Supabase): the
+flip side of the above — a student-facing card that checks their real career
+track and real earned certifications against `company-data.js`, a small
+illustrative roster of hiring bars spanning mass IT-services recruiters
+(Wipro, TCS Digital, Infosys, Accenture, Cognizant — broader tracks, a 6/10
+bar) and product companies (Google, Microsoft, Amazon, Flipkart, Zomato —
+narrower track, 7-8/10 bar). It shows which companies the student currently
+clears the bar for, motivating the next certification rather than claiming
+any real hiring pipeline exists. `recruiters.html`'s demo mode reuses the
+same company names so both sides of the site tell one consistent story.
+
+**Privacy trade-off, stated plainly rather than buried:** there is no
+company login. Anyone who opens `recruiters.html` can query and see any
+opted-in student's name and email — the opt-in toggle controls whether a
+student is discoverable at all, not who can discover them. This was a
+deliberate scope choice to keep the feature demoable without building a
+second authentication system; gating `recruiters.html` behind its own
+company accounts is the natural next step if this goes beyond a demo.
 
 ## Running locally
 

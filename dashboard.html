@@ -238,6 +238,12 @@
 
   .chip-static { padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); font-size: 11.5px; color: var(--ink-2); }
   .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip-match { padding: 4px 10px; border-radius: 999px; background: rgba(242,171,60,0.10); border: 1px solid rgba(242,171,60,0.28); font-size: 11.5px; color: var(--saffron); font-weight: 600; }
+  .match-status { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin-bottom: 12px; }
+
+  .recruit-status { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; margin-bottom: 12px; }
+  .recruit-actions { display: flex; flex-direction: column; gap: 8px; }
+  .recruit-actions .btn-sm, .recruit-actions .btn { width: 100%; }
 
   /* ── Per-skill logged-hours bar ──────────────────────────────────── */
   .logged { margin-top: 9px; display: flex; align-items: center; gap: 9px; }
@@ -379,6 +385,9 @@
       <a class="nav-link" href="analysis.html">Analysis</a>
       <a class="nav-link" href="lectures.html">Lectures</a>
       <a class="nav-link" href="mock-interview.html">Practice</a>
+      <a class="nav-link" href="certification.html">Certification</a>
+      <a class="nav-link" href="login.html">Login</a>
+      <a class="nav-link" href="recruiters.html">For Companies</a>
     </div>
     <div class="nav-actions">
       <a class="nav-signin" href="index.html">Exit</a>
@@ -496,6 +505,18 @@
           <div class="profile-rows" id="profileRows"></div>
         </div>
 
+        <div class="side-card glass" id="matchCard">
+          <h3>Companies you match</h3>
+          <p class="match-status" id="matchStatus">Checking…</p>
+          <div class="chip-row" id="matchChips"></div>
+        </div>
+
+        <div class="side-card glass" id="recruitCard">
+          <h3>Visible to recruiters</h3>
+          <p class="recruit-status" id="recruitStatus">Checking…</p>
+          <div class="recruit-actions" id="recruitActions"></div>
+        </div>
+
         <div class="side-card glass">
           <h3>Learning formats</h3>
           <div class="chip-row" id="formatChips"></div>
@@ -602,6 +623,10 @@
 </footer>
 
 <script src="skills-data.js"></script>
+<script src="certification-data.js"></script>
+<script src="company-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
 (function () {
   "use strict";
@@ -1161,7 +1186,152 @@
     render();
   });
 
+  /* ── Companies you match ──────────────────────────────────────────
+     Entirely local — no Supabase, no network. Checks the student's real
+     career track and real earned certifications (dronaskill_certifications)
+     against the illustrative hiring bars in company-data.js. This is a
+     motivational signal ("here's what you currently clear"), not a claim
+     that these companies are integrated with Dronaskill or have seen this
+     student's profile. */
+  function initMatchCard() {
+    var certs = window.DRONA_CERT ? window.DRONA_CERT.readCertifications() : [];
+    var matches = window.DRONA_COMPANIES ? window.DRONA_COMPANIES.matchCompanies(profile.career_goal, certs) : [];
+
+    var box = $("matchChips");
+    box.innerHTML = "";
+
+    if (!matches.length) {
+      $("matchStatus").textContent = certs.length
+        ? "None of your certifications clear a company's bar for " + currentPlan().trackLabel + " yet. Aim for a score of 6+ in a matching domain."
+        : "Earn a certification (6/10 or higher, in a domain matching your track) to see which companies you'd currently clear the bar for.";
+      return;
+    }
+
+    $("matchStatus").textContent = "Based on what you've earned, you currently meet the bar these companies typically hire for:";
+    matches.forEach(function (c) {
+      var chip = document.createElement("span");
+      chip.className = "chip-match";
+      chip.textContent = c.name;
+      box.appendChild(chip);
+    });
+  }
+
+  /* ── Recruiter visibility (Supabase) ──────────────────────────────
+     Opt-in only: nothing here is queryable by recruiters.html until the
+     student explicitly turns this on, which is enforced by Row Level
+     Security on the database side, not just by hiding the button. */
+  var recruitCfg = window.DRONA_SUPABASE || {};
+  var sb = (window.supabase && recruitCfg.url && recruitCfg.anonKey)
+    ? window.supabase.createClient(recruitCfg.url, recruitCfg.anonKey)
+    : null;
+
+  function makeBtn(label, cls, onClick) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function renderRecruitCard(status, buttons) {
+    $("recruitStatus").textContent = status;
+    var box = $("recruitActions");
+    box.innerHTML = "";
+    (buttons || []).forEach(function (b) { box.appendChild(b); });
+  }
+
+  function resolvedSkillNames(ids) {
+    return (ids || []).map(function (id) {
+      var s = D.SKILLS[id];
+      return s ? s.name : null;
+    }).filter(Boolean);
+  }
+
+  function syncProfile(session, plan, visible) {
+    var user = session.user;
+    var row = {
+      id: user.id,
+      name: profile.name || "",
+      email: user.email || "",
+      career_track_id: profile.career_goal || null,
+      career_track_label: plan.trackLabel || null,
+      education_level: profile.education_level || null,
+      stream: profile.stream || null,
+      known_skills: resolvedSkillNames(profile.known_skills),
+      visible_to_recruiters: visible,
+      updated_at: new Date().toISOString()
+    };
+
+    return sb.from("student_profiles").upsert(row).then(function (res) {
+      if (res.error) throw res.error;
+      if (!visible) return null; /* opting out: leave certification rows as-is, RLS just stops exposing them */
+
+      var certs = (window.DRONA_CERT ? window.DRONA_CERT.readCertifications() : []).map(function (c) {
+        return { user_id: user.id, domain: c.domain, score: c.score, total: c.total, date_iso: c.dateISO, cert_code: c.id };
+      });
+
+      return sb.from("student_certifications").delete().eq("user_id", user.id).then(function (delRes) {
+        if (delRes.error) throw delRes.error;
+        if (!certs.length) return null;
+        return sb.from("student_certifications").insert(certs).then(function (insRes) {
+          if (insRes.error) throw insRes.error;
+        });
+      });
+    });
+  }
+
+  function runSync(session, plan, visible) {
+    renderRecruitCard("Syncing…");
+    syncProfile(session, plan, visible).then(function () {
+      initRecruitCard();
+    }).catch(function (err) {
+      renderRecruitCard("Sync failed: " + (err.message || "unknown error"),
+        [makeBtn("Try again", "btn-ghost btn-sm", initRecruitCard)]);
+    });
+  }
+
+  function initRecruitCard() {
+    if (!sb) {
+      renderRecruitCard("Recruiter matching isn't configured on this deployment.");
+      return;
+    }
+
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (!session) {
+        renderRecruitCard("Log in to make your profile visible to companies hiring through Dronaskill.",
+          [makeBtn("Log In", "btn-ghost btn-sm", function () { window.location.href = "login.html"; })]);
+        return;
+      }
+
+      var plan = currentPlan();
+
+      sb.from("student_profiles").select("visible_to_recruiters").eq("id", session.user.id).maybeSingle()
+        .then(function (res2) {
+          if (res2.error) {
+            renderRecruitCard("Couldn't check your recruiter visibility right now.");
+            return;
+          }
+          var row = res2.data;
+
+          if (row && row.visible_to_recruiters) {
+            renderRecruitCard("✓ Visible to recruiters. Companies matching their criteria to your profile can see it.", [
+              makeBtn("Sync now", "btn-ghost btn-sm", function () { runSync(session, plan, true); }),
+              makeBtn("Stop sharing", "btn-ghost btn-sm", function () { runSync(session, plan, false); })
+            ]);
+          } else {
+            renderRecruitCard("Share your name, career track, education and certifications with companies hiring through Dronaskill. Nothing is shared until you turn this on.", [
+              makeBtn("Make my profile visible", "btn btn-sm", function () { runSync(session, plan, true); })
+            ]);
+          }
+        });
+    });
+  }
+
   render();
+  initMatchCard();
+  initRecruitCard();
 })();
 </script>
 </body>

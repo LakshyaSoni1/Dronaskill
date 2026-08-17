@@ -1,0 +1,326 @@
+====================================================================
+DRONASKILL — WHY US, COMPARED TO EVERYTHING ELSE
+Competitive positioning, honest weaknesses, and rebuttals
+====================================================================
+
+HOW TO USE THIS FILE
+---------------------
+This is the backup for the "What makes us different" slide and for
+the Q&A that follows it. Section 4 is the table to put on a slide.
+Sections 5-9 are what you SAY, not what you show.
+
+Read Section 8 (where we don't win) before you present. Judges trust
+a team that names its own gaps far more than one that claims to beat
+everyone at everything. You will almost certainly be asked.
+
+VERIFY BEFORE YOU PRESENT: this file deliberately compares BUSINESS
+MODELS and STRUCTURAL INCENTIVES, not prices or feature checklists,
+because those change every quarter. If you decide to quote a price
+or a specific competitor feature on a slide, check it yourself that
+week. Do not put a number on screen you cannot defend.
+
+
+====================================================================
+1. THE ONE-LINE ANSWER
+====================================================================
+
+  "Everyone else sells you content. We tell you what to learn,
+   in what order, and whether you're actually ready."
+
+If you only get one sentence, that is the sentence. Content is a
+commodity now — there are ten free tutorials for every topic in our
+catalogue. The scarce thing is SEQUENCE and FEEDBACK: what to learn
+next, and proof you've learned it. That is the gap DronaSkill fills.
+
+The second sentence, if you get one:
+
+  "And nobody's incentive is pointed at keeping you on the app
+   instead of getting you a job."
+
+
+====================================================================
+2. WHO WE ARE ACTUALLY COMPETING WITH
+====================================================================
+
+Be honest here — it wins you credibility. Our real competition is
+NOT Coursera. It is, in order of how many students actually use it:
+
+  1. YouTube + a browser tab      (the default, and it is free)
+  2. ChatGPT / Claude directly    (fast-growing, genuinely good)
+  3. Coding-practice sites        (LeetCode, GFG, HackerRank)
+  4. Paid bootcamps               (Scaler, Masai, Newton-type)
+  5. Course marketplaces          (Udemy, Coursera, Unacademy, PW)
+  6. The college placement cell   (the incumbent nobody names)
+
+Saying "our competitor is YouTube" out loud is a strong move. It
+signals you understand your user's actual behaviour instead of
+picking a flattering comparison.
+
+
+====================================================================
+3. THE STRUCTURAL ARGUMENT (the one that actually holds)
+====================================================================
+
+Every competitor's weakness comes from HOW THEY MAKE MONEY, not
+from bad engineering. This is the argument judges remember, because
+it cannot be fixed with a feature release.
+
+  AD-FUNDED (YouTube)
+    Revenue = time on platform. Every design decision -- autoplay,
+    suggested videos, comments, the infinite sidebar -- exists to
+    extend a session. A tool that got you to your answer and closed
+    itself would destroy their revenue. They cannot build us.
+
+  ENROLMENT-FUNDED (bootcamps)
+    Revenue = seats sold, often at a very high ticket price. The
+    incentive is to enrol everyone into the same cohort track,
+    because personalised paths don't scale a fixed syllabus. Also
+    optimised to make you feel you NEED the programme.
+
+  CATALOGUE-FUNDED (Udemy, Coursera, Unacademy, PW)
+    Revenue = courses sold or subscriptions. The incentive is a
+    bigger catalogue, not a shorter path. More courses looks like
+    more value; telling you "you can skip these four" does not.
+
+  ENGAGEMENT-FUNDED (practice sites, streak apps)
+    Revenue = daily actives and premium upsell. The incentive is
+    streaks and problem counts, which measure ACTIVITY, not
+    readiness.
+
+  DRONASKILL
+    No ads, no impressions, no seat sales, nothing to upsell inside
+    the learning loop. There is no revenue reason to keep a student
+    on the app one minute longer than the task needs. That is why we
+    can build a player with no suggested videos, and why we can tell
+    a student "tick this, you already know it, skip 40 hours."
+
+  SAY THIS: "Ask yourself what each of these companies loses if you
+  learn faster. For us, the answer is nothing."
+
+
+====================================================================
+4. THE COMPARISON TABLE  (this is the slide)
+====================================================================
+
+Trim to 5-6 rows for the actual slide. Full version here.
+
+                         Drona  YouTube  Course   Boot-  Practice
+                         Skill           market   camp   sites
+---------------------------------------------------------------
+Personalised path
+before you pay/commit      YES     no      no      no      no
+Tells you what to SKIP     YES     no      no      no      no
+Distraction-free player    YES     no     part    part     n/a
+Free at point of use       YES     YES     no      no     part
+No ads / no tracking       YES     no     part    part    part
+Learn + practice +
+verify in ONE place        YES     no      no     part     no
+Interview practice with
+spoken-answer feedback     YES     no      no     YES      no
+Measures HOURS, not
+just problems solved       YES     no     part     no      no
+Doubt-solving that knows
+your current lecture       YES     no      no     part     no
+Works with zero signup     YES     YES     no      no      no
+Add your own skills to
+the roadmap                YES     n/a     no      no      no
+---------------------------------------------------------------
+Human mentor / cohort       no     no      no     YES      no
+Recognised certificate      no     no     YES     YES     part
+Huge content library       part    YES     YES     part    YES
+
+NOTE the last three rows. Leave them in. A comparison table where
+you win every row reads as marketing; one where you lose three reads
+as an actual analysis. If a judge spots a missing row you didn't
+include, you lose the room.
+
+
+====================================================================
+5. HEAD-TO-HEAD: YOUTUBE
+====================================================================
+
+WHAT THEY DO WELL (say this first, always)
+  Effectively infinite free content, often better taught than paid
+  courses. Our own 214 curated lectures are YouTube videos. We are
+  built ON it, not against it.
+
+WHERE WE WIN
+  - Sequence. YouTube gives you a video; we give you skill #7 of 41
+    with the six before it already ticked off.
+  - No rabbit hole. Our player strips suggested videos, comments and
+    autoplay. Every one of those exists to end your study session.
+  - Memory. YouTube forgets you the moment you close the tab. We
+    keep the roadmap, the ticks, the logged hours and the charts.
+  - Curation with a guarantee: every video is checked for
+    embeddability before it enters the catalogue, so no dead
+    "Video unavailable" mid-path.
+
+HOW TO SAY IT
+  "We didn't try to replace YouTube's content. We replaced the
+   part of YouTube that's working against you."
+
+
+====================================================================
+6. HEAD-TO-HEAD: CHATGPT / CLAUDE USED DIRECTLY
+====================================================================
+
+Take this one seriously. It is the fastest-growing competitor and
+the one a technical judge is most likely to raise.
+
+WHAT THEY DO WELL
+  Answers any doubt instantly, better than our offline tier, and
+  students already have it open.
+
+WHERE WE WIN
+  - Context. A blank chatbot doesn't know you paused CS231n at
+    14:20, scored 85% on gradients, and are four skills into an ML
+    track. Guru AI sends that with every question.
+  - The answer becomes an ASSET. In a chatbot, your doubt scrolls
+    away forever. Here it becomes a revision card in tomorrow's
+    plan. Learning is retention, not one-time explanation.
+  - It refuses to bluff. When our offline tier has no match, it says
+    so and offers to log an open doubt. A general chatbot will
+    always produce a confident answer, right or wrong.
+  - Voice-first, hands-free: ask out loud, hear the answer, keep
+    your hands on the problem.
+
+HONEST CAVEAT (do not hide this)
+  Our LIVE tier needs the user's own Anthropic API key today,
+  because we run fully client-side with no backend. Without a key it
+  falls back to a 28-topic offline base. Say this plainly and pivot:
+  "the architecture is done and proven; the hosted key is a backend
+  problem, not a product problem."
+
+HOW TO SAY IT
+  "A chatbot answers your question. Guru AI answers your question
+   and then puts it in tomorrow's revision plan."
+
+
+====================================================================
+7. HEAD-TO-HEAD: THE OTHER THREE
+====================================================================
+
+PAID BOOTCAMPS (Scaler / Masai / Newton-type)
+  They win on: live human mentors, peer cohorts, accountability,
+  placement networks, an actual brand on your CV. Concede all of it.
+  We win on: cost (free), starting from what you ALREADY know
+  instead of week 1 for everybody, and no lock-in to a fixed
+  syllabus or an income-share agreement.
+  SAY: "We're not trying to beat a mentor. We're what the 95% of
+  students who will never pay for one actually get instead."
+
+COURSE MARKETPLACES (Udemy / Coursera / Unacademy / PW)
+  They win on: recognised certificates, instructor brands,
+  production quality, breadth.
+  We win on: a catalogue is not a plan. They sell you a course; we
+  tell you which four of their courses you can skip. Also: their
+  personalisation happens after you pay, ours happens before you
+  sign up at all.
+  SAY: "A course catalogue answers 'what exists.' We answer 'what
+  next.'"
+
+PRACTICE SITES (LeetCode / GFG / HackerRank)
+  They win on: problem volume, contests, company-tagged questions.
+  We win on: they measure problems solved, which is activity, not
+  readiness. We measure logged hours against a real target, plus
+  spoken interview answers with pace and filler-word feedback --
+  which is what an actual interview tests and a code editor never
+  does.
+  SAY: "Solving 300 problems doesn't tell you if you can explain one
+  of them out loud, under pressure, to a stranger."
+
+
+====================================================================
+8. WHERE WE DO NOT WIN (READ THIS BEFORE PRESENTING)
+====================================================================
+
+Volunteer two of these before you're asked. It buys enormous
+credibility and it defuses the question.
+
+  1. NO HUMAN MENTOR. A bootcamp's mentor beats our AI for
+     motivation and accountability. We don't compete there.
+
+  2. NO RECOGNISED CREDENTIAL. Our verification is self-contained;
+     it isn't yet a certificate an employer knows. Roadmap item.
+
+  3. DATA LIVES IN THE BROWSER. Clear your browser data and your
+     progress is gone. No cross-device sync. This is a deliberate
+     zero-backend tradeoff for shipping speed, not an oversight.
+
+  4. MOCK INTERVIEW GRADING IS A HEURISTIC TODAY. Keyword coverage,
+     answer length, filler words. The real LLM rubric is written and
+     mapped to the UI, waiting on a backend.
+
+  5. LIVE AI NEEDS THE USER'S OWN KEY. See Section 6.
+
+  6. CONTENT DEPENDS ON YOUTUBE. If a video is pulled, that slot
+     needs re-curation. Mitigated by pre-checking embeddability, not
+     eliminated.
+
+  SAY THIS: "Every one of these is a backend problem with a known
+  solution, not a design flaw. We chose to prove the product loop
+  first and pay for infrastructure second."
+
+
+====================================================================
+9. "WHY CAN'T A BIG PLAYER JUST COPY THIS?"
+====================================================================
+
+The single hardest question. The answer is NOT "we'll move faster."
+
+  YOUTUBE CAN'T, because a distraction-free player deletes their
+  revenue model. They would have to remove the sidebar, autoplay and
+  comments -- the three things that generate their watch time.
+
+  BOOTCAMPS CAN'T EASILY, because "here's a path that skips 40 hours
+  you already know" directly shrinks the product they sell seats to.
+
+  MARKETPLACES CAN'T EASILY, because their catalogue economics
+  reward you buying MORE courses, and our whole value is telling you
+  to take FEWER.
+
+  THE HONEST PART: any of them COULD build it if they were willing
+  to break their own business model. Historically, incumbents don't.
+  That's the opening.
+
+  SAY THIS: "It's not that they can't build it. It's that building
+  it would cost them more than it earns them. That gap is our
+  window."
+
+
+====================================================================
+10. PULL-QUOTES FOR SLIDES
+====================================================================
+
+Pick ONE per slide. Don't stack them.
+
+  - "Everyone else sells content. We sell sequence."
+  - "A catalogue tells you what exists. A guru tells you what's next."
+  - "The only platform here with no reason to keep you on it longer."
+  - "We didn't replace YouTube's content. We replaced the
+     distractions."
+  - "Solving 300 problems doesn't prove you can explain one out loud."
+  - "Personalised before you sign up, not after you pay."
+  - "Your doubt shouldn't scroll away. It should come back tomorrow."
+
+
+====================================================================
+11. NUMBERS TO BACK THE CLAIMS  (verified against the codebase)
+====================================================================
+
+  124  skills in the catalogue
+   18  career tracks
+   12  skill domains
+  214  curated lecture videos
+   28  offline topics Guru AI can answer with no API key
+    4  levels every path is ordered by (foundation -> core ->
+       advanced -> job-ready)
+    0  ads, 0 tracking scripts, 0 backend cost, 0 API keys shipped
+
+  NOTE: the presentation-points file currently says 213 videos. The
+  real count is 214. Fix it there so the two documents agree.
+
+
+====================================================================
+END OF FILE
+====================================================================

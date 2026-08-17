@@ -1,0 +1,466 @@
+====================================================================
+DRONASKILL — TECH STACK, AI & API EXPLAINER
+(Reference doc for talking to judges — organized by topic, not by
+slide. Read a section, understand it, explain it in your own words.)
+====================================================================
+
+HOW TO USE THIS FILE
+---------------------
+This is NOT slide content. It's the deep version of every technical
+answer you might need: how the product works end to end, exactly what
+tech stack it runs on, exactly what counts as "AI" and how it scores
+an answer, and exactly what each external API does and why it was
+chosen. If a judge asks "what tech did you use / what AI / what API /
+what does that API actually do" — the answer is in here.
+
+
+====================================================================
+1. ONE-LINE SUMMARY
+====================================================================
+DronaSkill is a static (no-backend) ed-tech web app: plain HTML/CSS/
+JavaScript, zero frameworks, zero build tools. It personalises a
+learning path, plays curated + playlist YouTube lectures distraction-
+free, tracks progress, and runs an AI-branded mock interview with a
+rule-based scoring engine today and a real LLM (Claude) grading
+prompt written and ready to wire in.
+
+
+====================================================================
+2. HOW THE WHOLE APP WORKS (END-TO-END FLOW)
+====================================================================
+1. Learner opens `index.html` (homepage/pitch) and starts onboarding.
+2. `onboarding.html` — a 6-step wizard — asks about background, career
+   goal, skills already known, weekly time budget, and preferred
+   learning formats. On submit, it calls `buildPlan()` (in
+   `skills-data.js`) which ranks the 124-skill catalogue against the
+   answers and writes a profile + a seeded progress map to
+   `localStorage`. Then it redirects to the dashboard.
+3. `dashboard.html` reads that profile + progress from `localStorage`
+   and renders: a completion ring, a skill checklist grouped by tier
+   (foundation → core → advanced → job-ready), domain/level filters,
+   and a "next up" card computed as the highest-priority unfinished
+   skill.
+4. Clicking a skill deep-links into `lectures.html?skill=<id>`, which
+   loads that skill's video list from `lectures-data.js`, plays it in
+   a stripped-down YouTube embed, and (optionally) auto-logs study
+   hours back into `localStorage` as the learner watches.
+5. `analysis.html` reads the same `localStorage` data and renders
+   charts (heatmap, level meters, domain coverage, burn-up line) over
+   it — no separate data pipeline, it's the exact same store the
+   dashboard reads, just aggregated differently.
+6. `mock-interview.html` is a separate flow: pick a role/experience/
+   mode, answer timed questions by typing or speaking, get scored
+   per-question by a local scoring engine (`evaluateAnswer()`), and
+   see a final report. Session data also lives in `localStorage`.
+
+The important architectural fact: there is exactly ONE data layer
+(`localStorage` in the learner's own browser) and every page just
+reads/writes different slices of it. Nothing is sent to a server,
+because there is no server.
+
+
+====================================================================
+3. FULL TECH STACK
+====================================================================
+FRONTEND
+- Plain HTML5 + CSS3 + vanilla JavaScript (ES6+). No React, Vue,
+  Angular, or any UI framework.
+- No build tool — no Webpack/Vite/esbuild, no `npm install`, no
+  `package.json` at all. What you see in the `.html` file is exactly
+  what runs in the browser.
+- Each page (`index.html`, `onboarding.html`, `dashboard.html`,
+  `analysis.html`, `lectures.html`, `mock-interview.html`) is fully
+  self-contained: its CSS is in an inline `<style>` block and its
+  logic is in an inline `<script>` block, duplicated across pages
+  rather than imported from a shared stylesheet.
+
+WHY NO FRAMEWORK / NO BUILD STEP (have this ready — judges ask):
+- Zero install friction: any judge can open the folder and run it,
+  no `npm install` step to fail on stage.
+- Zero hosting cost and zero server attack surface — there's nothing
+  to compromise because there's no backend holding data or secrets.
+- It's a deliberate hackathon/early-stage trade-off, not a skill gap:
+  the roadmap explicitly adds a backend where it earns its place
+  (real AI grading, cross-device accounts) — see the roadmap doc.
+
+SHARED DATA MODULES (the two exceptions to "fully self-contained")
+- `skills-data.js` → exposes `window.DRONA`. Holds the 124-skill
+  catalogue (each with domain, level, hour estimate, description), 18
+  career tracks, onboarding dropdown/checkbox option lists, all
+  `localStorage` key names, `buildPlan()` (turns onboarding answers
+  into a ranked skill plan), and progress-store read/write helpers.
+  Loaded by every app page.
+- `lectures-data.js` → exposes `window.DRONA_LECTURES`. Holds the
+  `CURATED` map: skill id → hand-picked, pre-verified YouTube video
+  list (213 videos, ~800 hours, covering all 124 skills).
+- Both are written as classic (non-ES-module) scripts on purpose, so
+  they still work when a page is opened straight from disk
+  (`file://`), not just over `http://`.
+
+DATA STORAGE
+- 100% client-side: the browser's `localStorage`. No database, no
+  ORM, no SQL/NoSQL of any kind. Full key list in Section 7.
+
+LOCAL DEV SERVER
+- `start-dronaskill.cmd` — a small local launcher script. It picks a
+  free port and serves the folder with whichever of Python
+  (`python -m http.server`) or Node (`npx serve`) is already on the
+  machine, opening `http://localhost:8000`. This exists purely
+  because YouTube refuses to embed video over a bare `file://` origin
+  (no real referrer) — everything else in the app works identically
+  either way.
+
+BROWSER-NATIVE APIS USED (no external library, ship with every
+modern browser for free)
+- Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`) —
+  powers the "answer by speaking" mode in the mock interview. Pure
+  client-side speech-to-text, no audio ever leaves the browser, no
+  key, no billing.
+- `localStorage` — the entire persistence layer (Section 7).
+- Canvas/SVG (native) — used for the charts on `analysis.html`
+  (heatmap, meters, burn-up line) with no charting library.
+
+
+====================================================================
+4. WHAT TECH TOUCHES EACH PAGE (QUICK MAP)
+====================================================================
+- index.html        → static markup/CSS only, no data reads.
+- onboarding.html    → skills-data.js (buildPlan) → writes profile +
+                        seeded progress to localStorage.
+- dashboard.html     → skills-data.js (reads profile/progress,
+                        progress-store helpers).
+- analysis.html      → skills-data.js data + two localStorage-backed
+                        hour datasets (estimated vs. logged, see
+                        Section 7) → hand-rolled chart rendering.
+- lectures.html      → lectures-data.js (curated lists) + YouTube
+                        IFrame Player API + YouTube oEmbed API for
+                        playlist mode (Section 6).
+- mock-interview.html→ local question bank (inline in the page) +
+                        evaluateAnswer() heuristic engine + Web Speech
+                        API for voice mode (Section 5).
+
+
+====================================================================
+5. THE AI SYSTEM — MOCK INTERVIEW GRADING
+====================================================================
+Be upfront with judges about this split: it's the single most
+technical, most "gotcha-able" part of the product, and honesty here
+reads as engineering maturity, not a weakness.
+
+--------------------------------------------------------------------
+5a. WHAT'S LIVE TODAY: a rule-based scoring engine, not a model
+--------------------------------------------------------------------
+Function: `evaluateAnswer()` inside `mock-interview.html`. Runs
+entirely client-side, in JavaScript, instantly, with zero network
+call. It is NOT a machine-learning model and does not call any AI
+API — it's deterministic text analysis. Here's exactly what it does,
+dimension by dimension:
+
+1. Empty/gibberish gate — first checks for a blank answer or
+   keyboard-mashed/off-topic gibberish (`isGibberishOrIrrelevant()`)
+   and immediately zeroes the whole score if so, rather than letting
+   nonsense text accidentally score through keyword luck.
+
+2. Accuracy (0–100) — each question carries a hand-written list of
+   `expectedConcepts` and `keywords`. The engine checks how many
+   expected concepts are actually present (matching on significant
+   word-parts, not just exact substrings) and blends that with raw
+   keyword-hit ratio (65% concept match + 35% keyword match). It also
+   checks the answer against a list of known misconceptions per
+   question PLUS a few generic hard-coded wrong-statement patterns
+   (e.g. claiming "re-rendering deletes component state" is factually
+   wrong for React) — each misconception detected subtracts 35 points.
+   Zero concepts AND zero keywords matched forces accuracy to 0.
+
+3. Relevance (0–100) — scores whether the answer engages with the
+   prompt at all, scaled by how many keywords were hit and whether
+   the answer meets a minimum length expected for the candidate's
+   stated experience level.
+
+4. Completeness (0–100) — ratio of expected concepts actually covered,
+   scaled down further if the answer is shorter than the "ideal
+   minimum" word count for that experience level.
+
+5. Clarity (0–100) — structural heuristic on sentence length: starts
+   at 85, penalises run-on sentences (avg > 28 words/sentence) and
+   overly choppy fragmented answers, rewards answers broken into
+   multiple sentences.
+
+6. Communication (0–100) — starts at 90, subtracts 8 points per filler
+   word found ("um", "uh", "like", "basically", "actually", "kind of",
+   "sort of", "you know"), capped at −45 total, small bonus for
+   meeting the expected length.
+
+7. Confidence (0–100) — starts at 75, adds 5 points per structural/
+   logical connector used ("first", "because", "therefore", "for
+   example", "specifically" …), subtracts 18 points per hedging phrase
+   ("I think maybe", "not sure", "I guess" …), extra penalty for very
+   short answers.
+
+8. STRICT ZERO RULE — if literally zero expected concepts and zero
+   keywords matched, ALL six dimensions are forced to 0, not just
+   accuracy — this stops a fluent-sounding but entirely off-topic
+   answer from still scoring well on "clarity"/"communication."
+
+9. Weighted overall score — the six dimensions are blended into one
+   0–100 score with DIFFERENT weights depending on question type:
+     - technical questions:   50% accuracy, 25% completeness,
+                               15% relevance, 10% clarity
+     - behavioral questions:  35% relevance, 30% completeness,
+                               20% communication, 15% clarity
+     - coding/problem-solving:45% accuracy, 30% completeness,
+                               15% relevance, 10% clarity
+   Then a hard cap kicks in: if accuracy or relevance is below 40, the
+   overall score can't exceed (that score + 15) no matter how good
+   the delivery was — this specifically prevents "confident nonsense"
+   from getting a good score.
+
+10. Final scaling — the 0–100 score is converted to a 0–10 half-point
+    scale (matching the rubric shown on the UI) and mapped to a tier
+    used to color/label the feedback card.
+
+11. Voice mode adds real acoustic-adjacent metrics: words-per-minute
+    (from actual speaking duration), estimated pause count, filler
+    count, and a pace label ("Ideal Pace" 110–160 wpm / "Too Fast" /
+    "Too Slow").
+
+Why this matters to say out loud: it's a genuinely multi-dimensional,
+carefully-tuned rules engine (11 checks, per-question-type weighting,
+anti-gaming caps) — not a trivial keyword counter — but it is still
+fundamentally pattern matching, not language understanding. Say that
+distinction plainly if asked.
+
+--------------------------------------------------------------------
+5b. WHAT'S PLANNED, NOT YET WIRED IN: real LLM grading via Claude
+--------------------------------------------------------------------
+- Provider chosen: Claude (Anthropic), via the Messages API — not
+  Gemini, not OpenAI. That decision is already made.
+- A full rubric-based grading system prompt already exists, written
+  and finished, in `mock-interview-grading-prompt.md` at the project
+  root. It specifies: strict 0–10 scoring, 5 rubric bands mapped onto
+  the 4 status strings the UI already uses, and a structured JSON
+  output (score, strengths, improvements, an "ideal answer" concept)
+  that maps directly onto the existing feedback modal and final
+  report — no UI redesign needed when it's wired in.
+- Why it's not connected yet: calling any LLM API from client-side
+  JavaScript would mean shipping the API key inside the page source,
+  visible to anyone who opens dev tools — a real security hole, not a
+  style choice. Wiring this in for real requires a backend or
+  serverless proxy (e.g. a small Cloudflare Worker / Vercel function)
+  that holds the key server-side and forwards graded requests. That's
+  an infrastructure decision the team deliberately deferred rather
+  than hacking around.
+- The pitch to judges: "the hard part — the rubric design and the UI
+  mapping — is done. What's left is infrastructure, not design."
+
+
+====================================================================
+6. EXTERNAL APIs USED (AND EXACTLY WHAT EACH ONE DOES)
+====================================================================
+Zero API keys exist anywhere in this project. Every external call is
+to a public, key-free, CORS-open endpoint — a direct consequence of
+having no backend to safely hold a secret in.
+
+--------------------------------------------------------------------
+6a. YouTube IFrame Player API
+--------------------------------------------------------------------
+- What it is: a free JavaScript API YouTube serves at
+  `https://www.youtube.com/iframe_api`. It lets a page embed and
+  remote-control a YouTube video player (play/pause, listen for state
+  changes) using `postMessage` under the hood — no API key required
+  at all (this is different from the paid/keyed YouTube Data API v3).
+- Loaded lazily: the script tag is only injected the first time a
+  learner switches a skill into "playlist mode" (pasting their own
+  YouTube playlist link) — the default curated-list mode never loads
+  it, since a plain `<iframe src="youtube-nocookie.com/embed/...">`
+  is enough there.
+- What DronaSkill uses it for, specifically:
+  1. `player.getPlaylist()` — once a player is bound to a playlist
+     URL, this returns the ordered list of video IDs actually in that
+     playlist. This is the ONLY way to know a playlist's contents
+     without a keyed Data API call, since playlist membership isn't
+     public information any other way.
+  2. `onStateChange` events — detects when the player naturally
+     advances to the next video in the playlist (`PLAYING` state with
+     a new video id) so the on-screen "now playing" UI stays in sync.
+  3. `player.getDuration()` — read the moment a video hits `ENDED`.
+     This is how the app learns a playlist video's real runtime,
+     since neither the IFrame API nor oEmbed exposes duration up
+     front. That measured duration is cached per-skill so future
+     auto-logged study hours for that video are accurate from then on.
+- Why this approach instead of the official Data API: the Data API
+  requires a project + API key tied to a Google Cloud account, which
+  this static site has nowhere safe to store (see the "no client-side
+  keys" principle above). The IFrame Player API achieves the needed
+  functionality (playlist membership, duration) with zero key
+  management, at the cost of only working once a video is actually
+  loaded/played in the browser.
+
+--------------------------------------------------------------------
+6b. YouTube oEmbed endpoint
+--------------------------------------------------------------------
+- What it is: a public, unauthenticated REST endpoint —
+  `https://www.youtube.com/oembed?format=json&url=<video-url>` — part
+  of the open oEmbed standard (also used by Twitter, Vimeo, etc. for
+  "paste a link, get embeddable metadata back"). No key, CORS-open,
+  so it can be called directly from browser JavaScript with `fetch()`.
+- What DronaSkill uses it for:
+  1. In playlist mode — for every new video id discovered via
+     `getPlaylist()`, one oEmbed call fetches that video's title and
+     channel/author name to display in the lecture list, since the
+     IFrame Player API alone doesn't expose that.
+  2. As a curation pre-flight check — before any video is hand-added
+     to the curated `CURATED` list in `lectures-data.js`, the team
+     checks its oEmbed response: HTTP 200 = exists and is embeddable,
+     HTTP 401 = embedding disabled by the uploader (must reject it),
+     HTTP 404 = dead/removed video. This matters because a
+     disabled-embed video renders a silent "Video unavailable" inside
+     the player with no way to detect that failure from JavaScript —
+     so this check is a mandatory step, not a nice-to-have.
+
+--------------------------------------------------------------------
+6c. Browser Web Speech API (SpeechRecognition)
+--------------------------------------------------------------------
+- What it is: a native browser API (`window.SpeechRecognition` /
+  `window.webkitSpeechRecognition`), not a third-party or Google
+  cloud API call — speech-to-text happens using the browser's own
+  built-in engine, no network request the app controls, no key.
+- What it's used for: the "answer by speaking" mode in the mock
+  interview room — converts spoken answers to text in real time,
+  which then flows into the exact same `evaluateAnswer()` engine as a
+  typed answer, plus feeds the voice-specific metrics (words per
+  minute, pace, filler count) described in Section 5a.
+
+--------------------------------------------------------------------
+6d. Explicitly NOT used: YouTube Data API v3
+--------------------------------------------------------------------
+Worth stating proactively if a technical judge asks "why not just use
+the real YouTube API" — the Data API v3 needs a Google Cloud API key.
+A key-free static site has no server-side place to keep that key
+secret, and putting it directly in client-side JS would let anyone
+steal and abuse it (quota theft, billing risk to whoever owns the
+key). The IFrame Player API + oEmbed combo was chosen specifically
+because it needs no key at all.
+
+
+====================================================================
+7. DATA STORAGE — FULL localStorage KEY MAP
+====================================================================
+No backend, no database. Everything below lives only in the
+learner's own browser, under these keys:
+
+- `dronaskill_profile`          — onboarding answers (background,
+  career goal, known skills, weekly hours, formats).
+- `dronaskill_skill_progress`   — ESTIMATED hours: `{ skillId:
+  "YYYY-MM-DD" }`, the date a skill was ticked off, valued at its
+  catalogue hour estimate. Read/written only via `readProgress()` /
+  `setSkillDone()` in skills-data.js.
+- `dronaskill_study_log`        — LOGGED hours: `{ "YYYY-MM-DD":
+  [{hours, skill, note}] }`, real sessions the learner entered or
+  that were auto-logged from watching a lecture. Read/written only
+  via `readLog()` / `addSession()` / `removeSession()`.
+- `dronaskill_lecture_library`  — per-skill lecture overrides:
+  hidden/edited/added videos and custom order, layered as a PATCH on
+  top of the curated defaults (not a replacement of them).
+- `dronaskill_lecture_progress` — `{ skillId: { videoId:
+  "YYYY-MM-DD" } }`, which lecture videos have been watched.
+- `dronaskill_lecture_prefs`    — `{ autoLog, breakEvery }` player
+  preferences.
+
+IMPORTANT DESIGN DECISION — estimated vs. logged hours are never
+blended in one chart. "Estimated" is the plan (what the catalogue
+says a skill is worth); "logged" is reality (what a learner actually
+recorded). `analysis.html` has an explicit source toggle between them
+rather than silently averaging two different kinds of numbers — good
+answer if asked about data integrity.
+
+CAVEAT worth knowing: `localStorage` is scoped per-origin. Opening
+the site via `file://` vs. via `http://localhost` (the launcher) are
+different origins to the browser, so profile/progress saved under one
+will not appear under the other — not data loss, just origin
+isolation. This is exactly why `start-dronaskill.cmd` exists.
+
+
+====================================================================
+8. KEY ENGINEERING DECISIONS WORTH MENTIONING
+====================================================================
+- Defensive reads everywhere: every value pulled out of localStorage
+  is re-validated against the real skill catalogue and, for video
+  ids, a strict 11-character YouTube id regex — so a value a user
+  hand-edited in dev tools can never reach an `<iframe src>` or get
+  charted as a fake skill.
+- Non-destructive migrations: an older progress data shape (`{skillId:
+  true}`) is auto-upgraded to the new dated shape in place, backdated
+  to the profile's onboarding day so it doesn't fake a spike on the
+  activity heatmap — existing users don't lose data across an update.
+- Patch-not-replace for lecture overrides: a learner's edits to the
+  curated video list are stored as a diff on top of the curated
+  defaults, so future curation updates still reach a learner who has
+  already customised their list.
+- Tab-visibility-aware timers: the lecture player's session timer
+  ignores time while the browser tab is in the background, so
+  "1 hour logged" reflects actual attention, not an idle tab.
+- Accessible charts by default: every chart on `analysis.html` ships
+  with a plain data-table twin next to it, not just a canvas/SVG.
+
+
+====================================================================
+9. QUICK-FIRE JUDGE Q&A — TECH EDITION
+====================================================================
+
+Q: "Is this actually AI, or just if-statements?"
+A: Be direct: the mock-interview scoring live today is a rules-based
+   NLP heuristic — concept matching, keyword ratios, filler/hedge
+   detection, weighted scoring — genuinely multi-dimensional, but not
+   a machine-learning model. The "AI" framing in the product refers to
+   the mock-interview *feature*, and the real model-based grading
+   (Claude, Anthropic Messages API) is fully designed and prompt-
+   written, just not network-connected yet, for the security reason
+   in Section 5b.
+
+Q: "What LLM would you use and why?"
+A: Claude, via Anthropic's Messages API — already decided, prompt
+   already written in `mock-interview-grading-prompt.md`. Chosen over
+   Gemini/OpenAI as the team's preferred provider for this use case.
+
+Q: "Why not just use the YouTube Data API for the playlist feature?"
+A: It requires a Google Cloud API key, and a purely static site with
+   no backend has nowhere safe to store one client-side. The IFrame
+   Player API + oEmbed combination gets the same practical result
+   (playlist contents, video metadata) with zero key management.
+
+Q: "What happens if YouTube changes their embed policy or the IFrame
+   API?"
+A: Both the curated-list player and playlist mode already handle the
+   one real failure case today — `file://` origins get refused by
+   YouTube — with a graceful fallback card instead of a broken
+   player. That's the same defensive pattern that would apply to any
+   future YouTube-side change.
+
+Q: "Where does user data actually live? Is it safe?"
+A: Entirely in the learner's own browser (`localStorage`) — nothing
+   is transmitted anywhere, because there's no server to send it to.
+   Safer by default against data breaches, but it means data doesn't
+   sync across devices and can be cleared by clearing browser data —
+   both explicitly named as the first problems a future backend
+   would solve.
+
+Q: "Why no framework — isn't that harder to maintain?"
+A: For a project this size (six pages, two shared data modules) a
+   framework's overhead (build step, dependency tree, bundler config)
+   outweighs its benefit. It also means literally zero install
+   friction for anyone judging or testing it — open the folder, run
+   the launcher, done.
+
+Q: "What's the single most technically interesting thing you built?"
+A: The playlist-mode integration — discovering a YouTube playlist's
+   contents and getting accurate durations with NO API key, using the
+   IFrame Player API's `getPlaylist()`/`getDuration()` plus the public
+   oEmbed endpoint, entirely from the browser. That's the one piece
+   that required real protocol-level understanding of what YouTube
+   exposes for free versus what's gated behind a keyed API.
+
+
+====================================================================
+END OF FILE
+====================================================================

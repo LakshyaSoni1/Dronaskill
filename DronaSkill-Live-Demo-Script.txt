@@ -1,0 +1,295 @@
+====================================================================
+DRONASKILL — LIVE DEMO SCRIPT (in-person, 2-3 minute product tour)
+Companion to DronaSkill-Presentation-Points.txt, Slide 6.
+====================================================================
+
+HOW TO USE THIS FILE
+---------------------
+This covers ONLY the live click-through portion of your talk — the
+part where you're actually driving the site in front of the room,
+separate from the slide deck. I built this from actually clicking
+through every feature of your real site end-to-end beforehand, so
+every step below is something I confirmed works, and every "landmine"
+below is something I actually hit while testing.
+
+Read PRE-DEMO CHECKLIST first. Do it 30-60 minutes before you're up,
+not five minutes before — two of these steps take a few minutes each
+and cannot be rushed on stage.
+
+
+====================================================================
+PRE-DEMO CHECKLIST — DO THIS BEFORE YOU WALK UP
+====================================================================
+
+1. LAUNCH OVER localhost, NOT file://
+   Double-click start-dronaskill.cmd well before your slot and leave
+   it running. Confirm the browser opened http://localhost:8000 (or
+   whatever port it picked) — not a file:/// URL. If you open the
+   site directly from disk, YouTube will refuse to embed the lecture
+   video (Error 153) and the one visually "wow" moment of your demo
+   won't load. Confirm the venue's wifi actually reaches YouTube
+   before you're on stage, ideally by pressing play on one lecture.
+
+2. PRE-SEED A DEMO PROFILE (don't build it live — too slow)
+   Go through onboarding.html ONCE ahead of time as your demo persona.
+   Suggested: name it something short and readable from a distance,
+   pick "Software Engineer (SDE)" as the goal (it's the richest
+   track — 22 skills, all four tiers populated), tick 3-4 skills as
+   already known so the dashboard shows a checklist that's partly
+   done, not a wall of empty checkboxes.
+
+3. LOG 2-3 STUDY SESSIONS ACROSS DIFFERENT DAYS
+   Use "Log study time" on the dashboard to add a few sessions dated
+   on different recent days (the date field lets you pick any date).
+   One logged session makes the Analysis heatmap show a single lonely
+   square — three or four across different days makes it look like an
+   actual product being used. Takes 60 seconds, worth doing.
+
+4. MARK 1-2 LECTURES WATCHED
+   Open one skill's lecture list and tick a video watched so the
+   dashboard and analysis both show some real progress, not just
+   ticked-in-onboarding skills.
+
+5. PRE-RUN ONE FULL MOCK INTERVIEW WITH GOOD ANSWERS — DO NOT LEAVE
+   THIS FOR LIVE. See "THE MOCK INTERVIEW LANDMINE" section below —
+   this is the single most important item on this checklist.
+
+6. OPEN TWO BROWSER WINDOWS BEFORE YOU START
+   - WINDOW A (your seeded demo profile): tabs open in this order —
+     Dashboard, Analysis, a lecture page, the finished mock-interview
+     report. Pin them so you can Ctrl+Tab between them instantly.
+   - WINDOW B (Incognito/private window, untouched localStorage):
+     one tab on onboarding.html, ready to show the wizard live for a
+     few seconds without disturbing your seeded profile's data.
+   Reason for two separate windows: localStorage is shared across
+   tabs of the same profile, so if you run onboarding live in the
+   same window as your seeded demo, you'll either overwrite your
+   good data or confuse which tab has which state. Incognito keeps
+   them fully separate.
+
+
+====================================================================
+THE MOCK INTERVIEW LANDMINE — READ THIS
+====================================================================
+I ran the mock interview myself with a genuinely coherent, well-
+structured answer that just didn't happen to use the exact expected
+phrases, and it scored 0% on every single metric with "completely
+off-topic or irrelevant." That's not a bug — it's the strict-zero
+rule in evaluateAnswer() working as designed (see the Tech Explainer,
+Section 5a, point 8) — but it will look exactly like a broken demo
+if it happens live in front of judges, and there's no way to fully
+predict which question you'll get, since each round pulls 5 of 6
+questions per role in random order.
+
+THE FIX — use your own model answers.
+Every question in mock-interview.html already ships with a
+hand-written `modelAnswer` field — the exact text that appears when
+someone clicks "Show model sample answer." It was written by your
+own team specifically to hit every expectedConcept and keyword, so
+it scores well by construction. You don't need to write new answers
+or memorize technical trivia under pressure — just have these ready
+to type or paste.
+
+Example — Frontend Developer track, all 6 possible questions, model
+answers included below so you can rehearse with real content. (If
+you're demoing a different role, open mock-interview.html, search for
+your role's key — backend / fullstack / ml / pm / design — the same
+modelAnswer field is there for every question.)
+
+  Q: "Walk me through how you would optimize a React application
+      that's re-rendering too often."
+  A: I'd start with the React DevTools Profiler to find which
+     components re-render unnecessarily and why. Common fixes: wrap
+     pure components in React.memo, memoize expensive calculations
+     with useMemo, and stabilize callback props with useCallback so
+     children don't see new references every render. I'd also check
+     for state that's colocated too high in the tree — moving it
+     closer to where it's used avoids re-rendering unrelated
+     siblings. Finally, I'd verify list keys are stable, since
+     unstable keys force full remounts.
+
+  Q: "What's the difference between CSS specificity and the cascade,
+      and how do you avoid specificity wars on a large team?"
+  A: Specificity is the scoring system the browser uses to decide
+     which rule wins when multiple selectors match the same element;
+     the cascade is the broader set of rules — source order, origin,
+     and specificity — that resolves conflicts overall. On a large
+     team I avoid specificity wars by keeping selectors flat (one
+     class per rule, BEM-style naming or utility classes) and banning
+     !important outside of true overrides, so no one ever needs to
+     out-specificity a previous rule.
+
+  Q: "How would you make a complex data table accessible to keyboard
+      and screen reader users?"
+  A: I'd start with semantic table markup — proper <th> elements with
+     scope attributes — since that alone gives screen readers a lot
+     for free. For keyboard users I'd implement roving tabindex so
+     arrow keys move focus within the grid instead of tabbing through
+     every cell. Where native semantics run out, like sortable
+     headers, I'd add ARIA roles and aria-sort, and always test with
+     an actual screen reader, not just an automated audit.
+
+  Q: "Explain how the browser's critical rendering path works and one
+      thing you'd change to speed up first paint."
+  A: The browser parses HTML into the DOM and CSS into the CSSOM,
+     combines them into a render tree, computes layout, then paints
+     pixels. Anything render-blocking — like a large stylesheet in
+     <head> — delays that first paint. One concrete fix I'd reach for
+     is inlining critical above-the-fold CSS and deferring the rest,
+     or using rel=preload for the font and hero image so the browser
+     starts fetching them before it discovers them in the CSSOM.
+
+  Q: "Tell me about a time you disagreed with a design decision. How
+      did you handle it?"
+  A: On a past project the design called for a multi-step signup
+     modal that I felt would hurt conversion. Instead of just pushing
+     back, I built a quick prototype of a single-step alternative and
+     we ran it past five users informally. Two clearly struggled with
+     the modal version, which gave the designer concrete evidence
+     rather than just my opinion, and we shipped the simpler version
+     — conversion on that flow improved about 9% the following month.
+
+  Q: "How do you decide between client-side rendering, server-side
+      rendering, and static generation for a new page?"
+  A: It comes down to how often the content changes and how much
+     first-paint speed or SEO matters. A marketing page that rarely
+     changes is a great fit for static generation — it's fast and
+     cacheable at the edge. A logged-in dashboard with per-user data
+     doesn't need SEO and benefits more from client-side rendering.
+     Anything in between, like a product page that changes daily and
+     needs to be indexable, is where I'd reach for server-side
+     rendering with revalidation.
+
+Use these to (a) pre-build the finished report you'll show in the
+live demo, and (b) as a safety net if you decide to type one live —
+paraphrase slightly in your own words so it doesn't read as obviously
+copy-pasted, but keep every bolded concept phrase intact.
+
+ALSO NOTE: refreshing or reloading the mock-interview tab mid-round
+restarts the interview with a newly randomized question set — it does
+NOT resume where you left off. Don't touch F5 on that tab.
+
+
+====================================================================
+THE 2-3 MINUTE LIVE SCRIPT
+====================================================================
+Budget: ~2:30 with buffer. Practice this with a timer at least twice
+before presenting — it's tighter than it feels on paper.
+
+--------------------------------------------------------------------
+:00 – :15  HOMEPAGE (Window A)
+--------------------------------------------------------------------
+DO: Land on index.html, no scrolling needed.
+SAY: "DronaSkill is an ad-free skill mentor — verify, learn, practice,
+get placed, all as one profile instead of four different apps."
+(This is Slide 3's one-liner — reuse it verbatim so slides and demo
+sound like one voice.)
+
+--------------------------------------------------------------------
+:15 – :35  ONBOARDING, LIVE (switch to Window B — Incognito)
+--------------------------------------------------------------------
+DO: Switch to the Incognito window, already on onboarding.html. Type
+a name, pick 2 dropdowns on step 1, click Next, pick a career goal on
+step 2. Do NOT finish the wizard.
+SAY: "It's a real 6-step wizard, not a mockup — background, career
+goal, what you already know, weekly time, learning format — and it
+builds a live, ranked plan from a 124-skill catalogue in under two
+minutes. I've already got a profile running so you can see the
+payoff." Switch back to Window A.
+
+--------------------------------------------------------------------
+:35 – 1:10  DASHBOARD (Window A, seeded profile)
+--------------------------------------------------------------------
+DO: Point at the progress ring, the tiered checklist (Foundation /
+Core / Advanced / Job-ready), and the "Next up" card.
+SAY: "This is the command center. Every skill's pre-ranked, the
+checklist already reflects what I said I know, and 'Next up' always
+tells the learner their single next action — no decision paralysis."
+Optionally click "Log study time" to flash the modal open, then
+Cancel (don't actually log — keep your seeded numbers intact).
+
+--------------------------------------------------------------------
+1:10 – 1:40  LECTURE PLAYER (click into a skill from the checklist)
+--------------------------------------------------------------------
+DO: Click "Learn"/"Revise" on any skill row to deep-link into
+lectures.html?skill=... Let the video actually start playing.
+SAY: "No suggested videos, no comments, no autoplay rabbit hole —
+just the lecture. Watching it can auto-log real hours straight back
+into the analytics you're about to see." If your audience is
+technical and you have 10 extra seconds: mention playlist mode —
+"learners can drop in their own YouTube playlist and we resolve it
+with zero API key, using YouTube's own IFrame Player API."
+
+--------------------------------------------------------------------
+1:40 – 2:10  DEEP ANALYSIS
+--------------------------------------------------------------------
+DO: Navigate to analysis.html. Point at the heatmap (should show a
+few lit squares from your pre-seeded sessions), the level meters, and
+the burn-up chart.
+SAY: "Estimated hours — what the plan says — and logged hours — what
+you actually did — are never blended into one number. You can toggle
+between them, because a plan and reality are two different things."
+
+--------------------------------------------------------------------
+2:10 – 2:40  MOCK INTERVIEW REPORT (pre-finished, do not run live)
+--------------------------------------------------------------------
+DO: Switch to the tab already sitting on your pre-completed final
+report screen (see PRE-DEMO CHECKLIST item 5). Point at the overall
+score, the per-question breakdown, and the personalized improvement
+plan.
+SAY: "Five role-matched questions, timed, graded instantly with zero
+network call — today that's a rules engine checking concept coverage,
+filler words, and structure. The rubric for real LLM grading, through
+Claude, is already written; it's a backend problem now, not a design
+problem." (Straight from Slide 13 — reuse the line.)
+
+--------------------------------------------------------------------
+2:40 – 3:00  GURU AI (quick close)
+--------------------------------------------------------------------
+DO: Navigate to guru-ai.html, click one of the four suggested prompt
+chips (these are pre-written and always answer instantly and
+correctly — safer than typing a live question).
+SAY: "And every doubt becomes a revision card for tomorrow, instead
+of scrolling away like it would in a chatbot." Close on: "DronaSkill
+— the guru that adapts to the student, not the other way around."
+
+
+====================================================================
+IF SOMETHING BREAKS ON STAGE
+====================================================================
+
+WIFI/YOUTUBE DOWN AT THE VENUE
+  Skip the live video play — say "video playback needs real internet,
+  which I don't want to gamble on right now" and move straight to
+  Analysis. Naming the limitation yourself lands better than a
+  visibly frozen embed.
+
+A JUDGE ASKS WHY DASHBOARD AND ANALYSIS SHOW DIFFERENT
+"HOURS REMAINING" NUMBERS
+  This is real — I found it during testing. Dashboard credits the
+  full estimated hours for any skill you tick as "already known";
+  Analysis only credits hours you've actually logged. Say: "Good
+  catch — those two views use different rules for crediting a skill
+  you already knew, and that's exactly the kind of consistency pass
+  that's next on our punch list, not something we've papered over."
+  Confident and specific beats defensive.
+
+A JUDGE ASKS WHY GURU AI SHOWS "ML Engineer / CS231n" INSTEAD OF
+YOUR DEMO PERSONA'S ACTUAL TRACK
+  That panel is illustrative demo data today, not yet wired to the
+  live profile the way Dashboard/Analysis/Lectures are. Say so
+  plainly: "That's on the list to connect — everything else you saw
+  IS live off the real profile."
+
+MOCK INTERVIEW SCORES LOW ANYWAY
+  Don't apologize or re-run it live. Pivot straight to the
+  improvement-plan section of the report and say: "This is exactly
+  the kind of specific, actionable feedback a student gets instantly
+  — right down to naming the exact concept they missed." A low score
+  with a detailed, useful breakdown still demonstrates the feature
+  working correctly.
+
+
+====================================================================
+END OF FILE
+====================================================================

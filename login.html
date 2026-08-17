@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log In — Dronaskill</title>
+<meta name="description" content="Sign in or create a Dronaskill account.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --good:  #22c55e;
+    --bad:   #ef4444;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background (identical system to the rest of the site) ─── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #5b6ee0 0%, #1e2a7a 55%, transparent 100%); }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 14.5px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease, opacity .2s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+  .btn-block { width: 100%; }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: linear-gradient(135deg,#7c7ff2,#4d4fc4); color: #fff; }
+
+  /* ── Auth card ───────────────────────────────────────────────────── */
+  .auth-wrap { padding: 60px 0 100px; display: flex; justify-content: center; }
+  .auth-card { width: min(440px, 100%); padding: 36px 32px 32px; border-radius: var(--r-xl); }
+  .auth-card h1 { font-size: 25px; margin: 14px 0 10px; }
+  .auth-card .lede { margin-bottom: 24px; }
+
+  .toggle-group { display: flex; gap: 6px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft); margin-bottom: 26px; }
+  .toggle-btn {
+    flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 14px; border: 0; border-radius: 10px; background: none; color: var(--ink-2);
+    font-family: inherit; font-size: 13px; font-weight: 560; cursor: pointer; white-space: nowrap;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .toggle-btn:hover { color: var(--ink); }
+  .toggle-btn[aria-pressed="true"] { background: var(--cta); color: var(--cta-ink); box-shadow: 0 4px 14px rgba(224,125,28,0.28); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink-2); margin-bottom: 8px; }
+  .text-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line); color: var(--ink); font-family: inherit; font-size: 14px;
+  }
+  .text-input:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+  .text-input::placeholder { color: var(--ink-3); }
+  .field-hint { margin-top: 7px; font-size: 11.5px; color: var(--ink-3); }
+
+  .form-msg {
+    margin-bottom: 18px; padding: 12px 14px; border-radius: var(--r-md);
+    font-size: 12.8px; line-height: 1.55; border: 1px solid var(--line-soft);
+  }
+  .form-msg.error { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); color: #fca5a5; }
+  .form-msg.info  { background: rgba(242,171,60,0.08); border-color: rgba(242,171,60,0.25); color: var(--saffron); }
+  .form-msg.hidden { display: none; }
+
+  .auth-submit { margin-top: 6px; }
+  .auth-submit p { margin-top: 12px; font-size: 11.5px; color: var(--ink-3); text-align: center; }
+
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(26,18,6,0.3); border-top-color: var(--cta-ink); animation: spin .75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-row { display: none; align-items: center; gap: 9px; }
+  .btn[data-loading="true"] .btn-label { display: none; }
+  .btn[data-loading="true"] .load-row { display: inline-flex; }
+
+  /* ── Signed-in state ─────────────────────────────────────────────── */
+  .status-card { text-align: center; }
+  .status-avatar {
+    width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 18px;
+    display: grid; place-items: center; background: linear-gradient(135deg,#7c7ff2,#4d4fc4);
+    color: #fff; font-size: 20px; font-weight: 650;
+  }
+  .status-email { font-size: 15px; font-weight: 600; margin-bottom: 6px; word-break: break-all; }
+  .status-note { font-size: 12.8px; color: var(--ink-2); margin-bottom: 24px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .auth-card { animation: fadeUp .5s ease both; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 560px) { .auth-card { padding: 30px 22px 26px; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="index.html#features">Learn</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+      <a class="nav-link" href="certification.html">Certification</a>
+      <a class="nav-link" href="login.html" aria-current="page">Login</a>
+      <a class="nav-link" href="recruiters.html">For Companies</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+      <span class="avatar" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>
+        </svg>
+      </span>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="auth-wrap wrap">
+
+    <!-- ── Signed-out: sign in / create account form ──────────────── -->
+    <div class="auth-card glass" id="authFormCard">
+      <span class="eyebrow">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
+        </svg>
+        Account
+      </span>
+      <h1 id="authTitle">Welcome back.</h1>
+      <p class="lede" id="authSub">Sign in to your Dronaskill account.</p>
+
+      <div class="toggle-group" role="group" aria-label="Sign in or create account" id="modeGroup">
+        <button type="button" class="toggle-btn" data-mode="signin" aria-pressed="true">Sign In</button>
+        <button type="button" class="toggle-btn" data-mode="signup" aria-pressed="false">Create Account</button>
+      </div>
+
+      <p class="form-msg hidden" id="formMsg" role="alert"></p>
+
+      <form id="authForm" novalidate>
+        <div class="field">
+          <label for="emailInput">Email</label>
+          <input type="email" id="emailInput" class="text-input" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="passwordInput">Password</label>
+          <input type="password" id="passwordInput" class="text-input" placeholder="At least 6 characters" autocomplete="current-password" required minlength="6">
+        </div>
+        <div class="field hidden" id="confirmField">
+          <label for="confirmInput">Confirm password</label>
+          <input type="password" id="confirmInput" class="text-input" placeholder="Type it again" autocomplete="new-password" minlength="6">
+        </div>
+
+        <div class="auth-submit">
+          <button type="submit" class="btn btn-block" id="submitBtn">
+            <span class="btn-label" id="submitLabel">Sign In</span>
+            <span class="load-row"><span class="spinner" aria-hidden="true"></span> Working…</span>
+          </button>
+          <p>By continuing you agree this is a personal Dronaskill account, not affiliated with your college.</p>
+        </div>
+      </form>
+    </div>
+
+    <!-- ── Signed-in state ──────────────────────────────────────────── -->
+    <div class="auth-card glass status-card hidden" id="authStatusCard">
+      <div class="status-avatar" id="statusAvatar">?</div>
+      <div class="status-email" id="statusEmail">you@example.com</div>
+      <p class="status-note">You're signed in to Dronaskill.</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a class="btn-ghost" href="dashboard.html">Go to Dashboard</a>
+        <button type="button" class="btn-ghost" id="signOutBtn">Log Out</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var cfg = window.DRONA_SUPABASE || {};
+  var sb = null;
+  if (window.supabase && cfg.url && cfg.anonKey) {
+    sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+  }
+
+  var mode = "signin"; /* "signin" | "signup" */
+
+  function showMsg(text, kind) {
+    var el = $("formMsg");
+    el.textContent = text;
+    el.className = "form-msg " + (kind || "error");
+  }
+  function clearMsg() {
+    var el = $("formMsg");
+    el.textContent = "";
+    el.className = "form-msg hidden";
+  }
+
+  /* Supabase's raw error text is accurate but terse — translate the ones
+     learners are actually likely to hit into something actionable. */
+  function friendlyAuthError(message) {
+    var m = String(message || "");
+    if (/rate limit/i.test(m)) {
+      return "Too many signup emails sent in a short time — Supabase's free plan limits this. Wait a few minutes and try again, or sign in instead if you already confirmed an account.";
+    }
+    if (/already registered|already exists/i.test(m)) {
+      return "That email already has an account — try signing in instead.";
+    }
+    if (/email.*invalid|invalid.*email/i.test(m)) {
+      return "That doesn't look like a deliverable email address — double-check it and try again.";
+    }
+    if (/invalid login credentials/i.test(m)) {
+      return "Email or password is incorrect — or this account hasn't confirmed its email yet.";
+    }
+    return m;
+  }
+
+  function setMode(next) {
+    mode = next;
+    document.querySelectorAll("#modeGroup .toggle-btn").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.mode === next ? "true" : "false");
+    });
+    var isSignup = next === "signup";
+    $("confirmField").classList.toggle("hidden", !isSignup);
+    $("confirmInput").required = isSignup;
+    $("authTitle").textContent = isSignup ? "Create your account." : "Welcome back.";
+    $("authSub").textContent = isSignup
+      ? "A few seconds, then you're in."
+      : "Sign in to your Dronaskill account.";
+    $("submitLabel").textContent = isSignup ? "Create Account" : "Sign In";
+    clearMsg();
+  }
+
+  function setLoading(on) {
+    $("submitBtn").disabled = on;
+    $("submitBtn").setAttribute("data-loading", on ? "true" : "false");
+  }
+
+  function showSignedIn(user) {
+    $("authFormCard").classList.add("hidden");
+    $("authStatusCard").classList.remove("hidden");
+    var email = user.email || "";
+    $("statusEmail").textContent = email;
+    $("statusAvatar").textContent = email ? email[0].toUpperCase() : "?";
+  }
+
+  function showSignedOut() {
+    $("authFormCard").classList.remove("hidden");
+    $("authStatusCard").classList.add("hidden");
+  }
+
+  /* ── Wire up tab toggle ──────────────────────────────────────────── */
+  document.querySelectorAll("#modeGroup .toggle-btn").forEach(function (b) {
+    b.addEventListener("click", function () { setMode(b.dataset.mode); });
+  });
+
+  /* ── Submit ──────────────────────────────────────────────────────── */
+  $("authForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearMsg();
+
+    if (!sb) {
+      showMsg("Supabase isn't configured yet — check supabase-config.js.", "error");
+      return;
+    }
+
+    var email = $("emailInput").value.trim();
+    var password = $("passwordInput").value;
+
+    if (!email || !password) {
+      showMsg("Enter your email and password.", "error");
+      return;
+    }
+    if (password.length < 6) {
+      showMsg("Password must be at least 6 characters.", "error");
+      return;
+    }
+
+    if (mode === "signup") {
+      var confirm = $("confirmInput").value;
+      if (password !== confirm) {
+        showMsg("Passwords don't match.", "error");
+        return;
+      }
+
+      setLoading(true);
+      sb.auth.signUp({ email: email, password: password }).then(function (res) {
+        setLoading(false);
+        if (res.error) { showMsg(friendlyAuthError(res.error.message), "error"); return; }
+
+        if (res.data.session) {
+          showSignedIn(res.data.user);
+        } else {
+          showMsg("Account created. Check " + email + " for a confirmation link, then sign in.", "info");
+          setMode("signin");
+        }
+      }).catch(function (err) {
+        setLoading(false);
+        showMsg(friendlyAuthError(err.message) || "Something went wrong. Try again.", "error");
+      });
+    } else {
+      setLoading(true);
+      sb.auth.signInWithPassword({ email: email, password: password }).then(function (res) {
+        setLoading(false);
+        if (res.error) { showMsg(friendlyAuthError(res.error.message), "error"); return; }
+        showSignedIn(res.data.user);
+      }).catch(function (err) {
+        setLoading(false);
+        showMsg(friendlyAuthError(err.message) || "Something went wrong. Try again.", "error");
+      });
+    }
+  });
+
+  /* ── Sign out ────────────────────────────────────────────────────── */
+  $("signOutBtn").addEventListener("click", function () {
+    if (!sb) return;
+    sb.auth.signOut().then(function () {
+      showSignedOut();
+      setMode("signin");
+      $("authForm").reset();
+    });
+  });
+
+  /* ── Restore session on load ─────────────────────────────────────── */
+  if (sb) {
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (session && session.user) showSignedIn(session.user);
+    });
+  } else {
+    showMsg("Supabase isn't configured yet — check supabase-config.js.", "error");
+  }
+})();
+</script>
+</body>
+</html>

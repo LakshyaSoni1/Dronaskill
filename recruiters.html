@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For Companies — Dronaskill</title>
+<meta name="description" content="Set your hiring criteria and see matching Dronaskill students who have opted in to be visible to recruiters.">
+<style>
+  :root {
+    --bg:          #07070d;
+    --surface:     #131318;
+
+    --ink:         rgba(255,255,255,0.92);
+    --ink-2:       rgba(255,255,255,0.60);
+    --ink-3:       rgba(255,255,255,0.38);
+    --line:        rgba(255,255,255,0.10);
+    --line-soft:   rgba(255,255,255,0.06);
+
+    --saffron:     #f2ab3c;
+    --saffron-lo:  #e07d1c;
+    --indigo:      #7c7ff2;
+    --cta:         linear-gradient(135deg, #f7bb52, #e07d1c);
+    --cta-ink:     #1a1206;
+
+    --good:  #22c55e;
+    --bad:   #ef4444;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+
+    --r-sm: 10px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 26px;
+    --maxw: 1140px;
+  }
+
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── Ambient background (identical system to the rest of the site) ─── */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.20; will-change: transform; }
+  .orb-1 { width: 560px; height: 560px; background: radial-gradient(circle, #f2ab3c 0%, #a35c10 55%, transparent 100%); }
+  .orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, #7c7ff2 0%, #2f2b8f 55%, transparent 100%); }
+  .orb-3 { width: 460px; height: 460px; background: radial-gradient(circle, #e07d1c 0%, #7a3d08 55%, transparent 100%); }
+  .orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #5b6ee0 0%, #1e2a7a 55%, transparent 100%); }
+  .orb-center {
+    width: 640px; height: 640px; top: 12%; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(circle, #a35c10 0%, transparent 68%); filter: blur(120px); opacity: 0.09;
+  }
+  .grid-layer {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+            mask-image: linear-gradient(#000 0%, #000 55%, transparent 92%);
+  }
+  .noise {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.036;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.055);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+            backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10);
+  }
+
+  .wrap { width: min(var(--maxw), 100%); margin-inline: auto; padding-inline: 22px; }
+  main { position: relative; z-index: 3; }
+
+  h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+  p { margin: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--saffron);
+  }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--saffron); opacity: .6; }
+  .lede { font-size: 14.5px; color: var(--ink-2); line-height: 1.65; }
+  .muted { color: var(--ink-3); }
+
+  .btn, .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-size: 14.5px; font-weight: 590;
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    text-decoration: none; white-space: nowrap; border: 0;
+    transition: transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease, opacity .2s ease;
+  }
+  .btn {
+    background: var(--cta); color: var(--cta-ink);
+    box-shadow: 0 6px 22px rgba(224,125,28,0.28), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn:hover { box-shadow: 0 8px 28px rgba(224,125,28,0.38), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .btn:disabled { opacity: .55; cursor: default; box-shadow: none; }
+  .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.18); }
+  .btn:active, .btn-ghost:active { transform: translateY(1px); }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--saffron); outline-offset: 3px; border-radius: 8px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────── */
+  .site-head { position: sticky; top: 0; z-index: 40; padding: 14px 22px; display: flex; justify-content: center; background: linear-gradient(var(--bg) 40%, transparent); }
+  nav.bar { width: min(var(--maxw), 100%); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 18px; border-radius: 999px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+  .brand .mark { width: 24px; height: 24px; flex: none; }
+  .brand b { font-weight: 650; }
+  .brand span { color: var(--saffron); font-weight: 650; }
+  .nav-links { display: flex; gap: 2px; margin-left: auto; flex-wrap: wrap; }
+  .nav-link { padding: 7px 13px; border-radius: 999px; color: var(--ink-2); font-size: 13px; text-decoration: none; transition: background .25s ease, color .25s ease; }
+  .nav-link:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+  .nav-link[aria-current="page"] { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .nav-signin { padding: 8px 14px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .nav-signin:hover { color: var(--ink); }
+
+  /* ── Page head + criteria form ──────────────────────────────────── */
+  .page-wrap { padding: 46px 0 90px; }
+  .page-head { max-width: 68ch; margin-bottom: 26px; }
+  .page-head h1 { font-size: clamp(26px, 4vw, 34px); margin: 14px 0 12px; }
+  .page-head .lede { max-width: 62ch; }
+
+  .disclosure {
+    margin-top: 16px; padding: 12px 14px; border-radius: var(--r-md);
+    background: rgba(242,171,60,0.08); border: 1px solid rgba(242,171,60,0.25);
+    font-size: 12.5px; color: var(--ink-2); line-height: 1.55; max-width: 68ch;
+  }
+
+  .demo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .demo-label { font-size: 12px; color: var(--ink-3); margin-right: 2px; }
+  .demo-chip {
+    padding: 7px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink-2);
+    cursor: pointer; font-family: inherit; transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .demo-chip:hover { background: rgba(255,255,255,0.09); color: var(--ink); }
+  .demo-chip[aria-pressed="true"] { background: var(--cta); border-color: transparent; color: var(--cta-ink); }
+
+  .criteria-card { padding: 26px 26px 24px; border-radius: var(--r-xl); margin-bottom: 30px; }
+  .criteria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink-2); margin-bottom: 8px; }
+  .select-wrap { position: relative; }
+  .select, .text-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line); color: var(--ink); font-family: inherit; font-size: 13.5px;
+  }
+  .select { appearance: none; -webkit-appearance: none; padding-right: 34px; cursor: pointer; }
+  .select option { background: #14141b; color: var(--ink); }
+  .select-wrap svg { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+  .select:focus, .text-input:focus { outline: none; border-color: rgba(242,171,60,0.5); }
+
+  .criteria-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .form-msg { padding: 12px 14px; border-radius: var(--r-md); font-size: 12.8px; border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); color: #fca5a5; }
+
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(26,18,6,0.3); border-top-color: var(--cta-ink); animation: spin .75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-row { display: none; align-items: center; gap: 9px; }
+  .btn[data-loading="true"] .btn-label { display: none; }
+  .btn[data-loading="true"] .load-row { display: inline-flex; }
+
+  /* ── Results ─────────────────────────────────────────────────────── */
+  .results-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .results-head h2 { font-size: 16px; }
+  .results-count { font-size: 12.5px; color: var(--ink-3); }
+
+  .results-list { display: grid; gap: 14px; }
+  .match-card { padding: 20px 22px; border-radius: var(--r-lg); }
+  .match-head h3 { font-size: 16px; font-weight: 620; }
+  .match-head p { font-size: 12.5px; margin-top: 3px; }
+  .match-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .meta-chip {
+    padding: 5px 12px; border-radius: 999px; font-size: 11.5px; color: var(--ink-2);
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-soft);
+  }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .cert-chip {
+    padding: 5px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+    color: var(--saffron); background: rgba(242,171,60,0.10); border: 1px solid rgba(242,171,60,0.28);
+  }
+  .skill-chip {
+    padding: 5px 12px; border-radius: 999px; font-size: 11.5px;
+    color: var(--ink-2); background: rgba(124,127,242,0.10); border: 1px solid rgba(124,127,242,0.25);
+  }
+
+  .empty-state { padding: 40px 24px; border-radius: var(--r-lg); text-align: center; color: var(--ink-3); font-size: 13.5px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeUp .5s ease both; }
+
+  footer.slim { position: relative; z-index: 3; border-top: 1px solid var(--line-soft); padding: 26px 0; }
+  .foot-slim { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+  .foot-slim a { color: var(--ink-3); text-decoration: none; }
+  .foot-slim a:hover { color: var(--saffron); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e07d1c"/>
+      <stop offset="100%" stop-color="#f7bb52"/>
+    </linearGradient>
+    <symbol id="drona-mark" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8.4" fill="none" stroke="url(#markGrad)" stroke-width="1.5" opacity=".45"/>
+      <circle cx="11" cy="13" r="3.6" fill="none" stroke="url(#markGrad)" stroke-width="1.6"/>
+      <path d="M11 13 L21.2 2.8" stroke="url(#markGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M16.6 2.8h4.6v4.6" fill="none" stroke="url(#markGrad)" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="orb orb-center"></div>
+</div>
+<div class="grid-layer" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="site-head">
+  <nav class="bar glass" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <svg class="mark" aria-hidden="true"><use href="#drona-mark"/></svg>
+      <b>Drona<span>skill</span></b>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="index.html#verify">Verify</a>
+      <a class="nav-link" href="index.html#features">Learn</a>
+      <a class="nav-link" href="onboarding.html">Onboarding</a>
+      <a class="nav-link" href="lectures.html">Lectures</a>
+      <a class="nav-link" href="mock-interview.html">Practice</a>
+      <a class="nav-link" href="certification.html">Certification</a>
+      <a class="nav-link" href="login.html">Login</a>
+      <a class="nav-link" href="recruiters.html" aria-current="page">For Companies</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-signin" href="index.html">Exit</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="page-wrap wrap">
+
+    <div class="page-head">
+      <span class="eyebrow">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+        For Companies
+      </span>
+      <h1>Find students who match what you're hiring for.</h1>
+      <p class="lede">Set your criteria and see Dronaskill students who have opted in to be visible to
+        recruiters — verified by the certification they've earned, not just a self-written resume line.</p>
+      <p class="disclosure">This is an open demo form — there's no company sign-in yet, so anyone can
+        submit criteria and see results. Only students who explicitly turned on "visible to recruiters"
+        ever appear here; everyone else's data stays private.</p>
+    </div>
+
+    <div class="demo-row" id="demoRow">
+      <span class="demo-label">Try a demo search:</span>
+      <button type="button" class="demo-chip" data-company="wipro">Wipro</button>
+      <button type="button" class="demo-chip" data-company="tcs">TCS Digital</button>
+      <button type="button" class="demo-chip" data-company="google">Google</button>
+      <button type="button" class="demo-chip" data-company="microsoft">Microsoft</button>
+      <button type="button" class="demo-chip" data-company="amazon">Amazon</button>
+      <button type="button" class="demo-chip" data-company="flipkart">Flipkart</button>
+      <button type="button" class="demo-chip" data-company="zomato">Zomato</button>
+    </div>
+
+    <div class="criteria-card glass fade-in">
+      <div class="criteria-grid">
+        <div class="field">
+          <label for="trackSelect">Career track</label>
+          <div class="select-wrap">
+            <select id="trackSelect" class="select">
+              <option value="">Any track</option>
+              <option value="sde">Software Engineer (SDE)</option>
+              <option value="frontend">Frontend Developer</option>
+              <option value="backend">Backend Developer</option>
+              <option value="fullstack">Full-Stack Developer</option>
+              <option value="mobile">Mobile App Developer</option>
+              <option value="devops">DevOps / Cloud Engineer</option>
+              <option value="data-analyst">Data Analyst</option>
+              <option value="data-scientist">Data Scientist</option>
+              <option value="ml-engineer">AI / ML Engineer</option>
+              <option value="data-engineer">Data Engineer</option>
+              <option value="cybersecurity">Cybersecurity Analyst</option>
+              <option value="uiux">UI/UX Designer</option>
+              <option value="product-manager">Product Manager</option>
+              <option value="business-analyst">Business Analyst</option>
+              <option value="digital-marketing">Digital Marketing</option>
+              <option value="embedded">Embedded / IoT Engineer</option>
+              <option value="gate">GATE / Higher Studies (CS)</option>
+              <option value="exploring">Still exploring</option>
+            </select>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="eduSelect">Education level</label>
+          <div class="select-wrap">
+            <select id="eduSelect" class="select">
+              <option value="">Any</option>
+              <option>Class 9–10</option>
+              <option>Class 11–12</option>
+              <option>Diploma / Polytechnic</option>
+              <option>B.Tech / B.E.</option>
+              <option>B.Sc</option>
+              <option>BCA</option>
+              <option>B.Com</option>
+              <option>BBA</option>
+              <option>BA</option>
+              <option>M.Tech / M.E.</option>
+              <option>MCA</option>
+              <option>M.Sc</option>
+              <option>MBA</option>
+              <option>Working professional</option>
+              <option>Self-taught / career break</option>
+            </select>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="domainSelect">Certification</label>
+          <div class="select-wrap">
+            <select id="domainSelect" class="select">
+              <option value="">Any</option>
+              <option>Employability</option>
+              <option>CS Fundamentals</option>
+              <option>Frontend</option>
+              <option>Backend & Infra</option>
+              <option>Mobile</option>
+              <option>Data & Analytics</option>
+              <option>AI & ML</option>
+              <option>Security</option>
+              <option>Design</option>
+              <option>Product & Business</option>
+              <option>Marketing</option>
+              <option>Electronics & Embedded</option>
+            </select>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="minScoreInput">Minimum score (out of 10)</label>
+          <input type="number" id="minScoreInput" class="text-input" value="7" min="0" max="10" step="1">
+        </div>
+      </div>
+
+      <div class="criteria-actions">
+        <button type="button" class="btn" id="findBtn">
+          <span class="btn-label">Find Matches</span>
+          <span class="load-row"><span class="spinner" aria-hidden="true"></span> Searching…</span>
+        </button>
+        <p class="form-msg hidden" id="formMsg" role="alert"></p>
+      </div>
+    </div>
+
+    <div class="results-head">
+      <h2>Matches</h2>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+    <div class="results-list" id="resultsList"></div>
+    <div class="empty-state glass hidden" id="emptyState">No students match those criteria yet. Try widening a filter.</div>
+
+  </div>
+</main>
+
+<footer class="slim">
+  <div class="wrap foot-slim">
+    <span>&copy; 2026 Dronaskill &middot; Made by Team Drona</span>
+    <a href="index.html">Back to Home</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var cfg = window.DRONA_SUPABASE || {};
+  var sb = null;
+  if (window.supabase && cfg.url && cfg.anonKey) {
+    sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function showMsg(text) {
+    var el = $("formMsg");
+    el.textContent = text;
+    el.className = "form-msg";
+  }
+  function clearMsg() {
+    var el = $("formMsg");
+    el.textContent = "";
+    el.className = "form-msg hidden";
+  }
+
+  function setLoading(on) {
+    $("findBtn").disabled = on;
+    $("findBtn").setAttribute("data-loading", on ? "true" : "false");
+  }
+
+  function renderResults(rows, demoLabel) {
+    var container = $("resultsList");
+    container.innerHTML = "";
+    var countText = rows.length ? (rows.length + " match" + (rows.length === 1 ? "" : "es")) : "";
+    if (countText && demoLabel) countText += " · Demo results for " + demoLabel;
+    $("resultsCount").textContent = countText;
+    $("emptyState").classList.toggle("hidden", rows.length > 0);
+
+    rows.forEach(function (r) {
+      var certsHtml = (r.matchedCerts || []).map(function (c) {
+        return "<span class=\"cert-chip\">" + escapeHtml(c.domain) + " — " + escapeHtml(c.score) + "/" + escapeHtml(c.total) + "</span>";
+      }).join("");
+      var skillsHtml = (r.known_skills || []).slice(0, 8).map(function (s) {
+        return "<span class=\"skill-chip\">" + escapeHtml(s) + "</span>";
+      }).join("");
+
+      var card = document.createElement("div");
+      card.className = "match-card glass";
+      card.innerHTML =
+        "<div class=\"match-head\">" +
+          "<h3>" + escapeHtml(r.name || "Unnamed student") + "</h3>" +
+          "<p class=\"muted\">" + escapeHtml(r.email || "") + "</p>" +
+        "</div>" +
+        "<div class=\"match-meta\">" +
+          (r.career_track_label ? "<span class=\"meta-chip\">" + escapeHtml(r.career_track_label) + "</span>" : "") +
+          (r.education_level ? "<span class=\"meta-chip\">" + escapeHtml(r.education_level) + "</span>" : "") +
+        "</div>" +
+        (certsHtml ? "<div class=\"chip-row\">" + certsHtml + "</div>" : "") +
+        (skillsHtml ? "<div class=\"chip-row\">" + skillsHtml + "</div>" : "");
+      container.appendChild(card);
+    });
+  }
+
+  /* ── Demo mode ────────────────────────────────────────────────────
+     Presentation-safe: no network call, no dependency on the schema
+     being applied yet or on any real student having opted in. Reuses
+     renderResults() exactly like a live query would, just with a
+     hand-written dataset shaped the same way. */
+  var DEMO_COMPANIES = {
+    wipro: {
+      label: "Wipro",
+      criteria: { track: "backend", domain: "CS Fundamentals", minScore: 6 },
+      matches: [
+        { name: "Meera Pillai", email: "meera.pillai.dev@gmail.com", career_track_label: "Backend Developer", education_level: "B.Tech / B.E.", known_skills: ["Programming Fundamentals", "DBMS Concepts", "Linux & Shell"], matchedCerts: [{ domain: "CS Fundamentals", score: 7, total: 10 }] },
+        { name: "Yash Agarwal", email: "yash.agarwal.tech@gmail.com", career_track_label: "Full-Stack Developer", education_level: "BCA", known_skills: ["Object-Oriented Programming", "SQL", "Computer Networks"], matchedCerts: [{ domain: "CS Fundamentals", score: 6, total: 10 }] },
+        { name: "Neha Kulkarni", email: "neha.kulkarni.eng@gmail.com", career_track_label: "Frontend Developer", education_level: "B.Tech / B.E.", known_skills: ["DSA — Arrays to Trees", "Git & GitHub", "REST API Design"], matchedCerts: [{ domain: "CS Fundamentals", score: 8, total: 10 }] }
+      ]
+    },
+    tcs: {
+      label: "TCS Digital",
+      criteria: { track: "sde", domain: "CS Fundamentals", minScore: 6 },
+      matches: [
+        { name: "Arjun Desai", email: "arjun.desai.sde@gmail.com", career_track_label: "Software Engineer (SDE)", education_level: "B.Tech / B.E.", known_skills: ["DSA — Arrays to Trees", "SQL", "Python Programming"], matchedCerts: [{ domain: "CS Fundamentals", score: 7, total: 10 }] },
+        { name: "Fatima Sheikh", email: "fatima.sheikh.dev@gmail.com", career_track_label: "Data Analyst", education_level: "BCA", known_skills: ["Programming Fundamentals", "DBMS Concepts", "Excel / Google Sheets"], matchedCerts: [{ domain: "CS Fundamentals", score: 6, total: 10 }] }
+      ]
+    },
+    google: {
+      label: "Google",
+      criteria: { track: "sde", domain: "CS Fundamentals", minScore: 8 },
+      matches: [
+        { name: "Aarav Mehta", email: "aarav.mehta.dev@gmail.com", career_track_label: "Software Engineer (SDE)", education_level: "B.Tech / B.E.", known_skills: ["DSA — Arrays to Trees", "Programming Fundamentals", "Time & Space Complexity"], matchedCerts: [{ domain: "CS Fundamentals", score: 9, total: 10 }] },
+        { name: "Priya Nair", email: "priya.nair.codes@gmail.com", career_track_label: "Software Engineer (SDE)", education_level: "B.Tech / B.E.", known_skills: ["Object-Oriented Programming", "DBMS Concepts", "Git & GitHub"], matchedCerts: [{ domain: "CS Fundamentals", score: 8, total: 10 }] },
+        { name: "Rohan Iyer", email: "rohan.iyer.mca@gmail.com", career_track_label: "GATE / Higher Studies (CS)", education_level: "MCA", known_skills: ["Operating Systems", "Computer Networks", "SQL"], matchedCerts: [{ domain: "CS Fundamentals", score: 10, total: 10 }] }
+      ]
+    },
+    microsoft: {
+      label: "Microsoft",
+      criteria: { track: "backend", domain: "Backend & Infra", minScore: 7 },
+      matches: [
+        { name: "Sanya Kapoor", email: "sanya.kapoor.dev@gmail.com", career_track_label: "Backend Developer", education_level: "B.Tech / B.E.", known_skills: ["Node.js & Express", "REST API Design", "Docker & Containers"], matchedCerts: [{ domain: "Backend & Infra", score: 8, total: 10 }] },
+        { name: "Vivaan Joshi", email: "vivaan.joshi.eng@gmail.com", career_track_label: "Backend Developer", education_level: "BCA", known_skills: ["Backend with Python (Django/FastAPI)", "SQL", "Authentication & App Security"], matchedCerts: [{ domain: "Backend & Infra", score: 7, total: 10 }] }
+      ]
+    },
+    amazon: {
+      label: "Amazon",
+      criteria: { track: "fullstack", domain: "CS Fundamentals", minScore: 7 },
+      matches: [
+        { name: "Ishaan Verma", email: "ishaan.verma.fs@gmail.com", career_track_label: "Full-Stack Developer", education_level: "B.Tech / B.E.", known_skills: ["JavaScript (ES6+)", "React", "Node.js & Express"], matchedCerts: [{ domain: "CS Fundamentals", score: 8, total: 10 }] },
+        { name: "Ananya Reddy", email: "ananya.reddy.swe@gmail.com", career_track_label: "Full-Stack Developer", education_level: "B.Tech / B.E.", known_skills: ["DSA — Arrays to Trees", "High-Level System Design", "SQL"], matchedCerts: [{ domain: "CS Fundamentals", score: 7, total: 10 }] }
+      ]
+    },
+    flipkart: {
+      label: "Flipkart",
+      criteria: { track: "frontend", domain: "Frontend", minScore: 7 },
+      matches: [
+        { name: "Kabir Malhotra", email: "kabir.malhotra.ui@gmail.com", career_track_label: "Frontend Developer", education_level: "B.Tech / B.E.", known_skills: ["React", "TypeScript", "Web Performance"], matchedCerts: [{ domain: "Frontend", score: 9, total: 10 }] },
+        { name: "Diya Bhatt", email: "diya.bhatt.frontend@gmail.com", career_track_label: "Frontend Developer", education_level: "BCA", known_skills: ["HTML & CSS", "JavaScript (ES6+)", "Accessibility (a11y)"], matchedCerts: [{ domain: "Frontend", score: 8, total: 10 }] }
+      ]
+    },
+    zomato: {
+      label: "Zomato",
+      criteria: { track: "product-manager", domain: "Product & Business", minScore: 7 },
+      matches: [
+        { name: "Aditi Rao", email: "aditi.rao.pm@gmail.com", career_track_label: "Product Manager", education_level: "MBA", known_skills: ["Product Sense", "PRDs & Requirement Writing", "Roadmapping & Prioritisation"], matchedCerts: [{ domain: "Product & Business", score: 8, total: 10 }] },
+        { name: "Karan Chopra", email: "karan.chopra.biz@gmail.com", career_track_label: "Product Manager", education_level: "B.Tech / B.E.", known_skills: ["User Research", "Product Metrics & Analytics", "Stakeholder Communication"], matchedCerts: [{ domain: "Product & Business", score: 7, total: 10 }] }
+      ]
+    }
+  };
+
+  function runDemo(key) {
+    var demo = DEMO_COMPANIES[key];
+    if (!demo) return;
+    clearMsg();
+
+    $("trackSelect").value = demo.criteria.track || "";
+    $("domainSelect").value = demo.criteria.domain || "";
+    $("eduSelect").value = "";
+    $("minScoreInput").value = demo.criteria.minScore || 0;
+
+    document.querySelectorAll(".demo-chip").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.company === key ? "true" : "false");
+    });
+
+    renderResults(demo.matches, demo.label);
+  }
+
+  document.querySelectorAll(".demo-chip").forEach(function (b) {
+    b.addEventListener("click", function () { runDemo(b.dataset.company); });
+  });
+
+  function findMatches() {
+    clearMsg();
+    document.querySelectorAll(".demo-chip").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+
+    if (!sb) {
+      showMsg("Supabase isn't configured — check supabase-config.js.");
+      return;
+    }
+
+    var track = $("trackSelect").value;
+    var edu = $("eduSelect").value;
+    var domain = $("domainSelect").value;
+    var minScore = Number($("minScoreInput").value);
+    if (!isFinite(minScore)) minScore = 0;
+
+    setLoading(true);
+
+    var query = sb.from("student_profiles")
+      .select("id, name, email, career_track_label, education_level, stream, known_skills, student_certifications(domain, score, total, date_iso, cert_code)")
+      .eq("visible_to_recruiters", true)
+      .limit(50);
+
+    if (track) query = query.eq("career_track_id", track);
+    if (edu) query = query.eq("education_level", edu);
+
+    query.then(function (res) {
+      setLoading(false);
+      if (res.error) { showMsg(res.error.message); return; }
+
+      var rows = (res.data || []).filter(function (r) {
+        var certs = r.student_certifications || [];
+        var matched = domain
+          ? certs.filter(function (c) { return c.domain === domain && c.score >= minScore; })
+          : certs;
+        r.matchedCerts = matched;
+        return !domain || matched.length > 0;
+      });
+
+      renderResults(rows);
+    }).catch(function (err) {
+      setLoading(false);
+      showMsg(err.message || "Something went wrong. Try again.");
+    });
+  }
+
+  $("findBtn").addEventListener("click", findMatches);
+
+  runDemo("wipro"); /* land on a populated, network-free view by default — safest first paint for a live demo */
+})();
+</script>
+</body>
+</html>
